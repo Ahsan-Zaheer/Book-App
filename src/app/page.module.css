@@ -90,6 +90,9 @@ a.primary {
 a.secondary {
   border-color: var(--gray-alpha-200);
   min-width: 158px;
+  background-color: #5662f6;
+  color: white;
+
 }
 
 .footer {
