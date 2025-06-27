@@ -14,7 +14,7 @@ export default function Sidebar() {
       {/* Header with Logo and Toggle */}
       <div className="sidebar-header d-flex justify-content-between align-items-center mb-4">
         {!isCollapsed && (
-          <h2 className="fw-bold" style={{ color: '#f4845f' }}>📚 Logo</h2>
+          <h2 className="fw-bold" style={{ color: '#f4845f', fontSize: "30px" }}>📚 Logo  <span className="beta">beta</span></h2>
         )}
         <button className="toggle-btn" onClick={toggleSidebar}>
           <Icon icon={isCollapsed ? "line-md:arrow-right" : "humbleicons:bars"} width="24" />
@@ -26,9 +26,9 @@ export default function Sidebar() {
         <>
           <div className="d-flex gap-2 mb-4">
             <button className="btn-1">+ New Book</button>
-            <button className="btn-2">
+            {/* <button className="btn-2">
               <Icon icon="icon-park-twotone:search" className="text-dark" />
-            </button>
+            </button> */}
           </div>
 
           <hr />
@@ -57,6 +57,12 @@ export default function Sidebar() {
                 <button className="nav-link text-start">
                   <Icon icon="grommet-icons:favorite" className="me-2" />
                   Favorites
+                </button>
+              </li>
+              <li>
+                <button className="nav-link text-start">
+                  <Icon icon="grommet-icons:trash" className="me-2" />
+                  Trash
                 </button>
               </li>
               {/* <li>
