@@ -87,17 +87,22 @@ a.primary {
   gap: 8px;
 }
 
-a.secondary {
+.secondary {
   min-width: 158px;
+  
   background-color: #f4845f;
   /* background-color: rgb(45, 39, 29); */
 
   color: white;
+  outline: none;
+  border: none;
+  border-radius: 100px;
+  padding: 0px 14px;
 
 }
 .secondary:hover{
 
-  background-color: rgb(45, 39, 29);
+  background-color: #f59271;
 }
 
 .footer {
