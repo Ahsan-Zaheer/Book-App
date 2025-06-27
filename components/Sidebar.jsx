@@ -53,7 +53,7 @@ export default function Sidebar() {
             </li>
 
             <div className="bottom-links">
-              <li>
+              {/* <li>
                 <button className="nav-link text-start">
                   <Icon icon="grommet-icons:favorite" className="me-2" />
                   Favorites
@@ -64,7 +64,7 @@ export default function Sidebar() {
                   <Icon icon="grommet-icons:trash" className="me-2" />
                   Trash
                 </button>
-              </li>
+              </li> */}
               {/* <li>
                 <button className="nav-link text-start">
                   <Icon icon="weui:setting-outlined" className="me-2" />
