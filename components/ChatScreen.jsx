@@ -27,41 +27,62 @@ export default function ChatScreen() {
     setInput('');
 
     setTimeout(() => {
-      if (step === 'summary') {
-        const botResponse = {
-          id: Date.now() + 1,
-          sender: 'bot',
-          custom: (
-            <div>
-              <p>Great! Based on that, here are a few title ideas:</p>
-              <ul className="list-unstyled d-flex flex-wrap gap-2">
-                <li>
-                  <button className="btn btn-sm btn-outline-primary" onClick={() => handleTitleSelect('Dreams of Tomorrow')}>Dreams of Tomorrow</button>
-                </li>
-                <li>
-                  <button className="btn btn-sm btn-outline-primary" onClick={() => handleTitleSelect('Code of the Future')}>Code of the Future</button>
-                </li>
-                <li>
-                  <button className="btn btn-sm btn-outline-primary" onClick={() => handleTitleSelect('The Final Algorithm')}>The Final Algorithm</button>
-                </li>
-              </ul>
-            </div>
-          )
-        };
-        setMessages((prev) => [...prev, botResponse]);
-        setStep('title');
-      }
+  if (step === 'summary') {
+    const botResponse = {
+      id: Date.now() + 1,
+      sender: 'bot',
+      custom: (
+        <div>
+          <p>Great! Based on that, here are a few title ideas:</p>
+          <ul className="list-unstyled d-flex flex-wrap gap-2">
+            <li>
+              <button className="selection" onClick={() => handleTitleSelect('Dreams of Tomorrow')}>Dreams of Tomorrow</button>
+            </li>
+            <li>
+              <button className="selection" onClick={() => handleTitleSelect('Code of the Future')}>Code of the Future</button>
+            </li>
+            <li>
+              <button className="selection" onClick={() => handleTitleSelect('The Final Algorithm')}>The Final Algorithm</button>
+            </li>
+          </ul>
+        </div>
+      )
+    };
+    setMessages((prev) => [...prev, botResponse]);
+    setStep('title');
+  }
 
-      if (step === 'content') {
-        const botResponse = {
-          id: Date.now() + 1,
-          sender: 'bot',
-          text: 'Chapter 1: A dim room flickered with code and caffeine. Zoe stared at her terminal. Outside, a cyberwar brewed. She had one chance left...'
-        };
-        setMessages((prev) => [...prev, botResponse]);
-        setStep('done');
-      }
+  else if (step === 'keypoints') {
+    const keyPoints = input.split(',').map(p => p.trim()).filter(Boolean);
+    if (keyPoints.length < 15) {
+      const warning = {
+        id: Date.now() + 1,
+        sender: 'bot',
+        text: "Try to include a few more points—aim for around 20 key ideas so I can build a great chapter!"
+      };
+      setMessages((prev) => [...prev, warning]);
+      return;
+    }
+
+    const botResponse = {
+      id: Date.now() + 2,
+      sender: 'bot',
+      text: "Great choice! Here's the opening chapter. 📖"
+    };
+    setMessages((prev) => [...prev, botResponse]);
+    setStep('content');
+
+    setTimeout(() => {
+      const chapterText = {
+        id: Date.now() + 2,
+        sender: 'bot',
+        text: 'Chapter 1: A dim room flickered with code and caffeine. Zoe stared at her terminal. Outside, a cyberwar brewed. She had one chance left...'
+      };
+      setMessages((prev) => [...prev, chapterText]);
     }, 800);
+  }
+}, 800);
+
   };
 
   const handleTitleSelect = (title) => {
@@ -76,9 +97,9 @@ export default function ChatScreen() {
           <div>
             <p>Awesome choice! Now, pick a name for Chapter 1:</p>
             <ul className="list-unstyled d-flex flex-wrap gap-2">
-              <li><button className="btn btn-sm btn-outline-success" onClick={() => handleChapterSelect('The Awakening')}>The Awakening</button></li>
-              <li><button className="btn btn-sm btn-outline-success" onClick={() => handleChapterSelect('The Terminal')}>The Terminal</button></li>
-              <li><button className="btn btn-sm btn-outline-success" onClick={() => handleChapterSelect('Lines of Destiny')}>Lines of Destiny</button></li>
+              <li><button className="selection" onClick={() => handleChapterSelect('The Awakening')}>The Awakening</button></li>
+              <li><button className="selection" onClick={() => handleChapterSelect('The Terminal')}>The Terminal</button></li>
+              <li><button className="selection" onClick={() => handleChapterSelect('Lines of Destiny')}>Lines of Destiny</button></li>
             </ul>
           </div>
         )
@@ -89,26 +110,26 @@ export default function ChatScreen() {
   };
 
   const handleChapterSelect = (chapterName) => {
-    const userChoice = { id: Date.now(), sender: 'user', text: `Let's go with "${chapterName}"` };
-    setMessages((prev) => [...prev, userChoice]);
+  const userChoice = { id: Date.now(), sender: 'user', text: `Let's go with "${chapterName}"` };
+  setMessages((prev) => [...prev, userChoice]);
 
-    setTimeout(() => {
-      const botIntro = {
-        id: Date.now() + 1,
-        sender: 'bot',
-        text: "Great choice! Here's the opening chapter. 📖"
-      };
-      setMessages((prev) => [...prev, botIntro]);
-      setStep('content');
-    }, 800);
-  };
+  setTimeout(() => {
+    const botPrompt = {
+      id: Date.now() + 1,
+      sender: 'bot',
+      text: "Nice! Before we dive into the first chapter, could you list 20 key points or ideas you'd like to include in the book? Just list them in one message, separated by commas."
+    };
+    setMessages((prev) => [...prev, botPrompt]);
+    setStep('keypoints');
+  }, 800);
+};
+
 
   return (
     <div className="d-flex flex-column chatScreen" style={{ height: '100vh' }}>
-      {/* Centered layout for first prompt */}
       {isFirstPrompt ? (
         <div className="d-flex flex-column justify-content-center align-items-center text-center flex-grow-1">
-          <h2 className="mb-4">Got a story in mind? Share a brief summary of your book!</h2>
+          <h2 className="mb-4 text-light">Got a story in mind? Share a brief summary of your book!</h2>
           <div className="chatInputBg">
             <input
               type="text"
@@ -134,7 +155,7 @@ export default function ChatScreen() {
                 className={`d-flex mb-3 ${msg.sender === 'user' ? 'justify-content-end' : 'justify-content-start'}`}
               >
                 <div
-                  className={`p-3 rounded ${msg.sender === 'user' ? 'bg-primary text-white' : 'bg-white border'}`}
+                  className={`p-3 rounded ${msg.sender === 'user' ? 'userMsg' : 'botMsg'}`}
                   style={{ maxWidth: '70%' }}
                 >
                   {msg.custom ? msg.custom : msg.text}

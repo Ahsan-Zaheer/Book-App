@@ -7,9 +7,10 @@ export default function Home() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-              <h2 className="mb-4 fw-bold text-primary">📚 Logo</h2>
+  
+              <h2 className="mb-4 fw-bold" style={{color: '#f4845f'}}>📚 Logo</h2>
 
-          <h1>Let&apos;s start writing your new book</h1>
+          <h1 className={styles.title}>Let&apos;s start writing your new book</h1>
        
 
         <div className={styles.ctas}>

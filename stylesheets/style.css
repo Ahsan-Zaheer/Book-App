@@ -1,13 +1,15 @@
 .sidebar{
-    background-color: whi;
+    background-color: black;
     width: 330px;    
     border-radius: 10px;
     height: 100vh;
     display: flex;
     padding: 20px;
     margin-left: 10px;
-    box-shadow: -5px 20px 20px 10px rgba(0, 0, 0, 0.129);
+    box-shadow: -5px 20px 200px 10px rgba(255, 255, 255, 0.129);
     flex-direction: column;
+    transition: width 0.3s ease, padding 0.3s ease;
+  overflow: hidden;
 }
 
 .s-title{
@@ -21,16 +23,16 @@
     height: 50px;
     outline: none;
     border: none;
-    background-color: #5662f6;
+    background-color: #f4845f;
     color: white;
 }
 .btn-2{
-    background-color: black;
+    background-color: white;
     border-radius: 100px;
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 50px;
+    width: 55px;
     height: 50px;
     font-size: 18px;
 }
@@ -54,6 +56,7 @@
     width: 100%;
     flex-direction: column;
     justify-content: end;
+    background-color: rgb(31, 31, 31);
 }
 
 .chatInputBg{
@@ -75,10 +78,11 @@
     outline: none;
     width: 100%;
     padding: 0px 15px;
+    color: black;
 }
 
 .btn-chat{
-    background-color: #5662f6;
+    background-color: #f4845f;
     color: white;
     border: none;
     outline: none;
@@ -94,4 +98,57 @@
 
 .bottom-links{
    margin-top: auto;
+}
+
+.nav-link{
+    color: white !important;
+}
+
+
+.sidebar.collapsed {
+  width: 60px;
+  padding: 20px 10px;
+  background: transparent;
+}
+
+.toggle-btn {
+  background-color: #f4845f;
+  border: none;
+  border-radius: 50%;
+  padding: 8px;
+  color: white;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.toggle-btn:hover {
+  background-color: #d96a4a;
+}
+
+.userMsg {
+  background-color: #f4845f;
+  color: white;
+}
+.botMsg {
+  background-color: #ffffff;
+  color: black;
+}
+
+.botMsg p {
+  color: black;
+}
+
+.selection {
+  background-color: transparent;
+  color: #f4845f;
+  border: 1px solid #f4845f;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.selection:hover {
+  background-color: #f4845f;
+  color: white;
+
 }

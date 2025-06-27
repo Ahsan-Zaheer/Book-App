@@ -88,11 +88,16 @@ a.primary {
 }
 
 a.secondary {
-  border-color: var(--gray-alpha-200);
   min-width: 158px;
-  background-color: #5662f6;
+  background-color: #f4845f;
+  /* background-color: rgb(45, 39, 29); */
+
   color: white;
 
+}
+.secondary:hover{
+
+  background-color: rgb(45, 39, 29);
 }
 
 .footer {
@@ -111,6 +116,9 @@ a.secondary {
   flex-shrink: 0;
 }
 
+.title{
+  color: #f4845f;
+}
 /* Enable hover only on non-touch devices */
 @media (hover: hover) and (pointer: fine) {
   a.primary:hover {
