@@ -16,21 +16,21 @@ export default function Home() {
         <h2 className="mb-4 fw-bold" style={{ color: '#f4845f' }}>📚 Logo</h2>
         <h1 className={styles.title}>Let&apos;s start writing your new book</h1>
 
-         {showInput && (
-          <div style={{textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'start'}}>
+        {showInput && (
+          <div className={styles.oldBookContainer}>
             <input
               type="text"
-              placeholder="Enter Book UUID"
+              placeholder="Enter Book ID"
               value={uuid}
               onChange={(e) => setUuid(e.target.value)}
-              style={{ padding: '0.5rem', width: '300px', borderRadius: '8px' }}
+              className={styles.oldBookInput}
             />
             {uuid && (
-                <Link href={`/home/${uuid}`} >
-              <button className={styles.secondary} style={{ marginTop: '1rem', height: '50px' }}>
+              <Link href={`/home/${uuid}`}>
+                <button className={`${styles.secondary} ${styles.continueBtn}`}>
                   Continue with this Book
-              </button>
-                </Link>
+                </button>
+              </Link>
             )}
           </div>
         )}
