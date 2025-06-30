@@ -79,6 +79,8 @@
     width: 100%;
     padding: 0px 15px;
     color: black;
+    resize: none;
+    overflow-y: auto;
 }
 
 .btn-chat{

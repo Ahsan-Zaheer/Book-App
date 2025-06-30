@@ -32,6 +32,14 @@ export default function ChatScreen() {
   const [currentChapter, setCurrentChapter] = useState(1);
   const [chapterTitleOptions, setChapterTitleOptions] = useState([]);
   const [hasKeyPoints, setHasKeyPoints] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+
+  const handleInputChange = (e) => {
+    setInput(e.target.value);
+    e.target.style.height = "auto";
+    e.target.style.height = e.target.scrollHeight + "px";
+  };
 
 
 
@@ -183,7 +191,9 @@ export default function ChatScreen() {
               ]);
               setStep('keypoints');
             } else {
+              setIsGenerating(true);
               await generateChapterContent(chapterTitle);
+              setIsGenerating(false);
             }
           }
   };
@@ -362,7 +372,9 @@ export default function ChatScreen() {
 
       setHasKeyPoints(true);
       setKeyPoints(filled);
+      setIsGenerating(true);
       await generateChapterContent(selectedChapter || input);
+      setIsGenerating(false);
     };
 
 
@@ -445,14 +457,14 @@ export default function ChatScreen() {
                     </button></li>
          </ul>
           <div className="chatInputBg">
-            <input
+            <textarea
               ref={inputRef}
-              type="text"
               className="chatInput"
               placeholder="Is it Ebook, Short Length Book or Full Length Book..."
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={handleInputChange}
               onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+              rows={1}
             />
             <button className="btn-chat" onClick={sendMessage}>
               <Icon icon="fa:send-o" />
@@ -481,7 +493,7 @@ export default function ChatScreen() {
           </div>
 
           {/* Input Section */}
-          {step === 'keypoints' ? (
+          {step === 'keypoints' && !isGenerating ? (
             <div className="p-3 keypointBg">
               <p className="text-light mb-2">Please enter {getRequiredKeyPoints()} key points you'd like to include in your book:</p>
               <div className="scrollable-keypoints mb-2">
@@ -505,14 +517,14 @@ export default function ChatScreen() {
             </div>
           ) : <div className="p-3">
                 <div className="chatInputBg d-flex align-items-center gap-2">
-                  <input
+                  <textarea
                     ref={inputRef}
-                    type="text"
                     className="chatInput"
                     placeholder="Type your message..."
                     value={input}
-                    onChange={(e) => setInput(e.target.value)}
+                    onChange={handleInputChange}
                     onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+                    rows={1}
                   />
                   <button className="btn-chat" onClick={sendMessage}>
                     <Icon icon="fa:send-o" />

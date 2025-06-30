@@ -19,7 +19,7 @@ export const POST = async (req: Request) => {
   book.status = "generating";
   await book.save();
 
-  const prompt = `You are a professional book writer. Write chapter ${chapterIndex} titled "${chapterTitle}" for the ${bookType} \"${title}\". Base it on the following summary and key points.\nSummary: ${summary}\nKey points: ${keyPoints.join("; ")}`;
+  const prompt = `You are a professional book writer. Write chapter ${chapterIndex} titled "${chapterTitle}" for the ${bookType} \"${title}\". Divide the chapter into 4 parts, each beginning with a short subheading. Base it on the following summary and key points.\nSummary: ${summary}\nKey points: ${keyPoints.join("; ")}`;
 
   const model = new ChatOpenAI({
     modelName: "gpt-4o-mini",
