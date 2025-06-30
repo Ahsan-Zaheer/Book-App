@@ -20,7 +20,6 @@ const BookSchema = new mongoose.Schema({
     lowercase: true
   },
   chapters: { type: [ChapterSchema], default: [] },
-  chapterCount: Number,
 }, {
   timestamps: true
 });
