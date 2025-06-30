@@ -4,7 +4,7 @@ const createUrl = (path) =>{
 
 
 export const askQuestion = async (question) => {
-    const res = await fetch( new Request( createUrl('/api/question'), {
+    const res = await fetch( new Request( createUrl('/api/book'), {
         method: 'POST',
         body: JSON.stringify({question}),
     }));
