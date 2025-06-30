@@ -1,13 +1,35 @@
 'use client';
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import "../stylesheets/style.css";
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [titles, setTitles] = useState([]);
 
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
+
+  useEffect(() => {
+    const stored = JSON.parse(localStorage.getItem("book_titles") || "[]");
+    setTitles(stored);
+    const refresh = () => {
+      const updated = JSON.parse(localStorage.getItem("book_titles") || "[]");
+      setTitles(updated);
+    };
+    window.addEventListener("titlesUpdated", refresh);
+    return () => window.removeEventListener("titlesUpdated", refresh);
+  }, []);
+
+  const handleSelect = (id) => {
+    window.dispatchEvent(new CustomEvent("loadChat", { detail: { bookId: id } }));
+  };
+
+  const clearAll = () => {
+    localStorage.removeItem("book_titles");
+    titles.forEach((t) => localStorage.removeItem(`chat_${t.id}`));
+    setTitles([]);
+  };
 
   return (
     <div className={`sidebar ${isCollapsed ? "collapsed" : ""}`}>
@@ -25,7 +47,7 @@ export default function Sidebar() {
       {!isCollapsed && (
         <>
           <div className="d-flex gap-2 mb-4">
-            <button className="btn-1">+ New Book</button>
+            <button className="btn-1" onClick={() => window.location.reload()}>+ New Book</button>
             {/* <button className="btn-2">
               <Icon icon="icon-park-twotone:search" className="text-dark" />
             </button> */}
@@ -34,23 +56,19 @@ export default function Sidebar() {
           <hr />
           <div className="s-sec1">
             <p>Your Books</p>
-            <a className="clear">Clear All</a>
+            <a className="clear" onClick={clearAll}>Clear All</a>
           </div>
           <hr />
 
           <ul className="nav nav-pills flex-column h-100">
-            <li className="nav-item">
-              <button className="nav-link text-start">
-                <Icon icon="tabler:book" className="me-2" />
-                Book Title
-              </button>
-            </li>
-            <li className="nav-item">
-              <button className="nav-link text-start">
-                <Icon icon="tabler:book" className="me-2" />
-                Book Title
-              </button>
-            </li>
+            {titles.map((b) => (
+              <li className="nav-item" key={b.id}>
+                <button className="nav-link text-start" onClick={() => handleSelect(b.id)}>
+                  <Icon icon="tabler:book" className="me-2" />
+                  {b.title}
+                </button>
+              </li>
+            ))}
 
             <div className="bottom-links">
               {/* <li>
