@@ -56,3 +56,15 @@ export const generateBook = async ({ bookId, bookType, summary, title, chapterCo
         throw new Error('Failed to generate book');
     }
 }
+export const generateChapter = async ({ bookId, bookType, summary, title, chapterIndex, chapterTitle, keyPoints }) => {
+    const res = await fetch(new Request(createUrl('/api/book/chapter'), {
+        method: 'POST',
+        body: JSON.stringify({ bookId, bookType, summary, title, chapterIndex, chapterTitle, keyPoints }),
+    }));
+    if(res.ok) {
+        const data = await res.json();
+        return data.data.chapter;
+    } else {
+        throw new Error('Failed to generate chapter');
+    }
+};

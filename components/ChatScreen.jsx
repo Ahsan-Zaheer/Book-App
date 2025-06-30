@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import '../stylesheets/style.css';
 import { Icon } from '@iconify/react';
 
-import { askQuestion, saveTitle, createBook, generateBook } from '../utils/api';
+import { askQuestion, saveTitle, createBook, generateChapter } from '../utils/api';
 
 
 export default function ChatScreen() {
@@ -27,6 +27,9 @@ export default function ChatScreen() {
   const [bookId, setBookId] = useState(null);
   const [titleOptions, setTitleOptions] = useState([]);
   const [summary, setSummary] = useState('');
+  const [currentChapter, setCurrentChapter] = useState(1);
+  const [chapterTitleOptions, setChapterTitleOptions] = useState([]);
+  const [hasKeyPoints, setHasKeyPoints] = useState(false);
 
 
 
@@ -137,6 +140,8 @@ export default function ChatScreen() {
           const num = parseInt(currentInput);
           if (!isNaN(num) && num > 0 && num <= 50) {
             setChapterCount(num);
+            const suggestions = await getChapterTitleSuggestions(1);
+            setChapterTitleOptions(suggestions);
             setMessages((prev) => [
               ...prev,
               {
@@ -146,31 +151,38 @@ export default function ChatScreen() {
                   <div>
                     <p>Awesome choice! Now, pick a name for Chapter 1:</p>
                     <ul className="list-unstyled d-flex flex-wrap gap-2">
-                      <li><button className="selection" onClick={() => handleChapterSelect('The Awakening')}>The Awakening</button></li>
-                      <li><button className="selection" onClick={() => handleChapterSelect('The Terminal')}>The Terminal</button></li>
-                      <li><button className="selection" onClick={() => handleChapterSelect('Lines of Destiny')}>Lines of Destiny</button></li>
+                      {suggestions.map((t, idx) => (
+                        <li key={idx}><button className="selection" onClick={() => handleChapterSelect(t)}>{t}</button></li>
+                      ))}
                     </ul>
                   </div>
                 ),
               },
             ]);
-            setStep('chapter');
+            setStep('chapterTitle');
           } else {
             setMessages((prev) => [
               ...prev,
               { id: Date.now(), sender: 'bot', text: 'Please enter a valid number of chapters (1–50).' },
             ]);
           }
-        } else if (step === 'chapter') {
-            setMessages((prev) => [
-              ...prev,
-              {
-                id: Date.now() + 1,
-                sender: 'bot',
-                text: `Awesome! Now, please enter ${getRequiredKeyPoints()} key points you want to cover in your book.`,
-              },
-            ]);
-            setStep('keypoints');
+        } else if (step === 'chapterTitle') {
+            const chapterTitle = selectedChapter || currentInput;
+            if (!chapterTitle.trim()) return;
+            if (!hasKeyPoints) {
+              setSelectedChapter(chapterTitle);
+              setMessages((prev) => [
+                ...prev,
+                {
+                  id: Date.now() + 1,
+                  sender: 'bot',
+                  text: `Awesome! Now, please enter ${getRequiredKeyPoints()} key points you want to cover in your book.`,
+                },
+              ]);
+              setStep('keypoints');
+            } else {
+              await generateChapterContent(chapterTitle);
+            }
           }
   };
 
@@ -214,7 +226,8 @@ export default function ChatScreen() {
   };
 
   const handleChapterSelect = (chapterName) => {
-    setInput(`Let's go with "${chapterName}"`);
+    setSelectedChapter(chapterName);
+    setInput(chapterName);
     inputRef.current?.focus();
   };
 
@@ -222,6 +235,80 @@ export default function ChatScreen() {
   setBookType(type);
   setInput(`I want to write a ${type}`);
   inputRef.current?.focus();
+  };
+
+  const getChapterTitleSuggestions = async (chapterIdx) => {
+    const answer = await askQuestion(
+      `Provide 5 title suggestions for chapter ${chapterIdx} of the ${bookType} \"${selectedTitle}\" based on this summary:\n${summary}`
+    );
+    const titles = answer
+      .split(/\n|\r/)
+      .map((t) => t.trim())
+      .filter((t) => /^\d+\./.test(t))
+      .map((t) => t.replace(/^\d+\.\s*/, ''));
+    return titles;
+  };
+
+  const generateChapterContent = async (chapterTitle) => {
+    const loadingId = Date.now() + 1;
+    setMessages((prev) => [
+      ...prev,
+      { id: loadingId, sender: 'bot', text: `Generating Chapter ${currentChapter}...` },
+    ]);
+
+    try {
+      const chapter = await generateChapter({
+        bookId,
+        bookType,
+        summary,
+        title: selectedTitle,
+        chapterIndex: currentChapter,
+        chapterTitle,
+        keyPoints,
+      });
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === loadingId ? { id: loadingId, sender: 'bot', text: chapter } : m
+        )
+      );
+
+      const next = currentChapter + 1;
+      if (next <= chapterCount) {
+        const suggestions = await getChapterTitleSuggestions(next);
+        setChapterTitleOptions(suggestions);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now() + 2,
+            sender: 'bot',
+            custom: (
+              <div>
+                <p>Great! Pick a title for Chapter {next}:</p>
+                <ul className="list-unstyled d-flex flex-wrap gap-2">
+                  {suggestions.map((t, idx) => (
+                    <li key={idx}><button className="selection" onClick={() => handleChapterSelect(t)}>{t}</button></li>
+                  ))}
+                </ul>
+              </div>
+            ),
+          },
+        ]);
+        setCurrentChapter(next);
+        setStep('chapterTitle');
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          { id: Date.now() + 2, sender: 'bot', text: '🎉 Book generation complete!' },
+        ]);
+        setStep('content');
+      }
+    } catch (e) {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === loadingId ? { id: loadingId, sender: 'bot', text: 'Failed to generate chapter.' } : m
+        )
+      );
+    }
   };
 
 
@@ -271,34 +358,9 @@ export default function ChatScreen() {
         },
       ]);
 
-      const loadingId = Date.now() + 1;
-      setMessages((prev) => [
-        ...prev,
-        { id: loadingId, sender: 'bot', text: 'Generating your book...' },
-      ]);
-
-      try {
-        const generated = await generateBook({
-          bookId,
-          bookType,
-          summary,
-          title: selectedTitle,
-          chapterCount,
-          keyPoints: filled,
-        });
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === loadingId ? { id: loadingId, sender: 'bot', text: generated.chapters?.[0]?.aiContent || generated } : m
-          )
-        );
-        setStep('content');
-      } catch (e) {
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === loadingId ? { id: loadingId, sender: 'bot', text: 'Failed to generate book.' } : m
-          )
-        );
-      }
+      setHasKeyPoints(true);
+      setKeyPoints(filled);
+      await generateChapterContent(selectedChapter || input);
     };
 
 
