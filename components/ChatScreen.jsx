@@ -37,10 +37,12 @@ export default function ChatScreen() {
 
 
   const handleInputChange = (e) => {
-    setInput(e.target.value);
+    const value = e.target.value;
+    setInput(value);
     e.target.style.height = "auto";
     e.target.style.height = e.target.scrollHeight + "px";
-    setIsMultiline(e.target.value.split("\n").length > 1);
+    // Apply multiline style as soon as the user starts typing
+    setIsMultiline(value.trim().length > 0);
   };
 
 
@@ -53,6 +55,28 @@ export default function ChatScreen() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Persist chat history whenever messages or bookId change
+  useEffect(() => {
+    if (bookId) {
+      localStorage.setItem(`chat_${bookId}`, JSON.stringify(messages));
+    }
+  }, [messages, bookId]);
+
+  // Listen for requests to load a previous chat
+  useEffect(() => {
+    const handler = (e) => {
+      const id = e.detail?.bookId;
+      if (!id) return;
+      const stored = localStorage.getItem(`chat_${id}`);
+      if (stored) {
+        setMessages(JSON.parse(stored));
+        setBookId(id);
+      }
+    };
+    window.addEventListener('loadChat', handler);
+    return () => window.removeEventListener('loadChat', handler);
+  }, []);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -234,6 +258,15 @@ const getRequiredKeyPoints = () => {
       console.log("Saving title:", title);
       console.log("Book ID:", bookIdArg);
       await saveTitle(bookIdArg, title);
+
+      // Persist title list in localStorage
+      const existing = JSON.parse(localStorage.getItem('book_titles') || '[]');
+      const found = existing.find((b) => b.id === bookIdArg);
+      if (!found) {
+        existing.push({ id: bookIdArg, title: cleanTitle });
+        localStorage.setItem('book_titles', JSON.stringify(existing));
+        window.dispatchEvent(new Event('titlesUpdated'));
+      }
 
     } catch (e) {
       console.error(e);
@@ -474,7 +507,7 @@ const getRequiredKeyPoints = () => {
                     }}>
                     <strong>Ebook</strong>
                      (40–80 pages)<br />
-                     <small>• 6 chapters<br />• ~700 words per chapter part</small>
+                     <small>• 6 chapters<br />• exactly 700 words per chapter part</small>
                     </button></li>
                   <li>
                     <button  className={`selection text-start ${selectedBookType === 'Short Book' ? 'selected' : ''}`} onClick={() => {
@@ -482,7 +515,7 @@ const getRequiredKeyPoints = () => {
                       setSelectedBookType('Short Book');
                     }}>
                       <strong>Short Book</strong> (80–125 pages)<br />
-                      <small>• 10 chapters<br />• ~1,000 words per chapter part</small>
+                      <small>• 10 chapters<br />• exactly 1,000 words per chapter part</small>
                     </button></li>
                   <li>
                     <button  className={`selection text-start ${selectedBookType === 'Full Length Book' ? 'selected' : ''}`} onClick={() => {
@@ -491,7 +524,7 @@ const getRequiredKeyPoints = () => {
 
                     }}>
                       <strong>Full Length Book</strong> (125–200 pages)<br />
-                      <small>• 12 chapters<br />• ~1,500 words per chapter part</small>
+                      <small>• 12 chapters<br />• exactly 1,500 words per chapter part</small>
                     </button></li>
          </ul>
           <div className={`chatInputBg${isMultiline ? " multiline" : ""}`}>
