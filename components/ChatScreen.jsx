@@ -16,6 +16,16 @@ export default function ChatScreen() {
   ]);
   const [step, setStep] = useState('summary');
   const [keyPoints, setKeyPoints] = useState(['', '', '']);
+  const [bookType, setBookType] = useState('');
+  const [selectedTitle, setSelectedTitle] = useState('');
+  const [selectedChapter, setSelectedChapter] = useState('');
+  const [selectedBookType, setSelectedBookType] = useState('');
+  const [chapterCount, setChapterCount] = useState(null);
+  const [bookUUID, setBookUUID] = useState('123e4567-e89b-12d3-a456-426614174000'); // Example UUID
+
+
+
+
 
 
   const isFirstPrompt = messages.length === 1 && step === 'summary';
@@ -41,12 +51,14 @@ export default function ChatScreen() {
             sender: 'bot',
             custom: (
               <div>
-                <p>Awesome! What type of book would you like to write?</p>
-                <ul className="list-unstyled d-flex flex-wrap gap-2">
-                  <li><button className="selection" onClick={() => handleTypeSelect('Ebook')}>Ebook (40–80 pages)</button></li>
-                  <li><button className="selection" onClick={() => handleTypeSelect('Short Book')}>Short Book (80–125 pages)</button></li>
-                  <li><button className="selection" onClick={() => handleTypeSelect('Full Length Book')}>Full Length Book (125–200 pages)</button></li>
+                <p>Great! To get started, I’ll need a brief book summary—just 3 to 6 sentences that describe the main message or journey you want to share in your book.</p>
+                <p>Once you provide that, I’ll:</p>
+                <ul className="d-flex flex-wrap gap-2">
+                  <li>Refine your summary into a clean and compelling version.</li>
+                  <li>Give you 10 title and subtitle suggestions to consider.</li>
+                  <li>Help you develop chapter ideas and an outline if you’d like.</li>
                 </ul>
+                <p>👉 Please go ahead and type or paste your book summary when you're ready.</p>
               </div>
             ),
           },
@@ -71,32 +83,51 @@ export default function ChatScreen() {
           },
         ]);
         setStep('title');
-      } else if (step === 'title') {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: Date.now() + 1,
-            sender: 'bot',
-            custom: (
-              <div>
-                <p>Awesome choice! Now, pick a name for Chapter 1:</p>
-                <ul className="list-unstyled d-flex flex-wrap gap-2">
-                  <li><button className="selection" onClick={() => handleChapterSelect('The Awakening')}>The Awakening</button></li>
-                  <li><button className="selection" onClick={() => handleChapterSelect('The Terminal')}>The Terminal</button></li>
-                  <li><button className="selection" onClick={() => handleChapterSelect('Lines of Destiny')}>Lines of Destiny</button></li>
-                </ul>
-              </div>
-            ),
-          },
-        ]);
-        setStep('chapter');
-      }  else if (step === 'chapter') {
+        }  else if (step === 'title') {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: Date.now() + 1,
+              sender: 'bot',
+              text: `How many chapters do you want in your ${selectedBookType}?`,
+            },
+          ]);
+          setStep('chapters');
+        } else if (step === 'chapters') {
+          const num = parseInt(currentInput);
+          if (!isNaN(num) && num > 0 && num <= 50) {
+            setChapterCount(num);
             setMessages((prev) => [
               ...prev,
               {
                 id: Date.now() + 1,
                 sender: 'bot',
-                text: 'Awesome! Now, please enter 20 key points you want to cover in your book.',
+                custom: (
+                  <div>
+                    <p>Awesome choice! Now, pick a name for Chapter 1:</p>
+                    <ul className="list-unstyled d-flex flex-wrap gap-2">
+                      <li><button className="selection" onClick={() => handleChapterSelect('The Awakening')}>The Awakening</button></li>
+                      <li><button className="selection" onClick={() => handleChapterSelect('The Terminal')}>The Terminal</button></li>
+                      <li><button className="selection" onClick={() => handleChapterSelect('Lines of Destiny')}>Lines of Destiny</button></li>
+                    </ul>
+                  </div>
+                ),
+              },
+            ]);
+            setStep('chapter');
+          } else {
+            setMessages((prev) => [
+              ...prev,
+              { id: Date.now(), sender: 'bot', text: 'Please enter a valid number of chapters (1–50).' },
+            ]);
+          }
+        } else if (step === 'chapter') {
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: Date.now() + 1,
+                sender: 'bot',
+                text: `Awesome! Now, please enter ${getRequiredKeyPoints()} key points you want to cover in your book.`,
               },
             ]);
             setStep('keypoints');
@@ -104,6 +135,13 @@ export default function ChatScreen() {
 
     }, 800);
   };
+
+  const getRequiredKeyPoints = () => {
+  if (bookType === 'Ebook') return 8;
+  if (bookType === 'Short Book') return 16;
+  return 20; // Full Length Book
+};
+
 
   const handleTitleSelect = (title) => {
     setInput(`I like "${title}"`);
@@ -116,9 +154,11 @@ export default function ChatScreen() {
   };
 
   const handleTypeSelect = (type) => {
-    setInput(`I want to write a ${type}`);
-    inputRef.current?.focus();
+  setBookType(type);
+  setInput(`I want to write a ${type}`);
+  inputRef.current?.focus();
   };
+
 
   const handleKeyPointChange = (e, index) => {
     const newPoints = [...keyPoints];
@@ -148,10 +188,10 @@ export default function ChatScreen() {
 
   const handleSubmitKeyPoints = () => {
       const filled = keyPoints.filter((p) => p.trim() !== '');
-      if (filled.length < 15) {
+      if (filled.length < getRequiredKeyPoints()) {
         setMessages((prev) => [
           ...prev,
-          { id: Date.now(), sender: 'bot', text: 'Please enter at least 15 key points.' },
+          { id: Date.now(), sender: 'bot', text: `Please enter at least ${getRequiredKeyPoints()} key points.` },
         ]);
         return;
       }
@@ -199,9 +239,15 @@ export default function ChatScreen() {
     setMessages([
       { id: 1, sender: 'bot', text: 'Hi 👋! What kind of book do you want to write?' },
     ]);
-    setInput('');
+     setInput('');
     setStep('summary');
-    setKeyPoints(['']);
+    setKeyPoints(['', '', '']);
+    setSelectedBookType('');
+    setSelectedTitle('');
+    setSelectedChapter('');
+    setBookType('');
+    setChapterCount(null);
+
   };
   const formatMessageText = (text) => {
       if (!text || typeof text !== 'string') return text;
@@ -228,19 +274,50 @@ export default function ChatScreen() {
       );
     };
 
+    
+
 
 
   return (
     <div className="d-flex flex-column chatScreen" style={{ height: '100vh' }}>
       {isFirstPrompt ? (
         <div className="d-flex flex-column justify-content-center align-items-center text-center flex-grow-1">
-          <h2 className="mb-4 text-light">Got a story in mind? Share a brief summary of your book!</h2>
+          <h2 className="mb-4 text-light"> What kind of book do you want to write?</h2>
+          <ul className="list-unstyled d-flex flex-wrap gap-2">
+                  <li>
+                    <button  className={`selection text-start ${selectedBookType === 'Ebook' ? 'selected' : ''}`} onClick={() =>
+                      {
+                         handleTypeSelect('Ebook');
+                         setSelectedBookType('Ebook');
+                    }}>
+                    <strong>Ebook</strong>
+                     (40–80 pages)<br />
+                     <small>• 6 chapters<br />• ~700 words per chapter part</small>
+                    </button></li>
+                  <li>
+                    <button  className={`selection text-start ${selectedBookType === 'Short Book' ? 'selected' : ''}`} onClick={() => {
+                      handleTypeSelect('Short Book');
+                      setSelectedBookType('Short Book');
+                    }}>
+                      <strong>Short Book</strong> (80–125 pages)<br />
+                      <small>• 10 chapters<br />• ~1,000 words per chapter part</small>
+                    </button></li>
+                  <li>
+                    <button  className={`selection text-start ${selectedBookType === 'Full Length Book' ? 'selected' : ''}`} onClick={() => {
+                      handleTypeSelect('Full Length Book');
+                      setSelectedBookType('Full Length Book');
+
+                    }}>
+                      <strong>Full Length Book</strong> (125–200 pages)<br />
+                      <small>• 12 chapters<br />• ~1,500 words per chapter part</small>
+                    </button></li>
+         </ul>
           <div className="chatInputBg">
             <input
               ref={inputRef}
               type="text"
               className="chatInput"
-              placeholder="Start typing your summary..."
+              placeholder="Is it Ebook, Short Length Book or Full Length Book..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
@@ -253,7 +330,7 @@ export default function ChatScreen() {
       ) : (
         <>
           {/* Messages */}
-          <div className="overflow-auto p-3 messages flex-grow-1">
+          <div className="overflow-auto p-3 messages flex-grow-1 pt-5 mt-5">
             {messages.map((msg) => (
               <div
                 key={msg.id}
@@ -274,7 +351,7 @@ export default function ChatScreen() {
           {/* Input Section */}
           {step === 'keypoints' ? (
             <div className="p-3 keypointBg">
-              <p className="text-light mb-2">Please enter 20 key points you'd like to include in your book:</p>
+              <p className="text-light mb-2">Please enter {getRequiredKeyPoints()} key points you'd like to include in your book:</p>
               <div className="scrollable-keypoints mb-2">
                 {keyPoints.map((point, idx) => (
                   <input
@@ -317,6 +394,12 @@ export default function ChatScreen() {
             🧹 Clear Chat
           </button>
         </div>
+        {/* Top Notch-like Title Bar */}
+        <div className="floating-title-bar">
+          Your Book uuid: <strong>{bookUUID}</strong>
+        </div>
+
+
 
         </>
       )}

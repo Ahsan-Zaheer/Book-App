@@ -145,11 +145,14 @@
   padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease; 
 }
 
 .selection:hover {
   background-color: #f4845f;
   color: white;
+  transform: scale(1.03);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 
 }
 
@@ -197,3 +200,28 @@ width: 80%;
   margin-right: auto;   
 
 }
+
+.selection.selected {
+  background-color: #f4845f;
+  color: white;
+}
+
+.floating-title-bar {
+  position: fixed;
+   
+  top: 12px;
+  left: 50%;
+  transform: translateX(-22%);
+  background: #000;
+  color: #fff;
+  padding: 8px 20px;
+  border-radius: 2px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  font-weight: 500;
+  z-index: 9999; /* Make sure it stays on top */
+  font-size: 17px;
+  opacity: 0.95;
+  pointer-events: none; /* Optional: makes it non-clickable */
+  
+}
+
