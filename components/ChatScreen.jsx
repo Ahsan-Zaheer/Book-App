@@ -3,7 +3,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../stylesheets/style.css';
 import { Icon } from '@iconify/react';
-import { askQuestion, saveTitle } from '../utils/api';
+
+
+import { askQuestion, saveTitle, createBook } from '../utils/api';
+
+
 
 export default function ChatScreen() {
   const bottomRef = useRef(null);
@@ -22,7 +26,11 @@ export default function ChatScreen() {
   const [selectedChapter, setSelectedChapter] = useState('');
   const [selectedBookType, setSelectedBookType] = useState('');
   const [chapterCount, setChapterCount] = useState(null);
+
   const [bookUUID, setBookUUID] = useState('123e4567-e89b-12d3-a456-426614174000'); // Example UUID
+
+  const [bookId, setBookId] = useState(null);
+
   const [titleOptions, setTitleOptions] = useState([]);
 
 
@@ -75,6 +83,10 @@ export default function ChatScreen() {
       ]);
 
       try {
+
+        const created = await createBook(currentInput);
+        setBookId(created._id);
+
         const answer = await askQuestion(
           `Provide 10 book title suggestions with subtitles based on the following summary:\n${currentInput}`
         );
@@ -179,7 +191,11 @@ export default function ChatScreen() {
       { id: Date.now(), sender: 'user', text: `I like "${title}"` },
     ]);
     try {
+
       await saveTitle(bookUUID, title);
+
+      await saveTitle(bookId, title);
+
     } catch (e) {
       console.error(e);
     }
@@ -295,6 +311,7 @@ export default function ChatScreen() {
     setSelectedChapter('');
     setBookType('');
     setChapterCount(null);
+    setBookId(null);
 
   };
   const formatMessageText = (text) => {
@@ -444,7 +461,7 @@ export default function ChatScreen() {
         </div>
         {/* Top Notch-like Title Bar */}
         <div className="floating-title-bar">
-          Your Book uuid: <strong>{bookUUID}</strong>
+          Your Book id: <strong>{bookId}</strong>
         </div>
 
 
