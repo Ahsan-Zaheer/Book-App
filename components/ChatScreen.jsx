@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../stylesheets/style.css';
 import { Icon } from '@iconify/react';
+import { askQuestion } from '../utils/api';
 
 export default function ChatScreen() {
   const bottomRef = useRef(null);
@@ -14,7 +15,7 @@ export default function ChatScreen() {
   const [messages, setMessages] = useState([
     { id: 1, sender: 'bot', text: 'Hi 👋! What kind of book do you want to write?' },
   ]);
-  const [step, setStep] = useState('summary');
+  const [step, setStep] = useState('bookType');
   const [keyPoints, setKeyPoints] = useState(['', '', '']);
   const [bookType, setBookType] = useState('');
   const [selectedTitle, setSelectedTitle] = useState('');
@@ -28,13 +29,13 @@ export default function ChatScreen() {
 
 
 
-  const isFirstPrompt = messages.length === 1 && step === 'summary';
+  const isFirstPrompt = messages.length === 1 && step === 'bookType';
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (!input.trim()) return;
 
     const userMsg = { id: Date.now(), sender: 'user', text: input };
@@ -42,8 +43,8 @@ export default function ChatScreen() {
     setMessages((prev) => [...prev, userMsg]);
     setInput('');
 
-    setTimeout(() => {
-      if (step === 'summary') {
+    if (step === 'bookType') {
+      setTimeout(() => {
         setMessages((prev) => [
           ...prev,
           {
@@ -63,27 +64,27 @@ export default function ChatScreen() {
             ),
           },
         ]);
-        setStep('type');
-      } else if (step === 'type') {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: Date.now() + 1,
-            sender: 'bot',
-            custom: (
-              <div>
-                <p>Great! Based on that, here are a few title ideas:</p>
-                <ul className="list-unstyled d-flex flex-wrap gap-2">
-                  <li><button className="selection" onClick={() => handleTitleSelect('Dreams of Tomorrow')}>Dreams of Tomorrow</button></li>
-                  <li><button className="selection" onClick={() => handleTitleSelect('Code of the Future')}>Code of the Future</button></li>
-                  <li><button className="selection" onClick={() => handleTitleSelect('The Final Algorithm')}>The Final Algorithm</button></li>
-                </ul>
-              </div>
-            ),
-          },
-        ]);
-        setStep('title');
-        }  else if (step === 'title') {
+      }, 400);
+      setStep('summary');
+    } else if (step === 'summary') {
+      const loadingId = Date.now() + 1;
+      setMessages((prev) => [
+        ...prev,
+        { id: loadingId, sender: 'bot', text: 'Generating title suggestions...' },
+      ]);
+
+      try {
+        const answer = await askQuestion(`Provide 10 book title suggestions with subtitles based on the following summary:\n${currentInput}`);
+        setMessages((prev) =>
+          prev.map((m) => (m.id === loadingId ? { id: loadingId, sender: 'bot', text: answer } : m))
+        );
+      } catch (e) {
+        setMessages((prev) =>
+          prev.map((m) => (m.id === loadingId ? { id: loadingId, sender: 'bot', text: 'Failed to fetch suggestions.' } : m))
+        );
+      }
+      setStep('title');
+    } else if (step === 'title') {
           setMessages((prev) => [
             ...prev,
             {
@@ -132,8 +133,6 @@ export default function ChatScreen() {
             ]);
             setStep('keypoints');
           }
-
-    }, 800);
   };
 
   const getRequiredKeyPoints = () => {
@@ -240,7 +239,7 @@ export default function ChatScreen() {
       { id: 1, sender: 'bot', text: 'Hi 👋! What kind of book do you want to write?' },
     ]);
      setInput('');
-    setStep('summary');
+    setStep('bookType');
     setKeyPoints(['', '', '']);
     setSelectedBookType('');
     setSelectedTitle('');
