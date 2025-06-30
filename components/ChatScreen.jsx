@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import '../stylesheets/style.css';
 import { Icon } from '@iconify/react';
 
-import { askQuestion, saveTitle, createBook } from '../utils/api';
+import { askQuestion, saveTitle, createBook, generateBook } from '../utils/api';
 
 
 export default function ChatScreen() {
@@ -26,6 +26,7 @@ export default function ChatScreen() {
   const [chapterCount, setChapterCount] = useState(null);
   const [bookId, setBookId] = useState(null);
   const [titleOptions, setTitleOptions] = useState([]);
+  const [summary, setSummary] = useState('');
 
 
 
@@ -70,6 +71,7 @@ export default function ChatScreen() {
       }, 400);
       setStep('summary');
     } else if (step === 'summary') {
+      setSummary(currentInput);
       const loadingId = Date.now() + 1;
       setMessages((prev) => [
         ...prev,
@@ -249,7 +251,7 @@ export default function ChatScreen() {
     };
 
 
-  const handleSubmitKeyPoints = () => {
+  const handleSubmitKeyPoints = async () => {
       const filled = keyPoints.filter((p) => p.trim() !== '');
       if (filled.length < getRequiredKeyPoints()) {
         setMessages((prev) => [
@@ -259,7 +261,6 @@ export default function ChatScreen() {
         return;
       }
 
-      // Add key points as a single user message
       const formattedKeyPoints = filled.map((kp, i) => `${i + 1}. ${kp}`).join('\n');
       setMessages((prev) => [
         ...prev,
@@ -270,31 +271,34 @@ export default function ChatScreen() {
         },
       ]);
 
-      // Then respond with bot message
-      setTimeout(() => {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: Date.now() + 1,
-            sender: 'bot',
-            text: "Great choice! Here's the opening chapter. 📖",
-          },
-        ]);
+      const loadingId = Date.now() + 1;
+      setMessages((prev) => [
+        ...prev,
+        { id: loadingId, sender: 'bot', text: 'Generating your book...' },
+      ]);
 
+      try {
+        const generated = await generateBook({
+          bookId,
+          bookType,
+          summary,
+          title: selectedTitle,
+          chapterCount,
+          keyPoints: filled,
+        });
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === loadingId ? { id: loadingId, sender: 'bot', text: generated.chapters?.[0]?.aiContent || generated } : m
+          )
+        );
         setStep('content');
-
-        setTimeout(() => {
-          setMessages((prev) => [
-            ...prev,
-            {
-              id: Date.now() + 2,
-              sender: 'bot',
-              text:
-                'Chapter 1: A dim room flickered with code and caffeine. Zoe stared at her terminal. Outside, a cyberwar brewed. She had one chance left...',
-            },
-          ]);
-        }, 800);
-      }, 400);
+      } catch (e) {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === loadingId ? { id: loadingId, sender: 'bot', text: 'Failed to generate book.' } : m
+          )
+        );
+      }
     };
 
 
