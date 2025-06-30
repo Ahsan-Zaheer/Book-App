@@ -59,9 +59,13 @@ export default function ChatScreen() {
   // Persist chat history whenever messages or bookId change
   useEffect(() => {
     if (bookId) {
-      localStorage.setItem(`chat_${bookId}`, JSON.stringify(messages));
+      const serializableMessages = messages
+        .filter((msg) => !msg.custom) // Exclude JSX
+        .map(({ id, sender, text }) => ({ id, sender, text }));
+      localStorage.setItem(`chat_${bookId}`, JSON.stringify(serializableMessages));
     }
   }, [messages, bookId]);
+
 
   // Listen for requests to load a previous chat
   useEffect(() => {
