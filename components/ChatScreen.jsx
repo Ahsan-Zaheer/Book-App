@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../stylesheets/style.css';
 import { Icon } from '@iconify/react';
-import { askQuestion } from '../utils/api';
+import { askQuestion, saveTitle } from '../utils/api';
 
 export default function ChatScreen() {
   const bottomRef = useRef(null);
@@ -23,6 +23,7 @@ export default function ChatScreen() {
   const [selectedBookType, setSelectedBookType] = useState('');
   const [chapterCount, setChapterCount] = useState(null);
   const [bookUUID, setBookUUID] = useState('123e4567-e89b-12d3-a456-426614174000'); // Example UUID
+  const [titleOptions, setTitleOptions] = useState([]);
 
 
 
@@ -74,13 +75,42 @@ export default function ChatScreen() {
       ]);
 
       try {
-        const answer = await askQuestion(`Provide 10 book title suggestions with subtitles based on the following summary:\n${currentInput}`);
+        const answer = await askQuestion(
+          `Provide 10 book title suggestions with subtitles based on the following summary:\n${currentInput}`
+        );
+        const titles = answer
+          .split(/\n|\r/)
+          .map((t) => t.trim())
+          .filter((t) => /^\d+\./.test(t))
+          .map((t) => t.replace(/^\d+\.\s*/, ''));
+        setTitleOptions(titles);
         setMessages((prev) =>
-          prev.map((m) => (m.id === loadingId ? { id: loadingId, sender: 'bot', text: answer } : m))
+          prev.map((m) =>
+            m.id === loadingId
+              ? {
+                  id: loadingId,
+                  sender: 'bot',
+                  custom: (
+                    <div>
+                      <p>Great! Based on your summary, here are some title ideas:</p>
+                      <ul className="list-unstyled d-flex flex-wrap gap-2">
+                        {titles.map((t, idx) => (
+                          <li key={idx}>
+                            <button className="selection" onClick={() => handleTitleSelect(t)}>{t}</button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ),
+                }
+              : m
+          )
         );
       } catch (e) {
         setMessages((prev) =>
-          prev.map((m) => (m.id === loadingId ? { id: loadingId, sender: 'bot', text: 'Failed to fetch suggestions.' } : m))
+          prev.map((m) =>
+            m.id === loadingId ? { id: loadingId, sender: 'bot', text: 'Failed to fetch suggestions.' } : m
+          )
         );
       }
       setStep('title');
@@ -142,8 +172,27 @@ export default function ChatScreen() {
 };
 
 
-  const handleTitleSelect = (title) => {
-    setInput(`I like "${title}"`);
+  const handleTitleSelect = async (title) => {
+    setSelectedTitle(title);
+    setMessages((prev) => [
+      ...prev,
+      { id: Date.now(), sender: 'user', text: `I like "${title}"` },
+    ]);
+    try {
+      await saveTitle(bookUUID, title);
+    } catch (e) {
+      console.error(e);
+    }
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: Date.now() + 1,
+        sender: 'bot',
+        text: `How many chapters do you want in your ${selectedBookType}?`,
+      },
+    ]);
+    setStep('chapters');
+    setInput('');
     inputRef.current?.focus();
   };
 

@@ -16,3 +16,16 @@ export const askQuestion = async (question) => {
     }    
 
 }
+
+export const saveTitle = async (bookId, title) => {
+    const res = await fetch(new Request(createUrl('/api/book/title'), {
+        method: 'POST',
+        body: JSON.stringify({ bookId, title }),
+    }));
+    if(res.ok) {
+        const data = await res.json();
+        return data.data;
+    } else {
+        throw new Error('Failed to save title');
+    }
+}
