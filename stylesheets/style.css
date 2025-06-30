@@ -60,7 +60,8 @@
 }
 
 .chatInputBg{
-    width: 500px;
+    width: 100%;
+    max-width: 500px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -238,7 +239,19 @@ width: 80%;
   z-index: 9999; /* Make sure it stays on top */
   font-size: 17px;
   opacity: 0.95;
-  pointer-events: none; 
-  
+  pointer-events: none;
+
+}
+
+@media (max-width: 600px) {
+  .messages {
+    width: 95%;
+  }
+  .chatInputBg {
+    width: 95%;
+  }
+  .keypointBg {
+    width: 95%;
+  }
 }
 

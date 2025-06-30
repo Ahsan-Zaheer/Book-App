@@ -9,7 +9,7 @@ import { askQuestion, saveTitle, createBook, generateChapter } from '../utils/ap
 const generateId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
 
-export default function ChatScreen() {
+export default function ChatScreen({ initialBookId = null }) {
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
   const keyPointRefs = useRef([]);
@@ -34,6 +34,17 @@ export default function ChatScreen() {
   const [hasKeyPoints, setHasKeyPoints] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isMultiline, setIsMultiline] = useState(false);
+
+  // Load stored chat when an initial book id is provided
+  useEffect(() => {
+    if (initialBookId) {
+      setBookId(initialBookId);
+      const stored = localStorage.getItem(`chat_${initialBookId}`);
+      if (stored) {
+        setMessages(JSON.parse(stored));
+      }
+    }
+  }, [initialBookId]);
 
 
   const handleInputChange = (e) => {
