@@ -33,12 +33,14 @@ export default function ChatScreen() {
   const [chapterTitleOptions, setChapterTitleOptions] = useState([]);
   const [hasKeyPoints, setHasKeyPoints] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isMultiline, setIsMultiline] = useState(false);
 
 
   const handleInputChange = (e) => {
     setInput(e.target.value);
     e.target.style.height = "auto";
     e.target.style.height = e.target.scrollHeight + "px";
+    setIsMultiline(e.target.value.split("\n").length > 1);
   };
 
 
@@ -391,32 +393,53 @@ export default function ChatScreen() {
     setBookType('');
     setChapterCount(null);
     setBookId(null);
+    setSummary('');
+    setTitleOptions([]);
+    setChapterTitleOptions([]);
+    setCurrentChapter(1);
+    setHasKeyPoints(false);
+    setIsGenerating(false);
+    setIsMultiline(false);
 
   };
   const formatMessageText = (text) => {
-      if (!text || typeof text !== 'string') return text;
+    if (!text || typeof text !== 'string') return text;
 
-      // Match lines that start with "1. ", "2. ", etc.
-      const numberedListRegex = /^(\d+\.\s.*)$/gm;
-      const parts = text.split(numberedListRegex);
+    // Remove Markdown-style bold markers
+    const sanitized = text.replace(/\*\*/g, '');
 
-      return (
-        <>
-          {parts.map((part, idx) => (
-            part.match(numberedListRegex) ? (
-              <React.Fragment key={idx}>
-                {part}
-                <br />
-              </React.Fragment>
-            ) : (
-              <React.Fragment key={idx}>
-                {part}
-              </React.Fragment>
-            )
-          ))}
-        </>
-      );
-    };
+    // Match lines that start with "1. ", "2. ", etc.
+    const numberedListRegex = /^(\d+\.\s.*)$/gm;
+    const parts = sanitized.split(numberedListRegex);
+
+    return (
+      <>
+        {parts.map((part, idx) =>
+          part.match(numberedListRegex) ? (
+            <React.Fragment key={idx}>
+              {part}
+              <br />
+            </React.Fragment>
+          ) : (
+            part.split(/\n/).map((line, jdx) => {
+              if (!line.trim()) return null;
+              return /^Part\s*\d+/i.test(line) ? (
+                <React.Fragment key={`${idx}-${jdx}`}>
+                  <strong>{line.trim()}</strong>
+                  <br />
+                </React.Fragment>
+              ) : (
+                <React.Fragment key={`${idx}-${jdx}`}>
+                  {line}
+                  <br />
+                </React.Fragment>
+              );
+            })
+          )
+        )}
+      </>
+    );
+  };
 
     
 
@@ -456,7 +479,7 @@ export default function ChatScreen() {
                       <small>• 12 chapters<br />• ~1,500 words per chapter part</small>
                     </button></li>
          </ul>
-          <div className="chatInputBg">
+          <div className={`chatInputBg${isMultiline ? " multiline" : ""}`}>
             <textarea
               ref={inputRef}
               className="chatInput"
@@ -516,7 +539,7 @@ export default function ChatScreen() {
               </button>
             </div>
           ) : <div className="p-3">
-                <div className="chatInputBg d-flex align-items-center gap-2">
+                <div className={`chatInputBg${isMultiline ? " multiline" : ""} d-flex align-items-center gap-2">
                   <textarea
                     ref={inputRef}
                     className="chatInput"
