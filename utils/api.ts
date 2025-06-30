@@ -63,7 +63,8 @@ export const generateChapter = async ({ bookId, bookType, summary, title, chapte
     }));
     if(res.ok) {
         const data = await res.json();
-        return data.data.chapter.content;
+        
+        return data.data.chapter.kwargs.content;
     } else {
         throw new Error('Failed to generate chapter');
     }
