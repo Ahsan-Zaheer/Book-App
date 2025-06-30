@@ -3,7 +3,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../stylesheets/style.css';
 import { Icon } from '@iconify/react';
+
 import { askQuestion, saveTitle } from '../utils/api';
+
+import { askQuestion } from '../utils/api';
+
 
 export default function ChatScreen() {
   const bottomRef = useRef(null);
@@ -75,6 +79,7 @@ export default function ChatScreen() {
       ]);
 
       try {
+
         const answer = await askQuestion(
           `Provide 10 book title suggestions with subtitles based on the following summary:\n${currentInput}`
         );
@@ -111,6 +116,15 @@ export default function ChatScreen() {
           prev.map((m) =>
             m.id === loadingId ? { id: loadingId, sender: 'bot', text: 'Failed to fetch suggestions.' } : m
           )
+
+        const answer = await askQuestion(`Provide 10 book title suggestions with subtitles based on the following summary:\n${currentInput}`);
+        setMessages((prev) =>
+          prev.map((m) => (m.id === loadingId ? { id: loadingId, sender: 'bot', text: answer } : m))
+        );
+      } catch (e) {
+        setMessages((prev) =>
+          prev.map((m) => (m.id === loadingId ? { id: loadingId, sender: 'bot', text: 'Failed to fetch suggestions.' } : m))
+
         );
       }
       setStep('title');
