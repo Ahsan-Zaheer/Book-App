@@ -43,3 +43,16 @@ export const saveTitle = async (bookId, title) => {
         throw new Error('Failed to save title');
     }
 }
+
+export const generateBook = async ({ bookId, bookType, summary, title, chapterCount, keyPoints }) => {
+    const res = await fetch(new Request(createUrl('/api/book/generate'), {
+        method: 'POST',
+        body: JSON.stringify({ bookId, bookType, summary, title, chapterCount, keyPoints }),
+    }));
+    if(res.ok) {
+        const data = await res.json();
+        return data.data;
+    } else {
+        throw new Error('Failed to generate book');
+    }
+}
