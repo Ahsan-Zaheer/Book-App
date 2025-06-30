@@ -6,6 +6,8 @@ import { Icon } from '@iconify/react';
 
 import { askQuestion, saveTitle, createBook, generateChapter } from '../utils/api';
 
+const generateId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
 
 export default function ChatScreen() {
   const bottomRef = useRef(null);
@@ -15,7 +17,7 @@ export default function ChatScreen() {
 
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([
-    { id: 1, sender: 'bot', text: 'Hi 👋! What kind of book do you want to write?' },
+    { id: generateId(), sender: 'bot', text: 'Hi 👋! What kind of book do you want to write?' },
   ]);
   const [step, setStep] = useState('bookType');
   const [keyPoints, setKeyPoints] = useState(['', '', '']);
@@ -45,7 +47,7 @@ export default function ChatScreen() {
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    const userMsg = { id: Date.now(), sender: 'user', text: input };
+    const userMsg = { id: generateId(), sender: 'user', text: input };
     const currentInput = input;
     setMessages((prev) => [...prev, userMsg]);
     setInput('');
@@ -55,7 +57,7 @@ export default function ChatScreen() {
         setMessages((prev) => [
           ...prev,
           {
-            id: Date.now() + 1,
+            id: generateId(),
             sender: 'bot',
             custom: (
               <div>
@@ -75,7 +77,7 @@ export default function ChatScreen() {
       setStep('summary');
     } else if (step === 'summary') {
       setSummary(currentInput);
-      const loadingId = Date.now() + 1;
+      const loadingId = generateId();
       setMessages((prev) => [
         ...prev,
         { id: loadingId, sender: 'bot', text: 'Generating title suggestions...' },
@@ -130,7 +132,7 @@ export default function ChatScreen() {
           setMessages((prev) => [
             ...prev,
             {
-              id: Date.now() + 1,
+              id: generateId(),
               sender: 'bot',
               text: `How many chapters do you want in your ${selectedBookType}?`,
             },
@@ -145,7 +147,7 @@ export default function ChatScreen() {
             setMessages((prev) => [
               ...prev,
               {
-                id: Date.now() + 1,
+                id: generateId(),
                 sender: 'bot',
                 custom: (
                   <div>
@@ -163,7 +165,7 @@ export default function ChatScreen() {
           } else {
             setMessages((prev) => [
               ...prev,
-              { id: Date.now(), sender: 'bot', text: 'Please enter a valid number of chapters (1–50).' },
+              { id: generateId(), sender: 'bot', text: 'Please enter a valid number of chapters (1–50).' },
             ]);
           }
         } else if (step === 'chapterTitle') {
@@ -174,7 +176,7 @@ export default function ChatScreen() {
               setMessages((prev) => [
                 ...prev,
                 {
-                  id: Date.now() + 1,
+                  id: generateId(),
                   sender: 'bot',
                   text: `Awesome! Now, please enter ${getRequiredKeyPoints()} key points you want to cover in your book.`,
                 },
@@ -202,7 +204,7 @@ export default function ChatScreen() {
 
     setMessages((prev) => [
       ...prev,
-      { id: Date.now(), sender: 'user', text: `I like "${title}"` },
+      { id: generateId(), sender: 'user', text: `I like "${title}"` },
     ]);
     try {
       console.log("Saving title:", title);
@@ -215,7 +217,7 @@ export default function ChatScreen() {
     setMessages((prev) => [
       ...prev,
       {
-        id: Date.now() + 1,
+        id: generateId(),
         sender: 'bot',
         text: `How many chapters do you want in your ${selectedBookType}?`,
       },
@@ -250,7 +252,7 @@ export default function ChatScreen() {
   };
 
   const generateChapterContent = async (chapterTitle) => {
-    const loadingId = Date.now() + 1;
+    const loadingId = generateId();
     setMessages((prev) => [
       ...prev,
       { id: loadingId, sender: 'bot', text: `Generating Chapter ${currentChapter}...` },
@@ -279,7 +281,7 @@ export default function ChatScreen() {
         setMessages((prev) => [
           ...prev,
           {
-            id: Date.now() + 2,
+            id: generateId(),
             sender: 'bot',
             custom: (
               <div>
@@ -298,7 +300,7 @@ export default function ChatScreen() {
       } else {
         setMessages((prev) => [
           ...prev,
-          { id: Date.now() + 2, sender: 'bot', text: '🎉 Book generation complete!' },
+          { id: generateId(), sender: 'bot', text: '🎉 Book generation complete!' },
         ]);
         setStep('content');
       }
@@ -343,7 +345,7 @@ export default function ChatScreen() {
       if (filled.length < getRequiredKeyPoints()) {
         setMessages((prev) => [
           ...prev,
-          { id: Date.now(), sender: 'bot', text: `Please enter at least ${getRequiredKeyPoints()} key points.` },
+          { id: generateId(), sender: 'bot', text: `Please enter at least ${getRequiredKeyPoints()} key points.` },
         ]);
         return;
       }
@@ -352,7 +354,7 @@ export default function ChatScreen() {
       setMessages((prev) => [
         ...prev,
         {
-          id: Date.now(),
+          id: generateId(),
           sender: 'user',
           text: `Here are my key points:\n${formattedKeyPoints}`,
         },
@@ -366,7 +368,7 @@ export default function ChatScreen() {
 
   const handleClearChat = () => {
     setMessages([
-      { id: 1, sender: 'bot', text: 'Hi 👋! What kind of book do you want to write?' },
+      { id: generateId(), sender: 'bot', text: 'Hi 👋! What kind of book do you want to write?' },
     ]);
      setInput('');
     setStep('bookType');
