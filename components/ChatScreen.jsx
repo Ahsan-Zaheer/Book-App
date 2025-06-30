@@ -106,7 +106,7 @@ export default function ChatScreen() {
           .split(/\n|\r/)
           .map((t) => t.trim())
           .filter((t) => /^\d+\./.test(t))
-          .map((t) => t.replace(/^\d+\.\s*/, ''));
+          .map((t) => t.replace(/^\d+\.\s*/, '').replace(/\*\*/g, '').trim());
         setTitleOptions(titles);
         setMessages((prev) =>
           prev.map((m) =>
@@ -144,7 +144,7 @@ export default function ChatScreen() {
             {
               id: generateId(),
               sender: 'bot',
-              text: `How many chapters do you want in your ${selectedBookType}?`,
+              text: `How many chapters do you want in your ${selectedBookType}? Usually this type has ${getChapterRange()} chapters.`,
             },
           ]);
           setStep('chapters');
@@ -191,6 +191,7 @@ export default function ChatScreen() {
                   text: `Awesome! Now, please enter ${getRequiredKeyPoints()} key points you want to cover in your book.`,
                 },
               ]);
+              setKeyPoints(getInitialKeyPoints());
               setStep('keypoints');
             } else {
               setIsGenerating(true);
@@ -200,15 +201,26 @@ export default function ChatScreen() {
           }
   };
 
-  const getRequiredKeyPoints = () => {
+const getRequiredKeyPoints = () => {
   if (bookType === 'Ebook') return 8;
   if (bookType === 'Short Book') return 16;
   return 20; // Full Length Book
 };
 
+  const getChapterRange = () => {
+    if (bookType === 'Ebook') return '4-6';
+    if (bookType === 'Short Book') return '5-10';
+    return '10-12';
+  };
+
+  const getInitialKeyPoints = () => {
+    return Array(Math.max(3, getRequiredKeyPoints())).fill('');
+  };
+
 
   const handleTitleSelect = async (title , bookIdArg) => {
-    setSelectedTitle(title);
+    const cleanTitle = title.replace(/\*\*/g, '').trim();
+    setSelectedTitle(cleanTitle);
     if (!bookIdArg) {
       console.error("Cannot save title: bookId is null");
       return;
@@ -231,7 +243,7 @@ export default function ChatScreen() {
       {
         id: generateId(),
         sender: 'bot',
-        text: `How many chapters do you want in your ${selectedBookType}?`,
+        text: `How many chapters do you want in your ${selectedBookType}? Usually this type has ${getChapterRange()} chapters.`,
       },
     ]);
     setStep('chapters');
@@ -240,8 +252,9 @@ export default function ChatScreen() {
   };
 
   const handleChapterSelect = (chapterName) => {
-    setSelectedChapter(chapterName);
-    setInput(chapterName);
+    const cleanName = chapterName.replace(/\*\*/g, '').trim();
+    setSelectedChapter(cleanName);
+    setInput(cleanName);
     inputRef.current?.focus();
   };
 
@@ -259,7 +272,7 @@ export default function ChatScreen() {
       .split(/\n|\r/)
       .map((t) => t.trim())
       .filter((t) => /^\d+\./.test(t))
-      .map((t) => t.replace(/^\d+\.\s*/, ''));
+      .map((t) => t.replace(/^\d+\.\s*/, '').replace(/\*\*/g, '').trim());
     return titles;
   };
 
@@ -308,6 +321,8 @@ export default function ChatScreen() {
           },
         ]);
         setCurrentChapter(next);
+        setHasKeyPoints(false);
+        setKeyPoints(getInitialKeyPoints());
         setStep('chapterTitle');
       } else {
         setMessages((prev) => [
@@ -386,7 +401,7 @@ export default function ChatScreen() {
     ]);
      setInput('');
     setStep('bookType');
-    setKeyPoints(['', '', '']);
+    setKeyPoints(getInitialKeyPoints());
     setSelectedBookType('');
     setSelectedTitle('');
     setSelectedChapter('');

@@ -21,7 +21,9 @@ export const POST = async (req: Request) => {
   book.chapterCount = chapterCount;
   await book.save();
 
-  const prompt = `You are a professional book writer. Write a ${bookType} titled "${title}" based on the following summary and key points. The book must have ${chapterCount} chapters. \nSummary: ${summary}\nKey points: ${keyPoints.join("; ")}`;
+  const wordsPerPart =
+    bookType === 'Ebook' ? 700 : bookType === 'Short Book' ? 100 : 1500;
+  const prompt = `You are a professional book writer. Write a ${bookType} titled "${title}" based on the following summary and key points. The book must have ${chapterCount} chapters with each part about ${wordsPerPart} words. \nSummary: ${summary}\nKey points: ${keyPoints.join("; ")}`;
 
   const model = new ChatOpenAI({
     modelName: "gpt-4o-mini",
