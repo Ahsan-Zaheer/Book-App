@@ -238,8 +238,7 @@ width: 80%;
   font-weight: 500;
   z-index: 9999; /* Make sure it stays on top */
   font-size: 17px;
-  opacity: 0.95;
-  pointer-events: none;
+  opacity: 0.95;  
 
 }
 

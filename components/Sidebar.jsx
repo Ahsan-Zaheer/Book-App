@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import "../stylesheets/style.css";
+import Link from "next/link";
+
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -36,7 +38,7 @@ export default function Sidebar() {
       {/* Header with Logo and Toggle */}
       <div className="sidebar-header d-flex justify-content-between align-items-center mb-4">
         {!isCollapsed && (
-          <h2 className="fw-bold" style={{ color: '#f4845f', fontSize: "30px" }}>📚 Logo  <span className="beta">beta</span></h2>
+          <h2 className="fw-bold" style={{ color: '#f4845f', fontSize: "30px" }}> <Link href="/">📚 Logo</Link>  <span className="beta">beta</span></h2>
         )}
         <button className="toggle-btn" onClick={toggleSidebar}>
           <Icon icon={isCollapsed ? "line-md:arrow-right" : "humbleicons:bars"} width="24" />

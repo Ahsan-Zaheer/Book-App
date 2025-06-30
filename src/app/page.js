@@ -16,7 +16,15 @@ export default function Home() {
         <h2 className="mb-4 fw-bold" style={{ color: '#f4845f' }}>📚 Logo</h2>
         <h1 className={styles.title}>Let&apos;s start writing your new book</h1>
 
-        {showInput && (
+        
+
+        <div className={styles.ctas}>
+          <Link className={styles.primary} href="/home">
+            <Icon icon="streamline-ultimate:pen-write" />
+            Write New Book
+          </Link>
+
+          {showInput && (
           <div className={styles.oldBookContainer}>
             <input
               type="text"
@@ -34,12 +42,6 @@ export default function Home() {
             )}
           </div>
         )}
-
-        <div className={styles.ctas}>
-          <Link className={styles.primary} href="/home">
-            <Icon icon="streamline-ultimate:pen-write" />
-            Write New Book
-          </Link>
 
           {showInput && uuid ? '' : (
             <button
