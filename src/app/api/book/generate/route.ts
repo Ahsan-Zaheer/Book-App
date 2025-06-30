@@ -32,7 +32,7 @@ export const POST = async (req: Request) => {
   const response = await model.invoke(prompt);
 
   book.status = "generated";
-  book.chapters = [ { idx: 1, title: title, keyPoints, aiContent: response } ];
+  book.chapters = [ { idx: 1, title: title, keyPoints, aiContent: response.content } ];
   await book.save();
 
   return NextResponse.json({ data: book });

@@ -29,7 +29,7 @@ export const POST = async (req: Request) => {
 
   const response = await model.invoke(prompt);
 
-  book.chapters.push({ idx: chapterIndex, title: chapterTitle, keyPoints, aiContent: response });
+  book.chapters.push({ idx: chapterIndex, title: chapterTitle, keyPoints, aiContent: response.content });
   if (book.chapterCount && book.chapters.length >= book.chapterCount) {
     book.status = "generated";
   }
