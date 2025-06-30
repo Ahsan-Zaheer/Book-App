@@ -4,9 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import '../stylesheets/style.css';
 import { Icon } from '@iconify/react';
 
-import { askQuestion, saveTitle } from '../utils/api';
-
-import { askQuestion } from '../utils/api';
+import { askQuestion, saveTitle, createBook } from '../utils/api';
 
 
 export default function ChatScreen() {
@@ -26,7 +24,7 @@ export default function ChatScreen() {
   const [selectedChapter, setSelectedChapter] = useState('');
   const [selectedBookType, setSelectedBookType] = useState('');
   const [chapterCount, setChapterCount] = useState(null);
-  const [bookUUID, setBookUUID] = useState('123e4567-e89b-12d3-a456-426614174000'); // Example UUID
+  const [bookId, setBookId] = useState(null);
   const [titleOptions, setTitleOptions] = useState([]);
 
 
@@ -80,6 +78,10 @@ export default function ChatScreen() {
 
       try {
 
+        const created = await createBook(currentInput);
+        const newBookId = created._id;
+        setBookId(newBookId);
+
         const answer = await askQuestion(
           `Provide 10 book title suggestions with subtitles based on the following summary:\n${currentInput}`
         );
@@ -101,7 +103,7 @@ export default function ChatScreen() {
                       <ul className="list-unstyled d-flex flex-wrap gap-2">
                         {titles.map((t, idx) => (
                           <li key={idx}>
-                            <button className="selection" onClick={() => handleTitleSelect(t)}>{t}</button>
+                            <button className="selection" onClick={() => handleTitleSelect(t, newBookId)}>{t}</button>
                           </li>
                         ))}
                       </ul>
@@ -116,15 +118,6 @@ export default function ChatScreen() {
           prev.map((m) =>
             m.id === loadingId ? { id: loadingId, sender: 'bot', text: 'Failed to fetch suggestions.' } : m
           )
-
-        const answer = await askQuestion(`Provide 10 book title suggestions with subtitles based on the following summary:\n${currentInput}`);
-        setMessages((prev) =>
-          prev.map((m) => (m.id === loadingId ? { id: loadingId, sender: 'bot', text: answer } : m))
-        );
-      } catch (e) {
-        setMessages((prev) =>
-          prev.map((m) => (m.id === loadingId ? { id: loadingId, sender: 'bot', text: 'Failed to fetch suggestions.' } : m))
-
         );
       }
       setStep('title');
@@ -186,14 +179,22 @@ export default function ChatScreen() {
 };
 
 
-  const handleTitleSelect = async (title) => {
+  const handleTitleSelect = async (title , bookIdArg) => {
     setSelectedTitle(title);
+    if (!bookIdArg) {
+      console.error("Cannot save title: bookId is null");
+      return;
+    }
+
     setMessages((prev) => [
       ...prev,
       { id: Date.now(), sender: 'user', text: `I like "${title}"` },
     ]);
     try {
-      await saveTitle(bookUUID, title);
+      console.log("Saving title:", title);
+      console.log("Book ID:", bookIdArg);
+      await saveTitle(bookIdArg, title);
+
     } catch (e) {
       console.error(e);
     }
@@ -309,6 +310,7 @@ export default function ChatScreen() {
     setSelectedChapter('');
     setBookType('');
     setChapterCount(null);
+    setBookId(null);
 
   };
   const formatMessageText = (text) => {
@@ -458,7 +460,7 @@ export default function ChatScreen() {
         </div>
         {/* Top Notch-like Title Bar */}
         <div className="floating-title-bar">
-          Your Book uuid: <strong>{bookUUID}</strong>
+          Your Book id: <strong>{bookId}</strong>
         </div>
 
 
