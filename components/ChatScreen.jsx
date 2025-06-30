@@ -539,7 +539,7 @@ export default function ChatScreen() {
               </button>
             </div>
           ) : <div className="p-3">
-                <div className={`chatInputBg${isMultiline ? " multiline" : ""} d-flex align-items-center gap-2">
+                <div className={`chatInputBg${isMultiline ? " multiline" : ""} d-flex align-items-center gap-2`}>
                   <textarea
                     ref={inputRef}
                     className="chatInput"
