@@ -72,11 +72,7 @@ export default function ChatScreen({ initialBookId = null }) {
           {outlineData.map((ch, idx) => (
             <li key={idx}>
               <strong>{ch.title}</strong>
-              <ul>
-                {ch.subheadings.map((s, i) => (
-                  <li key={i}>{s}</li>
-                ))}
-              </ul>
+              <p className="mb-0">{ch.concept}</p>
             </li>
           ))}
         </ol>
@@ -548,7 +544,7 @@ const getRequiredKeyPoints = () => {
 
   const getOutlineSuggestions = async (count) => {
     const answer = await askQuestion(
-      `Provide an outline of ${count} chapters for the ${bookType} "${selectedTitle}" based on this summary:\n${summary}. Each chapter should have a title and four subheadings.`
+      `Provide an outline of ${count} chapters for the ${bookType} "${selectedTitle}" based on this summary:\n${summary}. Each chapter should have a title followed by a brief concept of the chapter in no more than two lines.`
     );
 
     console.log("🧠 Outline response:", answer);
@@ -561,35 +557,38 @@ const getRequiredKeyPoints = () => {
     const chapters = [];
     let current = null;
 
+    const isChapterLine = (l) => /^(?:#+\s*)?(?:\d+\.\s*)?(?:chapter\s*\d+)/i.test(l);
+
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       console.log(`🔍 Line ${i + 1}: ${line}`);
 
-      if (/^(?:#+\s*)?(?:\d+\.\s*)?(?:chapter\s*\d+)/i.test(line)) {
+      if (isChapterLine(line)) {
         if (current) chapters.push(current);
 
-        let title = line
-          .replace(/^(?:#+\s*)?(?:\d+\.\s*)?(?:chapter\s*\d+[:.-]?\s*)/i, '')
-          .replace(/\*\*/g, '')
-          .trim();
+        let rest = line.replace(/^(?:#+\s*)?(?:\d+\.\s*)?(?:chapter\s*\d+[:.-]?\s*)/i, '').replace(/\*\*/g, '').trim();
+        let title = rest;
+        let concept = '';
 
-        if (!title && i + 1 < lines.length) {
+        const sepMatch = rest.match(/[-:–]\s*(.*)/);
+        if (sepMatch) {
+          title = rest.slice(0, sepMatch.index).trim();
+          concept = sepMatch[1].trim();
+        }
+
+        if (!concept && i + 1 < lines.length) {
           const nextLine = lines[i + 1];
-          if (
-            !/^(?:#+\s*)?(?:\d+\.\s*)?(?:chapter\s*\d+)/i.test(nextLine) &&
-            !/^[-•]/.test(nextLine)
-          ) {
-            title = nextLine.replace(/\*\*/g, '').trim();
+          if (!isChapterLine(nextLine)) {
+            concept = nextLine.replace(/\*\*/g, '').trim();
             i++;
           }
         }
 
-        current = { title, subheadings: [] };
+        current = { title, concept };
         console.log(`📌 Found chapter line, extracted title: ${title}`);
-      } else if (current && /^[-•]/.test(line)) {
-        const sub = line.replace(/^[-•]\s*/, '').replace(/\*\*/g, '').trim();
-        current.subheadings.push(sub);
-        console.log(`🧩 Added subheading: ${sub}`);
+      } else if (current && !current.concept) {
+        current.concept = line.replace(/\*\*/g, '').trim();
+        console.log(`🧩 Added concept continuation: ${current.concept}`);
       } else {
         console.warn(`⚠️ Ignored line (not matched): ${line}`);
       }
