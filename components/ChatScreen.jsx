@@ -61,18 +61,6 @@ export default function ChatScreen({ initialBookId = null }) {
           if (typeof stored.hasKeyPoints === 'boolean') setHasKeyPoints(stored.hasKeyPoints);
           if (Array.isArray(stored.outline)) setOutline(stored.outline);
           if (
-            !stored.selectedChapter &&
-            Array.isArray(stored.outline) &&
-            stored.outline.length > 0
-          ) {
-            const idx =
-              typeof stored.currentChapter === 'number'
-                ? stored.currentChapter - 1
-                : 0;
-            const title = stored.outline[idx]?.title;
-            if (title) setSelectedChapter(title);
-          }
-          if (
             stored.step === 'outline' &&
             Array.isArray(stored.outline) &&
             stored.outline.length > 0
@@ -204,18 +192,6 @@ export default function ChatScreen({ initialBookId = null }) {
           if (Array.isArray(stored.keyPoints)) setKeyPoints(stored.keyPoints);
           if (typeof stored.hasKeyPoints === 'boolean') setHasKeyPoints(stored.hasKeyPoints);
           if (Array.isArray(stored.outline)) setOutline(stored.outline);
-          if (
-            !stored.selectedChapter &&
-            Array.isArray(stored.outline) &&
-            stored.outline.length > 0
-          ) {
-            const idx =
-              typeof stored.currentChapter === 'number'
-                ? stored.currentChapter - 1
-                : 0;
-            const title = stored.outline[idx]?.title;
-            if (title) setSelectedChapter(title);
-          }
           if (
             stored.step === 'outline' &&
             Array.isArray(stored.outline) &&
@@ -520,16 +496,27 @@ const getRequiredKeyPoints = () => {
   inputRef.current?.focus();
   };
 
-  const handleOutlineDecision = async (useIt) => {
+  const handleOutlineDecision = async (useIt, chaptersArg = null) => {
+    const outlineToUse = chaptersArg || outline;
+
     if (useIt) {
-      const first = outline[0];
-      setSelectedChapter(first ? first.title : '');
+      console.log("📘 Using outline:", outlineToUse);
+
+      const first = outlineToUse[0];
+      console.log("📗 First chapter:", first);
+
+      if (!first) {
+        console.warn("⚠️ Outline is missing or malformed:", outlineToUse);
+        return;
+      }
+
+      setSelectedChapter(first.title || '');
       setMessages((prev) => [
         ...prev,
         {
           id: generateId(),
           sender: 'bot',
-          text: `Great! Let's start with Chapter 1: ${first ? first.title : ''}. Please enter ${getRequiredKeyPoints()} key points you want to cover.`,
+          text: `Great! Let's start with Chapter 1: ${first.title}. Please enter ${getRequiredKeyPoints()} key points you want to cover.`,
         },
       ]);
       setKeyPoints(getInitialKeyPoints());
@@ -547,28 +534,32 @@ const getRequiredKeyPoints = () => {
       `Provide an outline of ${count} chapters for the ${bookType} "${selectedTitle}" based on this summary:\n${summary}. Each chapter should have a title and four subheadings.`
     );
 
-    console.log("Outline response:", answer);
+    console.log("🧠 Outline response:", answer);
 
-    const lines = answer.split(/\n|\r/).map((l) => l.trim()).filter(Boolean);
+    const lines = answer
+      .split(/\n|\r/)
+      .map((l) => l.trim())
+      .filter(Boolean);
+
     const chapters = [];
-    const chapterPrefix = /^(?:#+\s*)?(?:\d+\.\s*)?(?:chapter\s*\d+[:.-]?\s*)/i;
-    const numberPrefix = /^\d+[\s.:\-)]+/;
     let current = null;
+
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      if (chapterPrefix.test(line) || numberPrefix.test(line)) {
+      console.log(`🔍 Line ${i + 1}: ${line}`);
+
+      if (/^(?:#+\s*)?(?:\d+\.\s*)?(?:chapter\s*\d+)/i.test(line)) {
         if (current) chapters.push(current);
+
         let title = line
-          .replace(chapterPrefix, '')
-          .replace(numberPrefix, '')
+          .replace(/^(?:#+\s*)?(?:\d+\.\s*)?(?:chapter\s*\d+[:.-]?\s*)/i, '')
           .replace(/\*\*/g, '')
           .trim();
 
         if (!title && i + 1 < lines.length) {
           const nextLine = lines[i + 1];
           if (
-            !chapterPrefix.test(nextLine) &&
-            !numberPrefix.test(nextLine) &&
+            !/^(?:#+\s*)?(?:\d+\.\s*)?(?:chapter\s*\d+)/i.test(nextLine) &&
             !/^[-•]/.test(nextLine)
           ) {
             title = nextLine.replace(/\*\*/g, '').trim();
@@ -577,15 +568,30 @@ const getRequiredKeyPoints = () => {
         }
 
         current = { title, subheadings: [] };
+        console.log(`📌 Found chapter line, extracted title: ${title}`);
       } else if (current && /^[-•]/.test(line)) {
-        current.subheadings.push(
-          line.replace(/^[-•]\s*/, '').replace(/\*\*/g, '').trim()
-        );
+        const sub = line.replace(/^[-•]\s*/, '').replace(/\*\*/g, '').trim();
+        current.subheadings.push(sub);
+        console.log(`🧩 Added subheading: ${sub}`);
+      } else {
+        console.warn(`⚠️ Ignored line (not matched): ${line}`);
       }
     }
+
     if (current) chapters.push(current);
-    return chapters.slice(0, count);
+    const finalChapters = chapters.slice(0, count);
+    console.log("✅ Final parsed chapters array:", finalChapters);
+    return finalChapters;
   };
+
+// Example of calling both together
+const generateAndUseOutline = async () => {
+  const chapters = await getOutlineSuggestions(chapterCount);
+  setOutline(chapters); // keep state if needed elsewhere
+  handleOutlineDecision(true, chapters);
+};
+
+
 
   const getChapterTitleSuggestions = async (chapterIdx) => {
     const answer = await askQuestion(
