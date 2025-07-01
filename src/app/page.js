@@ -1,11 +1,12 @@
 'use client'; // needed for state in Next.js 13+ app directory
 
 import { useState } from 'react';
-import Image from "next/image";
 import styles from "./page.module.css";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import  Image  from 'next/image';
+import logo from '../../assets/logo.png'; 
 
 export default function Home() {
   const [showInput, setShowInput] = useState(false);
@@ -31,10 +32,9 @@ export default function Home() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <h2 className="mb-4 fw-bold" style={{ color: '#f4845f' }}>📚 Logo</h2>
+        <Image src={logo} alt="Logo" width={150}  />
         <h1 className={styles.title}>Let&apos;s start writing your new book</h1>
 
-        
 
         <div className={styles.ctas}>
           <Link className={styles.primary} href="/home">

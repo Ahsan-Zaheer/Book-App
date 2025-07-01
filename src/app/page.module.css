@@ -98,14 +98,14 @@
 
 a.primary {
   background: var(--foreground);
-  color: var(--background);
+  color: black;
   gap: 8px;
 }
 
 .secondary {
   min-width: 158px;
   
-  background-color: #f4845f;
+  background-color: #0f01ff;
   /* background-color: rgb(45, 39, 29); */
 
   color: white;
@@ -117,7 +117,7 @@ a.primary {
 }
 .secondary:hover{
 
-  background-color: #f59271;
+  background-color: #2419f9;
 }
 
 .footer {
@@ -137,7 +137,7 @@ a.primary {
 }
 
 .title{
-  color: #f4845f;
+  color: #0f01ff;
 }
 /* Enable hover only on non-touch devices */
 @media (hover: hover) and (pointer: fine) {
