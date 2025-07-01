@@ -744,7 +744,32 @@ const getRequiredKeyPoints = () => {
                 Submit Key Points
               </button>
             </div>
-          ) : step === 'outline' ? null : <div className="p-3">
+          ) : step === 'outline' ? (
+            <div className="p-3">
+              <p className="text-light mb-2">Here is a suggested outline:</p>
+              <ol>
+                {outline.map((ch, idx) => (
+                  <li key={idx}>
+                    <strong>{ch.title}</strong>
+                    <ul>
+                      {ch.subheadings.map((s, i) => (
+                        <li key={i}>{s}</li>
+                      ))}
+                    </ul>
+                  </li>
+                ))}
+              </ol>
+              <div className="d-flex gap-2 mt-2">
+                <button className="selection" onClick={() => handleOutlineDecision(true)}>
+                  Go ahead with this
+                </button>
+                <button className="selection" onClick={() => handleOutlineDecision(false)}>
+                  Generate another suggestion
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="p-3">
                 <div className={`chatInputBg${isMultiline ? " multiline" : ""} d-flex align-items-center gap-2`}>
                   <textarea
                     ref={inputRef}
@@ -759,7 +784,7 @@ const getRequiredKeyPoints = () => {
                     <Icon icon="fa:send-o" />
                   </button>
                 </div>
-            </div>}
+            </div>) }
 
           {/* Clear Chat */}
          <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', zIndex: 1000 }}>
