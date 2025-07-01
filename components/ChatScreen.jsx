@@ -793,7 +793,7 @@ const generateAndUseOutline = async () => {
       )}
       {isFirstPrompt ? (
         <div className="d-flex flex-column justify-content-center align-items-center text-center flex-grow-1">
-          <h2 className="mb-4 text-light"> What kind of book do you want to write?</h2>
+          <h2 className="mb-4"> What kind of book do you want to write?</h2>
           <ul className="list-unstyled d-flex flex-wrap gap-2">
                   <li>
                     <button  className={`selection text-start ${selectedBookType === 'Ebook' ? 'selected' : ''}`} onClick={() =>
@@ -862,7 +862,7 @@ const generateAndUseOutline = async () => {
           {/* Input Section */}
           {step === 'keypoints' && !isGenerating ? (
             <div className="p-3 keypointBg">
-              <p className="text-light mb-2">Please enter {getRequiredKeyPoints()} key points you'd like to include in your book:</p>
+              <p className="text-dark mb-2">Please enter {getRequiredKeyPoints()} key points you'd like to include in your book:</p>
               <div className="scrollable-keypoints mb-2">
                 {keyPoints.map((point, idx) => (
                   <input
