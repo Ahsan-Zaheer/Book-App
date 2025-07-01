@@ -38,26 +38,27 @@ export default function ChatScreen({ initialBookId = null }) {
   // Load stored chat when an initial book id is provided
   useEffect(() => {
     const load = async () => {
-      if (initialBookId) {
-        setBookId(initialBookId);
-        try {
-          const stored = await loadChatState(initialBookId);
-          if (stored) {
-            setMessages(stored.messages || []);
-            if (stored.step) setStep(stored.step);
-            if (stored.bookType) setBookType(stored.bookType);
-            if (stored.selectedBookType) setSelectedBookType(stored.selectedBookType);
-            if (stored.selectedTitle) setSelectedTitle(stored.selectedTitle);
-            if (stored.selectedChapter) setSelectedChapter(stored.selectedChapter);
-            if (typeof stored.chapterCount !== 'undefined') setChapterCount(stored.chapterCount);
-            if (stored.summary) setSummary(stored.summary);
-            if (typeof stored.currentChapter !== 'undefined') setCurrentChapter(stored.currentChapter);
-            if (Array.isArray(stored.keyPoints)) setKeyPoints(stored.keyPoints);
-            if (typeof stored.hasKeyPoints === 'boolean') setHasKeyPoints(stored.hasKeyPoints);
-          }
-        } catch (e) {
-          console.error('Failed to load stored chat', e);
+      if (!initialBookId) return;
+      try {
+        const stored = await loadChatState(initialBookId);
+        if (stored) {
+          setMessages(stored.messages || []);
+          if (stored.step) setStep(stored.step);
+          if (stored.bookType) setBookType(stored.bookType);
+          if (stored.selectedBookType) setSelectedBookType(stored.selectedBookType);
+          if (stored.selectedTitle) setSelectedTitle(stored.selectedTitle);
+          if (stored.selectedChapter) setSelectedChapter(stored.selectedChapter);
+          if (typeof stored.chapterCount !== 'undefined') setChapterCount(stored.chapterCount);
+          if (stored.summary) setSummary(stored.summary);
+          if (typeof stored.currentChapter !== 'undefined') setCurrentChapter(stored.currentChapter);
+          if (Array.isArray(stored.keyPoints)) setKeyPoints(stored.keyPoints);
+          if (typeof stored.hasKeyPoints === 'boolean') setHasKeyPoints(stored.hasKeyPoints);
         }
+        // only set the book id after successfully loading the state to avoid
+        // overwriting the stored chat with the initial empty values
+        setBookId(initialBookId);
+      } catch (e) {
+        console.error('Failed to load stored chat', e);
       }
     };
     load();
