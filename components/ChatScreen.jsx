@@ -160,34 +160,40 @@ export default function ChatScreen({ initialBookId = null }) {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Persist chat history and state whenever relevant data changes
+  // Persist chat history and state whenever relevant data changes.
+  // Throttle updates to avoid sending a request on every streaming chunk.
+  const saveTimeout = useRef(null);
   useEffect(() => {
-    if (bookId) {
-      const serializableMessages = messages.map((msg) => {
-        if (msg.customType) {
-          return { id: msg.id, sender: msg.sender, customType: msg.customType, data: msg.data };
-        }
-        const { id, sender, text } = msg;
-        return { id, sender, text };
-      });
-      const data = {
-        messages: serializableMessages,
-        step,
-        bookType,
-        selectedBookType,
-        selectedTitle,
-        selectedChapter,
-        chapterCount,
-        summary,
-        refinedSummary,
-        titleOptions,
-        currentChapter,
-        keyPoints,
-        hasKeyPoints,
-        outline,
-      };
+    if (!bookId) return;
+    const serializableMessages = messages.map((msg) => {
+      if (msg.customType) {
+        return { id: msg.id, sender: msg.sender, customType: msg.customType, data: msg.data };
+      }
+      const { id, sender, text } = msg;
+      return { id, sender, text };
+    });
+
+    const data = {
+      messages: serializableMessages,
+      step,
+      bookType,
+      selectedBookType,
+      selectedTitle,
+      selectedChapter,
+      chapterCount,
+      summary,
+      refinedSummary,
+      titleOptions,
+      currentChapter,
+      keyPoints,
+      hasKeyPoints,
+      outline,
+    };
+
+    if (saveTimeout.current) clearTimeout(saveTimeout.current);
+    saveTimeout.current = setTimeout(() => {
       saveChatState(bookId, data).catch((e) => console.error('Failed to save chat', e));
-    }
+    }, 1000);
   }, [
     messages,
     bookId,
