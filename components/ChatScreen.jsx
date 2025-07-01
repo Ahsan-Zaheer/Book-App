@@ -36,6 +36,7 @@ export default function ChatScreen({ initialBookId = null }) {
   const [isMultiline, setIsMultiline] = useState(false);
   const [outline, setOutline] = useState([]);
   const [isLoadingChat, setIsLoadingChat] = useState(false);
+  const [useSimpleInput, setUseSimpleInput] = useState(false);
 
   // Load stored chat when an initial book id is provided
   useEffect(() => {
@@ -103,6 +104,7 @@ export default function ChatScreen({ initialBookId = null }) {
         console.error('Failed to load stored chat', e);
       } finally {
         setIsLoadingChat(false);
+        setUseSimpleInput(false);
       }
     };
     load();
@@ -404,7 +406,7 @@ export default function ChatScreen({ initialBookId = null }) {
               { id: generateId(), sender: 'bot', text: 'Please enter a valid number of chapters (1–50).' },
             ]);
           }
-        } else if (step === 'chapterTitle') {
+          } else if (step === 'chapterTitle') {
             const chapterTitle = selectedChapter || currentInput;
             if (!chapterTitle.trim()) return;
             if (!hasKeyPoints) {
@@ -419,11 +421,45 @@ export default function ChatScreen({ initialBookId = null }) {
               ]);
               setKeyPoints(getInitialKeyPoints());
               setStep('keypoints');
+              setUseSimpleInput(false);
             } else {
               setIsGenerating(true);
               await generateChapterContent(chapterTitle);
               setIsGenerating(false);
             }
+          } else if (step === 'keypoints' && useSimpleInput) {
+            const simplePoints = currentInput
+              .split(/[;\n]+/)
+              .map((p) => p.trim())
+              .filter(Boolean);
+            if (simplePoints.length < getRequiredKeyPoints()) {
+              setMessages((prev) => [
+                ...prev,
+                {
+                  id: generateId(),
+                  sender: 'bot',
+                  text: `Please enter at least ${getRequiredKeyPoints()} key points.`,
+                },
+              ]);
+              return;
+            }
+
+            const formattedKeyPoints = simplePoints
+              .map((kp, i) => `${i + 1}. ${kp}`)
+              .join('\n');
+            setMessages((prev) => [
+              ...prev,
+              {
+                id: generateId(),
+                sender: 'user',
+                text: `Here are my key points:\n${formattedKeyPoints}`,
+              },
+            ]);
+            setHasKeyPoints(true);
+            setKeyPoints(simplePoints);
+            setIsGenerating(true);
+            await generateChapterContent(selectedChapter || currentInput);
+            setIsGenerating(false);
           }
   };
 
@@ -527,6 +563,8 @@ const getRequiredKeyPoints = () => {
       ]);
       setKeyPoints(getInitialKeyPoints());
       setStep('keypoints');
+      setUseSimpleInput(false);
+      setUseSimpleInput(false);
     } else {
       // regenerate outline
       setInput(String(chapterCount));
@@ -742,6 +780,7 @@ const generateAndUseOutline = async () => {
     setHasKeyPoints(false);
     setIsGenerating(false);
     setIsMultiline(false);
+    setUseSimpleInput(false);
     if (bookId) {
       saveChatState(bookId, {}).catch(() => {});
     }
@@ -867,27 +906,51 @@ const generateAndUseOutline = async () => {
 
           {/* Input Section */}
           {step === 'keypoints' && !isGenerating ? (
-            <div className="p-3 keypointBg">
-              <p className="text-dark mb-2">Please enter {getRequiredKeyPoints()} key points you'd like to include in your book:</p>
-              <div className="scrollable-keypoints mb-2">
-                {keyPoints.map((point, idx) => (
-                  <input
-                    key={idx}
-                    type="text"
-                    className="keypoint-input"
-                    value={point}
-                    placeholder={`Key Point ${idx + 1}`}
-                    onChange={(e) => handleKeyPointChange(e, idx)}
-                    onKeyDown={(e) => handleKeyPointEnter(e, idx)}
-                    ref={(el) => (keyPointRefs.current[idx] = el)}
+            useSimpleInput ? (
+              <div className="p-3">
+                <div className={`chatInputBg${isMultiline ? " multiline" : ""} d-flex align-items-center gap-2`}>
+                  <textarea
+                    ref={inputRef}
+                    className="chatInput"
+                    placeholder={`Enter ${getRequiredKeyPoints()} key points separated by semicolons`}
+                    value={input}
+                    onChange={handleInputChange}
+                    onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+                    rows={1}
                   />
-                ))}
-
+                  <button className="btn-chat" onClick={sendMessage}>
+                    <Icon icon="fa:send-o" />
+                  </button>
+                </div>
               </div>
-              <button className="btn-chat" onClick={handleSubmitKeyPoints}>
-                Submit Key Points
-              </button>
-            </div>
+            ) : (
+              <div className="p-3 keypointBg">
+                <p className="text-dark mb-2">Please enter {getRequiredKeyPoints()} key points you'd like to include in your book:</p>
+                <div className="scrollable-keypoints mb-2">
+                  {keyPoints.map((point, idx) => (
+                    <input
+                      key={idx}
+                      type="text"
+                      className="keypoint-input"
+                      value={point}
+                      placeholder={`Key Point ${idx + 1}`}
+                      onChange={(e) => handleKeyPointChange(e, idx)}
+                      onKeyDown={(e) => handleKeyPointEnter(e, idx)}
+                      ref={(el) => (keyPointRefs.current[idx] = el)}
+                    />
+                  ))}
+
+                </div>
+                <div className="d-flex justify-content-between">
+                  <button className="btn-chat" onClick={handleSubmitKeyPoints}>
+                    Submit Key Points
+                  </button>
+                  <button className="btn-toggle-input" onClick={() => setUseSimpleInput(true)}>
+                    Use simple input
+                  </button>
+                </div>
+              </div>
+            )
           ) : step === 'outline' ? null : (
             <div className="p-3">
                 <div className={`chatInputBg${isMultiline ? " multiline" : ""} d-flex align-items-center gap-2`}>

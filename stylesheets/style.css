@@ -108,6 +108,14 @@
     border-radius: 100px;
     font-size: 16px;
 }
+
+.btn-toggle-input{
+    background-color: transparent;
+    border: none;
+    color: #0f01ff;
+    cursor: pointer;
+    padding: 0.6rem 1rem;
+}
 .messages{
     width: 80%;
     margin-right: auto;
