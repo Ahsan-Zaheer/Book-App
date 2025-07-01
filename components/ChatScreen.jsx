@@ -940,7 +940,7 @@ const generateAndUseOutline = async () => {
                     onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
                     rows={1}
                   />
-                  <button className="btn-chat" onClick={sendMessage}>
+                  <button className="btn-chat" onClick={()=>sendMessage()}>
                     <Icon icon="fa:send-o" />
                   </button>
                 </div>
