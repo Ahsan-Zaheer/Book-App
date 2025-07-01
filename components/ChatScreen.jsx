@@ -86,7 +86,7 @@ export default function ChatScreen({ initialBookId = null }) {
                       ))}
                     </ol>
                     <div className="d-flex gap-2 mt-2">
-                      <button className="selection" onClick={() => handleOutlineDecision(true)}>Go ahead with this</button>
+                      <button className="selection" onClick={() => handleOutlineDecision(true, stored.outline)}>Go ahead with this</button>
                       <button className="selection" onClick={() => handleOutlineDecision(false)}>Generate another suggestion</button>
                     </div>
                   </div>
@@ -218,7 +218,7 @@ export default function ChatScreen({ initialBookId = null }) {
                       ))}
                     </ol>
                     <div className="d-flex gap-2 mt-2">
-                      <button className="selection" onClick={() => handleOutlineDecision(true)}>Go ahead with this</button>
+                      <button className="selection" onClick={() => handleOutlineDecision(true, stored.outline)}>Go ahead with this</button>
                       <button className="selection" onClick={() => handleOutlineDecision(false)}>Generate another suggestion</button>
                     </div>
                   </div>
@@ -375,7 +375,7 @@ export default function ChatScreen({ initialBookId = null }) {
                               ))}
                             </ol>
                             <div className="d-flex gap-2 mt-2">
-                              <button className="selection" onClick={() => handleOutlineDecision(true)}>Go ahead with this</button>
+                              <button className="selection" onClick={() => handleOutlineDecision(true, outlineData)}>Go ahead with this</button>
                               <button className="selection" onClick={() => handleOutlineDecision(false)}>Generate another suggestion</button>
                             </div>
                           </div>
