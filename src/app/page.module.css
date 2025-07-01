@@ -203,7 +203,10 @@ a.primary {
   padding: 0.5rem;
   width: 300px;
   border-radius: 8px;
-  border: 1px solid #ccc;
+  border: none;
+  outline: none;
+  color: black;
+  background-color: rgb(239, 239, 239);
 }
 
 .continueBtn {
