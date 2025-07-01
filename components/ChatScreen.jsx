@@ -35,19 +35,24 @@ export default function ChatScreen({ initialBookId = null }) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isMultiline, setIsMultiline] = useState(false);
   const [outline, setOutline] = useState([]);
+  const [isLoadingChat, setIsLoadingChat] = useState(false);
 
   // Load stored chat when an initial book id is provided
   useEffect(() => {
     const load = async () => {
       if (!initialBookId) return;
+      setIsLoadingChat(true);
       try {
         const stored = await loadChatState(initialBookId);
         if (stored) {
-          setMessages(stored.messages || []);
+          let restoredMessages = stored.messages || [];
           if (stored.step) setStep(stored.step);
           if (stored.bookType) setBookType(stored.bookType);
           if (stored.selectedBookType) setSelectedBookType(stored.selectedBookType);
-          if (stored.selectedTitle) setSelectedTitle(stored.selectedTitle);
+          if (stored.selectedTitle) {
+            setSelectedTitle(stored.selectedTitle);
+            ensureTitleInStorage(initialBookId, stored.selectedTitle);
+          }
           if (stored.selectedChapter) setSelectedChapter(stored.selectedChapter);
           if (typeof stored.chapterCount !== 'undefined') setChapterCount(stored.chapterCount);
           if (stored.summary) setSummary(stored.summary);
@@ -55,12 +60,45 @@ export default function ChatScreen({ initialBookId = null }) {
           if (Array.isArray(stored.keyPoints)) setKeyPoints(stored.keyPoints);
           if (typeof stored.hasKeyPoints === 'boolean') setHasKeyPoints(stored.hasKeyPoints);
           if (Array.isArray(stored.outline)) setOutline(stored.outline);
+          if (stored.step === 'outline' && Array.isArray(stored.outline) && stored.outline.length > 0) {
+            restoredMessages = [
+              ...restoredMessages,
+              {
+                id: generateId(),
+                sender: 'bot',
+                custom: (
+                  <div>
+                    <p>Here is a suggested outline:</p>
+                    <ol>
+                      {stored.outline.map((ch, idx) => (
+                        <li key={idx}>
+                          <strong>{ch.title}</strong>
+                          <ul>
+                            {ch.subheadings.map((s, i) => (
+                              <li key={i}>{s}</li>
+                            ))}
+                          </ul>
+                        </li>
+                      ))}
+                    </ol>
+                    <div className="d-flex gap-2 mt-2">
+                      <button className="selection" onClick={() => handleOutlineDecision(true)}>Go ahead with this</button>
+                      <button className="selection" onClick={() => handleOutlineDecision(false)}>Generate another suggestion</button>
+                    </div>
+                  </div>
+                ),
+              },
+            ];
+          }
+          setMessages(restoredMessages);
         }
         // only set the book id after successfully loading the state to avoid
         // overwriting the stored chat with the initial empty values
         setBookId(initialBookId);
       } catch (e) {
         console.error('Failed to load stored chat', e);
+      } finally {
+        setIsLoadingChat(false);
       }
     };
     load();
@@ -131,14 +169,18 @@ export default function ChatScreen({ initialBookId = null }) {
     const handler = async (e) => {
       const id = e.detail?.bookId;
       if (!id) return;
+      setIsLoadingChat(true);
       try {
         const stored = await loadChatState(id);
         if (stored) {
-          setMessages(stored.messages || []);
+          let restoredMessages = stored.messages || [];
           if (stored.step) setStep(stored.step);
           if (stored.bookType) setBookType(stored.bookType);
           if (stored.selectedBookType) setSelectedBookType(stored.selectedBookType);
-          if (stored.selectedTitle) setSelectedTitle(stored.selectedTitle);
+          if (stored.selectedTitle) {
+            setSelectedTitle(stored.selectedTitle);
+            ensureTitleInStorage(id, stored.selectedTitle);
+          }
           if (stored.selectedChapter) setSelectedChapter(stored.selectedChapter);
           if (typeof stored.chapterCount !== 'undefined') setChapterCount(stored.chapterCount);
           if (stored.summary) setSummary(stored.summary);
@@ -146,10 +188,43 @@ export default function ChatScreen({ initialBookId = null }) {
           if (Array.isArray(stored.keyPoints)) setKeyPoints(stored.keyPoints);
           if (typeof stored.hasKeyPoints === 'boolean') setHasKeyPoints(stored.hasKeyPoints);
           if (Array.isArray(stored.outline)) setOutline(stored.outline);
+          if (stored.step === 'outline' && Array.isArray(stored.outline) && stored.outline.length > 0) {
+            restoredMessages = [
+              ...restoredMessages,
+              {
+                id: generateId(),
+                sender: 'bot',
+                custom: (
+                  <div>
+                    <p>Here is a suggested outline:</p>
+                    <ol>
+                      {stored.outline.map((ch, idx) => (
+                        <li key={idx}>
+                          <strong>{ch.title}</strong>
+                          <ul>
+                            {ch.subheadings.map((s, i) => (
+                              <li key={i}>{s}</li>
+                            ))}
+                          </ul>
+                        </li>
+                      ))}
+                    </ol>
+                    <div className="d-flex gap-2 mt-2">
+                      <button className="selection" onClick={() => handleOutlineDecision(true)}>Go ahead with this</button>
+                      <button className="selection" onClick={() => handleOutlineDecision(false)}>Generate another suggestion</button>
+                    </div>
+                  </div>
+                ),
+              },
+            ];
+          }
+          setMessages(restoredMessages);
         }
         setBookId(id);
       } catch (err) {
         console.error('Failed to load stored chat', err);
+      } finally {
+        setIsLoadingChat(false);
       }
     };
     window.addEventListener('loadChat', handler);
@@ -354,6 +429,16 @@ const getRequiredKeyPoints = () => {
     return Array(Math.max(3, getRequiredKeyPoints())).fill('');
   };
 
+  const ensureTitleInStorage = (id, title) => {
+    if (!id || !title) return;
+    const list = JSON.parse(localStorage.getItem('book_titles') || '[]');
+    if (!list.find((b) => b.id === id)) {
+      list.push({ id, title });
+      localStorage.setItem('book_titles', JSON.stringify(list));
+      window.dispatchEvent(new Event('titlesUpdated'));
+    }
+  };
+
 
   const handleTitleSelect = async (title , bookIdArg) => {
     const cleanTitle = title.replace(/\*\*/g, '').trim();
@@ -372,14 +457,7 @@ const getRequiredKeyPoints = () => {
       console.log("Book ID:", bookIdArg);
       await saveTitle(bookIdArg, title);
 
-      // Persist title list in localStorage
-      const existing = JSON.parse(localStorage.getItem('book_titles') || '[]');
-      const found = existing.find((b) => b.id === bookIdArg);
-      if (!found) {
-        existing.push({ id: bookIdArg, title: cleanTitle });
-        localStorage.setItem('book_titles', JSON.stringify(existing));
-        window.dispatchEvent(new Event('titlesUpdated'));
-      }
+      ensureTitleInStorage(bookIdArg, cleanTitle);
 
     } catch (e) {
       console.error(e);
@@ -653,6 +731,11 @@ const getRequiredKeyPoints = () => {
 
   return (
     <div className="d-flex flex-column chatScreen" style={{ height: '100vh' }}>
+      {isLoadingChat && (
+        <div className="loading-overlay">
+          <div className="loading-spinner" />
+        </div>
+      )}
       {isFirstPrompt ? (
         <div className="d-flex flex-column justify-content-center align-items-center text-center flex-grow-1">
           <h2 className="mb-4 text-light"> What kind of book do you want to write?</h2>

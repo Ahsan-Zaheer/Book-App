@@ -4,11 +4,13 @@ import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import "../stylesheets/style.css";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 
 export default function Sidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [titles, setTitles] = useState([]);
+  const router = useRouter();
 
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
 
@@ -24,7 +26,7 @@ export default function Sidebar() {
   }, []);
 
   const handleSelect = (id) => {
-    window.dispatchEvent(new CustomEvent("loadChat", { detail: { bookId: id } }));
+    router.push(`/home/${id}`);
   };
 
   const clearAll = () => {
