@@ -551,25 +551,28 @@ const getRequiredKeyPoints = () => {
 
     const lines = answer.split(/\n|\r/).map((l) => l.trim()).filter(Boolean);
     const chapters = [];
+    const chapterPrefix = /^(?:#+\s*)?(?:\d+\.\s*)?(?:chapter\s*\d+[:.-]?\s*)/i;
+    const numberPrefix = /^\d+[\s.:\-)]+/;
     let current = null;
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      if (/^(?:#+\s*)?(?:\d+\.\s*)?(?:chapter\s*\d+)/i.test(line)) {
+      if (chapterPrefix.test(line) || numberPrefix.test(line)) {
         if (current) chapters.push(current);
         let title = line
-          .replace(/^(?:#+\s*)?(?:\d+\.\s*)?(?:chapter\s*\d+[:.-]?\s*)/i, '')
+          .replace(chapterPrefix, '')
+          .replace(numberPrefix, '')
           .replace(/\*\*/g, '')
           .trim();
 
-        // If the title is empty, check the next line for the title
         if (!title && i + 1 < lines.length) {
           const nextLine = lines[i + 1];
           if (
-            !/^(?:#+\s*)?(?:\d+\.\s*)?(?:chapter\s*\d+)/i.test(nextLine) &&
+            !chapterPrefix.test(nextLine) &&
+            !numberPrefix.test(nextLine) &&
             !/^[-•]/.test(nextLine)
           ) {
             title = nextLine.replace(/\*\*/g, '').trim();
-            i++; // skip the next line as it's part of the title
+            i++;
           }
         }
 
