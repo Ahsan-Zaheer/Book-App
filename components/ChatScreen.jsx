@@ -250,15 +250,18 @@ export default function ChatScreen({ initialBookId = null }) {
     return () => window.removeEventListener('loadChat', handler);
   }, []);
 
-  const sendMessage = async () => {
-    if (!input.trim()) return;
+  const sendMessage = async (overrideInput = null, overrideStep = null) => {
+    const messageText = overrideInput !== null && overrideInput !== undefined ? overrideInput : input;
+    const currentStep = overrideStep || step;
 
-    const userMsg = { id: generateId(), sender: 'user', text: input };
-    const currentInput = input;
+    if (!messageText.trim()) return;
+
+    const userMsg = { id: generateId(), sender: 'user', text: messageText };
+    const currentInput = messageText;
     setMessages((prev) => [...prev, userMsg]);
     setInput('');
 
-    if (step === 'outline') {
+    if (currentStep === 'outline') {
       setMessages((prev) => [
         ...prev,
         { id: generateId(), sender: 'bot', text: 'Please use the buttons above to continue.' },
@@ -266,7 +269,7 @@ export default function ChatScreen({ initialBookId = null }) {
       return;
     }
 
-    if (step === 'bookType') {
+    if (currentStep === 'bookType') {
       setTimeout(() => {
         setMessages((prev) => [
           ...prev,
@@ -289,7 +292,7 @@ export default function ChatScreen({ initialBookId = null }) {
         ]);
       }, 400);
       setStep('summary');
-    } else if (step === 'summary') {
+    } else if (currentStep === 'summary') {
       setSummary(currentInput);
       const loadingId = generateId();
       setMessages((prev) => [
@@ -332,7 +335,7 @@ export default function ChatScreen({ initialBookId = null }) {
         );
       }
       setStep('title');
-    } else if (step === 'title') {
+    } else if (currentStep === 'title') {
           setMessages((prev) => [
             ...prev,
             {
@@ -342,7 +345,7 @@ export default function ChatScreen({ initialBookId = null }) {
             },
           ]);
           setStep('chapters');
-        } else if (step === 'chapters') {
+        } else if (currentStep === 'chapters') {
           const num = parseInt(currentInput);
           if (!isNaN(num) && num > 0 && num <= 50) {
             setChapterCount(num);
@@ -375,7 +378,7 @@ export default function ChatScreen({ initialBookId = null }) {
               { id: generateId(), sender: 'bot', text: 'Please enter a valid number of chapters (1–50).' },
             ]);
           }
-          } else if (step === 'chapterTitle') {
+          } else if (currentStep === 'chapterTitle') {
             const chapterTitle = selectedChapter || currentInput;
             if (!chapterTitle.trim()) return;
             if (!hasKeyPoints) {
@@ -396,7 +399,7 @@ export default function ChatScreen({ initialBookId = null }) {
               await generateChapterContent(chapterTitle);
               setIsGenerating(false);
             }
-          } else if (step === 'keypoints' && useSimpleInput) {
+          } else if (currentStep === 'keypoints' && useSimpleInput) {
             const simplePoints = currentInput
               .split(/[;\n]+/)
               .map((p) => p.trim())
@@ -535,10 +538,8 @@ const getRequiredKeyPoints = () => {
       setUseSimpleInput(false);
       setUseSimpleInput(false);
     } else {
-      // regenerate outline
-      setInput(String(chapterCount));
-      setStep('chapters');
-      await sendMessage();
+      // regenerate outline using stored chapter count
+      await sendMessage(String(chapterCount), 'chapters');
     }
   };
 
