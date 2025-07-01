@@ -436,6 +436,9 @@ const getRequiredKeyPoints = () => {
     const answer = await askQuestion(
       `Provide an outline of ${count} chapters for the ${bookType} "${selectedTitle}" based on this summary:\n${summary}. Each chapter should have a title and four subheadings.`
     );
+
+    console.log("Outline response:", answer);
+    
     const lines = answer.split(/\n|\r/).map(l => l.trim()).filter(Boolean);
     const chapters = [];
     let current = null;
