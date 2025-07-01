@@ -254,6 +254,36 @@ width: 80%;
   }
 }
 
+@media (max-width: 768px) {
+  .mainBg {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    height: auto;
+    margin-left: 0;
+    flex-direction: row;
+    padding: 10px;
+  }
+  .sidebar.collapsed {
+    width: 100%;
+  }
+  .chatScreen {
+    margin-top: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn-1 {
+    width: 100%;
+  }
+  .messages,
+  .chatInputBg,
+  .keypointBg {
+    width: 100%;
+  }
+}
+
 .loading-overlay {
   position: fixed;
   top: 0;

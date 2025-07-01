@@ -192,6 +192,7 @@ a.primary {
   }
 }
 
+
 .oldBookContainer {
   display: flex;
   align-items: center;
@@ -222,6 +223,34 @@ a.primary {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .oldBookContainer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .oldBookInput {
+    width: 100%;
+    min-width: 0;
+  }
+  .continueBtn {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+  .ctas a {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.5rem;
+  }
+  .page {
+    padding: 24px;
   }
 }
 
