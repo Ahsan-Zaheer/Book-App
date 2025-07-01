@@ -443,12 +443,17 @@ const getRequiredKeyPoints = () => {
     const chapters = [];
     let current = null;
     for (const line of lines) {
-      if (/^(\d+\.|chapter\s+\d+)/i.test(line)) {
+      if (/^(?:#+\s*)?(?:\d+\.\s*)?(?:chapter\s*\d+)/i.test(line)) {
         if (current) chapters.push(current);
-        const title = line.replace(/^(\d+\.|chapter\s*\d+[:.-]?)/i, '').replace(/\*\*/g, '').trim();
+        const title = line
+          .replace(/^(?:#+\s*)?(?:\d+\.\s*)?(?:chapter\s*\d+[:.-]?)/i, '')
+          .replace(/\*\*/g, '')
+          .trim();
         current = { title, subheadings: [] };
       } else if (current && /^[-•]/.test(line)) {
-        current.subheadings.push(line.replace(/^[-•]\s*/, '').replace(/\*\*/g, '').trim());
+        current.subheadings.push(
+          line.replace(/^[-•]\s*/, '').replace(/\*\*/g, '').trim()
+        );
       }
     }
     if (current) chapters.push(current);
