@@ -1,6 +1,6 @@
 .sidebar{
     background-color: black;
-    width: 330px;    
+    width: 330px;
     border-radius: 10px;
     height: 100vh;
     display: flex;
@@ -8,8 +8,9 @@
     margin-left: 10px;
     box-shadow: -5px 20px 200px 10px rgba(255, 255, 255, 0.129);
     flex-direction: column;
-    transition: width 0.3s ease, padding 0.3s ease;
-  overflow: hidden;
+    transition: width 0.3s ease, padding 0.3s ease, transform 0.3s ease;
+    overflow: hidden;
+    transform: translateX(0);
 }
 
 .s-title{
@@ -127,6 +128,7 @@
   width: 60px;
   padding: 20px 10px;
   background: transparent;
+  transform: translateX(-270px);
 }
 
 .toggle-btn {
@@ -154,6 +156,21 @@
 
 .botMsg p {
   color: white;
+}
+
+.message {
+  animation: fadeInUp 0.4s ease both;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .selection {
@@ -267,6 +284,7 @@ width: 80%;
   }
   .sidebar.collapsed {
     width: 100%;
+    transform: translateX(0);
   }
   .chatScreen {
     margin-top: 1rem;
