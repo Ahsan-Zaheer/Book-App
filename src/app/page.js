@@ -54,7 +54,7 @@ export default function Home() {
             {uuid && (
                 <button
                   onClick={handleContinue}
-                  className={`${styles.secondary} ${styles.continueBtn}`}
+                  className={`${styles.secondary} ${styles.continueBtn} ms-3`}
                 >
                   Continue with this Book
                 </button>

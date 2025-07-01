@@ -38,7 +38,7 @@ export default function Sidebar() {
       {/* Header with Logo and Toggle */}
       <div className="sidebar-header d-flex justify-content-between align-items-center mb-4">
         {!isCollapsed && (
-          <h2 className="fw-bold" style={{ color: '#f4845f', fontSize: "30px" }}> <Link href="/">📚 Logo</Link>  <span className="beta">beta</span></h2>
+          <h2 className="fw-bold" style={{ color: '#f4845f', fontSize: "30px" }}> <Link href="/" style={{ color: '#f4845f' }}>📚 Logo</Link>  <span className="beta">beta</span></h2>
         )}
         <button className="toggle-btn" onClick={toggleSidebar}>
           <Icon icon={isCollapsed ? "line-md:arrow-right" : "humbleicons:bars"} width="24" />
@@ -62,15 +62,28 @@ export default function Sidebar() {
           </div>
           <hr />
 
-          <ul className="nav nav-pills flex-column h-100">
+         <ul
+            className="flex-column"
+            style={{
+              maxHeight: '100%',
+              overflowY: 'auto',
+              padding: '0px'
+            }}
+          >
             {titles.map((b) => (
               <li className="nav-item" key={b.id}>
-                <button className="nav-link text-start" onClick={() => handleSelect(b.id)}>
+                <button
+                  className="nav-link my-4 text-start w-100 text-truncate"
+                  onClick={() => handleSelect(b.id)}
+                  style={{ whiteSpace: 'normal' }} // prevents multiline overflow
+                >
                   <Icon icon="tabler:book" className="me-2" />
                   {b.title}
                 </button>
               </li>
             ))}
+
+
 
             <div className="bottom-links">
               {/* <li>
