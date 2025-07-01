@@ -793,7 +793,7 @@ const getRequiredKeyPoints = () => {
                 className={`d-flex mb-3 ${msg.sender === 'user' ? 'justify-content-end' : 'justify-content-start'}`}
               >
                 <div
-                  className={`p-3 rounded ${msg.sender === 'user' ? 'userMsg' : 'botMsg'}`}
+                  className={`p-3 rounded message ${msg.sender === 'user' ? 'userMsg' : 'botMsg'}`}
                   style={{ maxWidth: '70%' }}
                 >
                  {msg.custom ? msg.custom : formatMessageText(msg.text)}
