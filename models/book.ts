@@ -20,6 +20,7 @@ const BookSchema = new mongoose.Schema({
     lowercase: true
   },
   chapters: { type: [ChapterSchema], default: [] },
+  chatState: { type: mongoose.Schema.Types.Mixed, default: {} },
 }, {
   timestamps: true
 });

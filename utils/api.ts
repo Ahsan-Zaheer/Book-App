@@ -69,3 +69,26 @@ export const generateChapter = async ({ bookId, bookType, summary, title, chapte
         throw new Error('Failed to generate chapter');
     }
 };
+
+export const loadChatState = async (bookId) => {
+    const res = await fetch(createUrl(`/api/book/chat?bookId=${bookId}`));
+    if (res.ok) {
+        const data = await res.json();
+        return data.data;
+    } else {
+        throw new Error('Failed to load chat');
+    }
+};
+
+export const saveChatState = async (bookId, state) => {
+    const res = await fetch(new Request(createUrl('/api/book/chat'), {
+        method: 'PUT',
+        body: JSON.stringify({ bookId, state }),
+    }));
+    if (res.ok) {
+        const data = await res.json();
+        return data.data;
+    } else {
+        throw new Error('Failed to save chat');
+    }
+};
