@@ -28,6 +28,7 @@ export default function ChatScreen({ initialBookId = null }) {
   const [chapterCount, setChapterCount] = useState(null);
   const [bookId, setBookId] = useState(null);
   const [titleOptions, setTitleOptions] = useState([]);
+  const [refinedSummary, setRefinedSummary] = useState('');
   const [summary, setSummary] = useState('');
   const [currentChapter, setCurrentChapter] = useState(1);
   const [chapterTitleOptions, setChapterTitleOptions] = useState([]);
@@ -38,6 +39,68 @@ export default function ChatScreen({ initialBookId = null }) {
   const [isLoadingChat, setIsLoadingChat] = useState(false);
   const [useSimpleInput, setUseSimpleInput] = useState(false);
 
+  const createTitleSuggestionMessage = (id, refined, titles, bookIdArg) => ({
+    id,
+    sender: 'bot',
+    customType: 'titleSuggestions',
+    data: { refinedSummary: refined, titles },
+    custom: (
+      <div>
+        <p>
+          Great! {refined} Based on your summary, here are some title ideas:
+        </p>
+        <ul className="list-unstyled d-flex flex-wrap gap-2">
+          {titles.map((t, idx) => (
+            <li key={idx}>
+              <button className="selection" onClick={() => handleTitleSelect(t, bookIdArg)}>{t}</button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ),
+  });
+
+  const createOutlineMessage = (id, outlineData) => ({
+    id,
+    sender: 'bot',
+    customType: 'outline',
+    data: { outline: outlineData },
+    custom: (
+      <div>
+        <p>Here is a suggested outline:</p>
+        <ol>
+          {outlineData.map((ch, idx) => (
+            <li key={idx}>
+              <strong>{ch.title}</strong>
+              <ul>
+                {ch.subheadings.map((s, i) => (
+                  <li key={i}>{s}</li>
+                ))}
+              </ul>
+            </li>
+          ))}
+        </ol>
+        <div className="d-flex gap-2 mt-2">
+          <button className="selection" onClick={() => handleOutlineDecision(true, outlineData)}>Go ahead with this</button>
+          <button className="selection" onClick={() => handleOutlineDecision(false)}>Generate another suggestion</button>
+        </div>
+      </div>
+    ),
+  });
+
+  const restoreMessage = (msg, bookIdArg) => {
+    if (msg.customType === 'titleSuggestions' && msg.data) {
+      setRefinedSummary(msg.data.refinedSummary || '');
+      setTitleOptions(msg.data.titles || []);
+      return createTitleSuggestionMessage(msg.id, msg.data.refinedSummary, msg.data.titles || [], bookIdArg);
+    }
+    if (msg.customType === 'outline' && msg.data) {
+      setOutline(msg.data.outline || []);
+      return createOutlineMessage(msg.id, msg.data.outline || []);
+    }
+    return msg;
+  };
+
   // Load stored chat when an initial book id is provided
   useEffect(() => {
     const load = async () => {
@@ -46,7 +109,6 @@ export default function ChatScreen({ initialBookId = null }) {
       try {
         const stored = await loadChatState(initialBookId);
         if (stored) {
-          let restoredMessages = stored.messages || [];
           if (stored.step) setStep(stored.step);
           if (stored.bookType) setBookType(stored.bookType);
           if (stored.selectedBookType) setSelectedBookType(stored.selectedBookType);
@@ -61,44 +123,15 @@ export default function ChatScreen({ initialBookId = null }) {
           if (Array.isArray(stored.keyPoints)) setKeyPoints(stored.keyPoints);
           if (typeof stored.hasKeyPoints === 'boolean') setHasKeyPoints(stored.hasKeyPoints);
           if (Array.isArray(stored.outline)) setOutline(stored.outline);
-          if (
-            stored.step === 'outline' &&
-            Array.isArray(stored.outline) &&
-            stored.outline.length > 0
-          ) {
-            restoredMessages = [
-              ...restoredMessages,
-              {
-                id: generateId(),
-                sender: 'bot',
-                custom: (
-                  <div>
-                    <p>Here is a suggested outline:</p>
-                    <ol>
-                      {stored.outline.map((ch, idx) => (
-                        <li key={idx}>
-                          <strong>{ch.title}</strong>
-                          <ul>
-                            {ch.subheadings.map((s, i) => (
-                              <li key={i}>{s}</li>
-                            ))}
-                          </ul>
-                        </li>
-                      ))}
-                    </ol>
-                    <div className="d-flex gap-2 mt-2">
-                      <button className="selection" onClick={() => handleOutlineDecision(true, stored.outline)}>Go ahead with this</button>
-                      <button className="selection" onClick={() => handleOutlineDecision(false)}>Generate another suggestion</button>
-                    </div>
-                  </div>
-                ),
-              },
-            ];
-          }
+          if (stored.refinedSummary) setRefinedSummary(stored.refinedSummary);
+          if (Array.isArray(stored.titleOptions)) setTitleOptions(stored.titleOptions);
+
+          let restoredMessages = Array.isArray(stored.messages)
+            ? stored.messages.map((m) => restoreMessage(m, initialBookId))
+            : [];
+
           setMessages(restoredMessages);
         }
-        // only set the book id after successfully loading the state to avoid
-        // overwriting the stored chat with the initial empty values
         setBookId(initialBookId);
       } catch (e) {
         console.error('Failed to load stored chat', e);
@@ -134,9 +167,13 @@ export default function ChatScreen({ initialBookId = null }) {
   // Persist chat history and state whenever relevant data changes
   useEffect(() => {
     if (bookId) {
-      const serializableMessages = messages
-        .filter((msg) => !msg.custom)
-        .map(({ id, sender, text }) => ({ id, sender, text }));
+      const serializableMessages = messages.map((msg) => {
+        if (msg.customType) {
+          return { id: msg.id, sender: msg.sender, customType: msg.customType, data: msg.data };
+        }
+        const { id, sender, text } = msg;
+        return { id, sender, text };
+      });
       const data = {
         messages: serializableMessages,
         step,
@@ -146,6 +183,8 @@ export default function ChatScreen({ initialBookId = null }) {
         selectedChapter,
         chapterCount,
         summary,
+        refinedSummary,
+        titleOptions,
         currentChapter,
         keyPoints,
         hasKeyPoints,
@@ -163,6 +202,8 @@ export default function ChatScreen({ initialBookId = null }) {
     selectedChapter,
     chapterCount,
     summary,
+    refinedSummary,
+    titleOptions,
     currentChapter,
     keyPoints,
     hasKeyPoints,
@@ -179,7 +220,6 @@ export default function ChatScreen({ initialBookId = null }) {
       try {
         const stored = await loadChatState(id);
         if (stored) {
-          let restoredMessages = stored.messages || [];
           if (stored.step) setStep(stored.step);
           if (stored.bookType) setBookType(stored.bookType);
           if (stored.selectedBookType) setSelectedBookType(stored.selectedBookType);
@@ -194,40 +234,13 @@ export default function ChatScreen({ initialBookId = null }) {
           if (Array.isArray(stored.keyPoints)) setKeyPoints(stored.keyPoints);
           if (typeof stored.hasKeyPoints === 'boolean') setHasKeyPoints(stored.hasKeyPoints);
           if (Array.isArray(stored.outline)) setOutline(stored.outline);
-          if (
-            stored.step === 'outline' &&
-            Array.isArray(stored.outline) &&
-            stored.outline.length > 0
-          ) {
-            restoredMessages = [
-              ...restoredMessages,
-              {
-                id: generateId(),
-                sender: 'bot',
-                custom: (
-                  <div>
-                    <p>Here is a suggested outline:</p>
-                    <ol>
-                      {stored.outline.map((ch, idx) => (
-                        <li key={idx}>
-                          <strong>{ch.title}</strong>
-                          <ul>
-                            {ch.subheadings.map((s, i) => (
-                              <li key={i}>{s}</li>
-                            ))}
-                          </ul>
-                        </li>
-                      ))}
-                    </ol>
-                    <div className="d-flex gap-2 mt-2">
-                      <button className="selection" onClick={() => handleOutlineDecision(true, stored.outline)}>Go ahead with this</button>
-                      <button className="selection" onClick={() => handleOutlineDecision(false)}>Generate another suggestion</button>
-                    </div>
-                  </div>
-                ),
-              },
-            ];
-          }
+          if (stored.refinedSummary) setRefinedSummary(stored.refinedSummary);
+          if (Array.isArray(stored.titleOptions)) setTitleOptions(stored.titleOptions);
+
+          const restoredMessages = Array.isArray(stored.messages)
+            ? stored.messages.map((m) => restoreMessage(m, id))
+            : [];
+
           setMessages(restoredMessages);
         }
         setBookId(id);
@@ -297,6 +310,7 @@ export default function ChatScreen({ initialBookId = null }) {
         const refined = await askQuestion(
           `Rewrite the following book summary in a single polished paragraph:\n${currentInput}`
         );
+        setRefinedSummary(refined);
 
         const answer = await askQuestion(
           `Provide 10 book title suggestions with subtitles based on the following summary:\n${currentInput}`
@@ -310,24 +324,7 @@ export default function ChatScreen({ initialBookId = null }) {
         setMessages((prev) =>
           prev.map((m) =>
             m.id === loadingId
-              ? {
-                  id: loadingId,
-                  sender: 'bot',
-                  custom: (
-                    <div>
-                      <p>
-                        Great! {refined} Based on your summary, here are some title ideas:
-                      </p>
-                      <ul className="list-unstyled d-flex flex-wrap gap-2">
-                        {titles.map((t, idx) => (
-                          <li key={idx}>
-                            <button className="selection" onClick={() => handleTitleSelect(t, newBookId)}>{t}</button>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ),
-                }
+              ? createTitleSuggestionMessage(loadingId, refined, titles, newBookId)
               : m
           )
         );
@@ -364,31 +361,7 @@ export default function ChatScreen({ initialBookId = null }) {
               setMessages((prev) =>
                 prev.map((m) =>
                   m.id === loadingId
-                    ? {
-                        id: loadingId,
-                        sender: 'bot',
-                        custom: (
-                          <div>
-                            <p>Here is a suggested outline:</p>
-                            <ol>
-                              {outlineData.map((ch, idx) => (
-                                <li key={idx}>
-                                  <strong>{ch.title}</strong>
-                                  <ul>
-                                    {ch.subheadings.map((s, i) => (
-                                      <li key={i}>{s}</li>
-                                    ))}
-                                  </ul>
-                                </li>
-                              ))}
-                            </ol>
-                            <div className="d-flex gap-2 mt-2">
-                              <button className="selection" onClick={() => handleOutlineDecision(true, outlineData)}>Go ahead with this</button>
-                              <button className="selection" onClick={() => handleOutlineDecision(false)}>Generate another suggestion</button>
-                            </div>
-                          </div>
-                        ),
-                      }
+                    ? createOutlineMessage(loadingId, outlineData)
                     : m
                 )
               );
@@ -773,6 +746,7 @@ const generateAndUseOutline = async () => {
     setChapterCount(null);
     setBookId(null);
     setSummary('');
+    setRefinedSummary('');
     setTitleOptions([]);
     setChapterTitleOptions([]);
     setCurrentChapter(1);
