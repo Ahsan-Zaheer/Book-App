@@ -61,6 +61,18 @@ export default function ChatScreen({ initialBookId = null }) {
           if (typeof stored.hasKeyPoints === 'boolean') setHasKeyPoints(stored.hasKeyPoints);
           if (Array.isArray(stored.outline)) setOutline(stored.outline);
           if (
+            !stored.selectedChapter &&
+            Array.isArray(stored.outline) &&
+            stored.outline.length > 0
+          ) {
+            const idx =
+              typeof stored.currentChapter === 'number'
+                ? stored.currentChapter - 1
+                : 0;
+            const title = stored.outline[idx]?.title;
+            if (title) setSelectedChapter(title);
+          }
+          if (
             stored.step === 'outline' &&
             Array.isArray(stored.outline) &&
             stored.outline.length > 0
@@ -192,6 +204,18 @@ export default function ChatScreen({ initialBookId = null }) {
           if (Array.isArray(stored.keyPoints)) setKeyPoints(stored.keyPoints);
           if (typeof stored.hasKeyPoints === 'boolean') setHasKeyPoints(stored.hasKeyPoints);
           if (Array.isArray(stored.outline)) setOutline(stored.outline);
+          if (
+            !stored.selectedChapter &&
+            Array.isArray(stored.outline) &&
+            stored.outline.length > 0
+          ) {
+            const idx =
+              typeof stored.currentChapter === 'number'
+                ? stored.currentChapter - 1
+                : 0;
+            const title = stored.outline[idx]?.title;
+            if (title) setSelectedChapter(title);
+          }
           if (
             stored.step === 'outline' &&
             Array.isArray(stored.outline) &&
