@@ -34,6 +34,7 @@ export default function ChatScreen({ initialBookId = null }) {
   const [hasKeyPoints, setHasKeyPoints] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isMultiline, setIsMultiline] = useState(false);
+  const [outline, setOutline] = useState([]);
 
   // Load stored chat when an initial book id is provided
   useEffect(() => {
@@ -53,6 +54,7 @@ export default function ChatScreen({ initialBookId = null }) {
           if (typeof stored.currentChapter !== 'undefined') setCurrentChapter(stored.currentChapter);
           if (Array.isArray(stored.keyPoints)) setKeyPoints(stored.keyPoints);
           if (typeof stored.hasKeyPoints === 'boolean') setHasKeyPoints(stored.hasKeyPoints);
+          if (Array.isArray(stored.outline)) setOutline(stored.outline);
         }
         // only set the book id after successfully loading the state to avoid
         // overwriting the stored chat with the initial empty values
@@ -103,6 +105,7 @@ export default function ChatScreen({ initialBookId = null }) {
         currentChapter,
         keyPoints,
         hasKeyPoints,
+        outline,
       };
       saveChatState(bookId, data).catch((e) => console.error('Failed to save chat', e));
     }
@@ -119,6 +122,7 @@ export default function ChatScreen({ initialBookId = null }) {
     currentChapter,
     keyPoints,
     hasKeyPoints,
+    outline,
   ]);
 
 
@@ -141,6 +145,7 @@ export default function ChatScreen({ initialBookId = null }) {
           if (typeof stored.currentChapter !== 'undefined') setCurrentChapter(stored.currentChapter);
           if (Array.isArray(stored.keyPoints)) setKeyPoints(stored.keyPoints);
           if (typeof stored.hasKeyPoints === 'boolean') setHasKeyPoints(stored.hasKeyPoints);
+          if (Array.isArray(stored.outline)) setOutline(stored.outline);
         }
         setBookId(id);
       } catch (err) {
@@ -158,6 +163,14 @@ export default function ChatScreen({ initialBookId = null }) {
     const currentInput = input;
     setMessages((prev) => [...prev, userMsg]);
     setInput('');
+
+    if (step === 'outline') {
+      setMessages((prev) => [
+        ...prev,
+        { id: generateId(), sender: 'bot', text: 'Please use the buttons above to continue.' },
+      ]);
+      return;
+    }
 
     if (step === 'bookType') {
       setTimeout(() => {
@@ -249,26 +262,53 @@ export default function ChatScreen({ initialBookId = null }) {
           const num = parseInt(currentInput);
           if (!isNaN(num) && num > 0 && num <= 50) {
             setChapterCount(num);
-            const suggestions = await getChapterTitleSuggestions(1);
-            setChapterTitleOptions(suggestions);
+            const loadingId = generateId();
             setMessages((prev) => [
               ...prev,
-              {
-                id: generateId(),
-                sender: 'bot',
-                custom: (
-                  <div>
-                    <p>Awesome choice! Now, pick a name for Chapter 1:</p>
-                    <ul className="list-unstyled d-flex flex-wrap gap-2">
-                      {suggestions.map((t, idx) => (
-                        <li key={idx}><button className="selection" onClick={() => handleChapterSelect(t)}>{t}</button></li>
-                      ))}
-                    </ul>
-                  </div>
-                ),
-              },
+              { id: loadingId, sender: 'bot', text: 'Generating outline...' },
             ]);
-            setStep('chapterTitle');
+            try {
+              const outlineData = await getOutlineSuggestions(num);
+              setOutline(outlineData);
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.id === loadingId
+                    ? {
+                        id: loadingId,
+                        sender: 'bot',
+                        custom: (
+                          <div>
+                            <p>Here is a suggested outline:</p>
+                            <ol>
+                              {outlineData.map((ch, idx) => (
+                                <li key={idx}>
+                                  <strong>{ch.title}</strong>
+                                  <ul>
+                                    {ch.subheadings.map((s, i) => (
+                                      <li key={i}>{s}</li>
+                                    ))}
+                                  </ul>
+                                </li>
+                              ))}
+                            </ol>
+                            <div className="d-flex gap-2 mt-2">
+                              <button className="selection" onClick={() => handleOutlineDecision(true)}>Go ahead with this</button>
+                              <button className="selection" onClick={() => handleOutlineDecision(false)}>Generate another suggestion</button>
+                            </div>
+                          </div>
+                        ),
+                      }
+                    : m
+                )
+              );
+              setStep('outline');
+            } catch (e) {
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.id === loadingId ? { id: loadingId, sender: 'bot', text: 'Failed to generate outline.' } : m
+                )
+              );
+            }
           } else {
             setMessages((prev) => [
               ...prev,
@@ -370,6 +410,48 @@ const getRequiredKeyPoints = () => {
   inputRef.current?.focus();
   };
 
+  const handleOutlineDecision = async (useIt) => {
+    if (useIt) {
+      const first = outline[0];
+      setSelectedChapter(first ? first.title : '');
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: generateId(),
+          sender: 'bot',
+          text: `Great! Let's start with Chapter 1: ${first ? first.title : ''}. Please enter ${getRequiredKeyPoints()} key points you want to cover.`,
+        },
+      ]);
+      setKeyPoints(getInitialKeyPoints());
+      setStep('keypoints');
+    } else {
+      // regenerate outline
+      setInput(String(chapterCount));
+      setStep('chapters');
+      await sendMessage();
+    }
+  };
+
+  const getOutlineSuggestions = async (count) => {
+    const answer = await askQuestion(
+      `Provide an outline of ${count} chapters for the ${bookType} "${selectedTitle}" based on this summary:\n${summary}. Each chapter should have a title and four subheadings.`
+    );
+    const lines = answer.split(/\n|\r/).map(l => l.trim()).filter(Boolean);
+    const chapters = [];
+    let current = null;
+    for (const line of lines) {
+      if (/^(\d+\.|chapter\s+\d+)/i.test(line)) {
+        if (current) chapters.push(current);
+        const title = line.replace(/^(\d+\.|chapter\s*\d+[:.-]?)/i, '').replace(/\*\*/g, '').trim();
+        current = { title, subheadings: [] };
+      } else if (current && /^[-•]/.test(line)) {
+        current.subheadings.push(line.replace(/^[-•]\s*/, '').replace(/\*\*/g, '').trim());
+      }
+    }
+    if (current) chapters.push(current);
+    return chapters.slice(0, count);
+  };
+
   const getChapterTitleSuggestions = async (chapterIdx) => {
     const answer = await askQuestion(
       `Provide 5 title suggestions for chapter ${chapterIdx} of the ${bookType} \"${selectedTitle}\" based on this summary:\n${summary}`
@@ -407,29 +489,20 @@ const getRequiredKeyPoints = () => {
 
       const next = currentChapter + 1;
       if (next <= chapterCount) {
-        const suggestions = await getChapterTitleSuggestions(next);
-        setChapterTitleOptions(suggestions);
+        const nextTitle = outline[next - 1]?.title || `Chapter ${next}`;
         setMessages((prev) => [
           ...prev,
           {
             id: generateId(),
             sender: 'bot',
-            custom: (
-              <div>
-                <p>Great! Pick a title for Chapter {next}:</p>
-                <ul className="list-unstyled d-flex flex-wrap gap-2">
-                  {suggestions.map((t, idx) => (
-                    <li key={idx}><button className="selection" onClick={() => handleChapterSelect(t)}>{t}</button></li>
-                  ))}
-                </ul>
-              </div>
-            ),
+            text: `Great! Let's work on Chapter ${next}: ${nextTitle}. Please enter ${getRequiredKeyPoints()} key points you want to cover.`,
           },
         ]);
         setCurrentChapter(next);
+        setSelectedChapter(nextTitle);
         setHasKeyPoints(false);
         setKeyPoints(getInitialKeyPoints());
-        setStep('chapterTitle');
+        setStep('keypoints');
       } else {
         setMessages((prev) => [
           ...prev,
@@ -518,6 +591,7 @@ const getRequiredKeyPoints = () => {
     setTitleOptions([]);
     setChapterTitleOptions([]);
     setCurrentChapter(1);
+    setOutline([]);
     setHasKeyPoints(false);
     setIsGenerating(false);
     setIsMultiline(false);
@@ -662,7 +736,7 @@ const getRequiredKeyPoints = () => {
                 Submit Key Points
               </button>
             </div>
-          ) : <div className="p-3">
+          ) : step === 'outline' ? null : <div className="p-3">
                 <div className={`chatInputBg${isMultiline ? " multiline" : ""} d-flex align-items-center gap-2`}>
                   <textarea
                     ref={inputRef}
