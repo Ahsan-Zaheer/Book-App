@@ -56,18 +56,36 @@ export const generateBook = async ({ bookId, bookType, summary, title, chapterCo
         throw new Error('Failed to generate book');
     }
 }
-export const generateChapter = async ({ bookId, bookType, summary, title, chapterIndex, chapterTitle, keyPoints }) => {
+export const generateChapterStream = async ({ bookId, bookType, summary, title, chapterIndex, chapterTitle, keyPoints }) => {
     const res = await fetch(new Request(createUrl('/api/book/chapter'), {
         method: 'POST',
         body: JSON.stringify({ bookId, bookType, summary, title, chapterIndex, chapterTitle, keyPoints }),
     }));
-    if(res.ok) {
-        const data = await res.json();
-        
-        return data.data.chapter.kwargs.content;
-    } else {
+    if(!res.ok || !res.body) {
         throw new Error('Failed to generate chapter');
     }
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    async function* parse() {
+        while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+            let idx;
+            while ((idx = buffer.indexOf('\n\n')) !== -1) {
+                const line = buffer.slice(0, idx).trim();
+                buffer = buffer.slice(idx + 2);
+                if (line.startsWith('data: ')) {
+                    yield line.slice(6);
+                }
+            }
+        }
+    }
+
+    return parse();
 };
 
 export const loadChatState = async (bookId) => {

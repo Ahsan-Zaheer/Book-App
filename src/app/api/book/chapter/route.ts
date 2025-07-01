@@ -26,16 +26,41 @@ export const POST = async (req: Request) => {
   const model = new ChatOpenAI({
     modelName: "gpt-4o-mini",
     temperature: 0.7,
+    streaming: true,
     openAIApiKey: process.env.OPEN_AI_KEY,
   });
 
-  const response = await model.invoke(prompt);
+  const encoder = new TextEncoder();
+  let content = "";
 
-  book.chapters.push({ idx: chapterIndex, title: chapterTitle, keyPoints, aiContent: response.content });
-  if (book.chapterCount && book.chapters.length >= book.chapterCount) {
-    book.status = "generated";
-  }
-  await book.save();
+  const stream = new ReadableStream({
+    async start(controller) {
+      try {
+        for await (const chunk of model.stream(prompt)) {
+          const token = chunk.content ?? "";
+          content += token;
+          controller.enqueue(encoder.encode(`data: ${token}\n\n`));
+        }
 
-  return NextResponse.json({ data: { chapter: response } });
+        book.chapters.push({ idx: chapterIndex, title: chapterTitle, keyPoints, aiContent: content });
+        if (book.chapterCount && book.chapters.length >= book.chapterCount) {
+          book.status = "generated";
+        }
+        await book.save();
+
+        controller.enqueue(encoder.encode("event: done\n\n"));
+        controller.close();
+      } catch (err) {
+        controller.error(err);
+      }
+    },
+  });
+
+  return new NextResponse(stream, {
+    headers: {
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+    },
+  });
 };
