@@ -292,6 +292,10 @@ export default function ChatScreen({ initialBookId = null }) {
         const newBookId = created._id;
         setBookId(newBookId);
 
+        const refined = await askQuestion(
+          `Rewrite the following book summary in a single polished paragraph:\n${currentInput}`
+        );
+
         const answer = await askQuestion(
           `Provide 10 book title suggestions with subtitles based on the following summary:\n${currentInput}`
         );
@@ -309,7 +313,9 @@ export default function ChatScreen({ initialBookId = null }) {
                   sender: 'bot',
                   custom: (
                     <div>
-                      <p>Great! Based on your summary, here are some title ideas:</p>
+                      <p>
+                        Great! {refined} Based on your summary, here are some title ideas:
+                      </p>
                       <ul className="list-unstyled d-flex flex-wrap gap-2">
                         {titles.map((t, idx) => (
                           <li key={idx}>
