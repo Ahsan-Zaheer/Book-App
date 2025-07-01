@@ -71,9 +71,18 @@ export const generateChapter = async ({ bookId, bookType, summary, title, chapte
 };
 
 export const loadChatState = async (bookId) => {
+    const cached = localStorage.getItem(`chat_${bookId}`);
+    if (cached) {
+        try {
+            return JSON.parse(cached);
+        } catch {}
+    }
     const res = await fetch(createUrl(`/api/book/chat?bookId=${bookId}`));
     if (res.ok) {
         const data = await res.json();
+        if (data.data) {
+            localStorage.setItem(`chat_${bookId}`, JSON.stringify(data.data));
+        }
         return data.data;
     } else {
         throw new Error('Failed to load chat');
@@ -81,6 +90,7 @@ export const loadChatState = async (bookId) => {
 };
 
 export const saveChatState = async (bookId, state) => {
+    localStorage.setItem(`chat_${bookId}`, JSON.stringify(state));
     const res = await fetch(new Request(createUrl('/api/book/chat'), {
         method: 'PUT',
         body: JSON.stringify({ bookId, state }),

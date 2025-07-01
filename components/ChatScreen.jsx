@@ -60,7 +60,11 @@ export default function ChatScreen({ initialBookId = null }) {
           if (Array.isArray(stored.keyPoints)) setKeyPoints(stored.keyPoints);
           if (typeof stored.hasKeyPoints === 'boolean') setHasKeyPoints(stored.hasKeyPoints);
           if (Array.isArray(stored.outline)) setOutline(stored.outline);
-          if (Array.isArray(stored.outline) && stored.outline.length > 0) {
+          if (
+            stored.step === 'outline' &&
+            Array.isArray(stored.outline) &&
+            stored.outline.length > 0
+          ) {
             restoredMessages = [
               ...restoredMessages,
               {
@@ -188,7 +192,11 @@ export default function ChatScreen({ initialBookId = null }) {
           if (Array.isArray(stored.keyPoints)) setKeyPoints(stored.keyPoints);
           if (typeof stored.hasKeyPoints === 'boolean') setHasKeyPoints(stored.hasKeyPoints);
           if (Array.isArray(stored.outline)) setOutline(stored.outline);
-          if (Array.isArray(stored.outline) && stored.outline.length > 0) {
+          if (
+            stored.step === 'outline' &&
+            Array.isArray(stored.outline) &&
+            stored.outline.length > 0
+          ) {
             restoredMessages = [
               ...restoredMessages,
               {
