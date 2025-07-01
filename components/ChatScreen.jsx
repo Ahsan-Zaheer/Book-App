@@ -524,17 +524,31 @@ const getRequiredKeyPoints = () => {
     );
 
     console.log("Outline response:", answer);
-    
-    const lines = answer.split(/\n|\r/).map(l => l.trim()).filter(Boolean);
+
+    const lines = answer.split(/\n|\r/).map((l) => l.trim()).filter(Boolean);
     const chapters = [];
     let current = null;
-    for (const line of lines) {
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
       if (/^(?:#+\s*)?(?:\d+\.\s*)?(?:chapter\s*\d+)/i.test(line)) {
         if (current) chapters.push(current);
-        const title = line
-          .replace(/^(?:#+\s*)?(?:\d+\.\s*)?(?:chapter\s*\d+[:.-]?)/i, '')
+        let title = line
+          .replace(/^(?:#+\s*)?(?:\d+\.\s*)?(?:chapter\s*\d+[:.-]?\s*)/i, '')
           .replace(/\*\*/g, '')
           .trim();
+
+        // If the title is empty, check the next line for the title
+        if (!title && i + 1 < lines.length) {
+          const nextLine = lines[i + 1];
+          if (
+            !/^(?:#+\s*)?(?:\d+\.\s*)?(?:chapter\s*\d+)/i.test(nextLine) &&
+            !/^[-•]/.test(nextLine)
+          ) {
+            title = nextLine.replace(/\*\*/g, '').trim();
+            i++; // skip the next line as it's part of the title
+          }
+        }
+
         current = { title, subheadings: [] };
       } else if (current && /^[-•]/.test(line)) {
         current.subheadings.push(
