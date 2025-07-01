@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import '../stylesheets/style.css';
 import { Icon } from '@iconify/react';
 
-import { askQuestion, saveTitle, createBook, generateChapter, loadChatState, saveChatState } from '../utils/api';
+import { askQuestion, saveTitle, createBook, generateChapterStream, loadChatState, saveChatState } from '../utils/api';
 
 const generateId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
@@ -626,11 +626,11 @@ const generateAndUseOutline = async () => {
     const loadingId = generateId();
     setMessages((prev) => [
       ...prev,
-      { id: loadingId, sender: 'bot', text: `Generating Chapter ${currentChapter}...` },
+      { id: loadingId, sender: 'bot', text: '' },
     ]);
 
     try {
-      const chapter = await generateChapter({
+      const stream = await generateChapterStream({
         bookId,
         bookType,
         summary,
@@ -639,11 +639,14 @@ const generateAndUseOutline = async () => {
         chapterTitle,
         keyPoints,
       });
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === loadingId ? { id: loadingId, sender: 'bot', text: chapter } : m
-        )
-      );
+
+      for await (const chunk of stream) {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === loadingId ? { ...m, text: (m.text || '') + chunk } : m
+          )
+        );
+      }
 
       const next = currentChapter + 1;
       if (next <= chapterCount) {
