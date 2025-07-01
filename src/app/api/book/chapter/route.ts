@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { connectToDatabase } from "../../../../../utils/db";
 import { Book } from "../../../../../models/book";
 import { ChatOpenAI } from "@langchain/openai";
+import { CallbackManager } from "@langchain/core/callbacks/manager"; // ✅ Import this
+import { HumanMessage } from "@langchain/core/messages"; // ✅ Needed for .call()
 
 export const POST = async (req: Request) => {
   const { bookId, bookType, summary, title, chapterIndex, chapterTitle, keyPoints } = await req.json();
@@ -20,15 +22,9 @@ export const POST = async (req: Request) => {
   await book.save();
 
   const wordsPerPart =
-    bookType === 'Ebook' ? 700 : bookType === 'Short Book' ? 1000 : 1500;
-  const prompt = `You are a professional book writer. Write chapter ${chapterIndex} titled "${chapterTitle}" for the ${bookType} \"${title}\". Divide the chapter into 4 parts, each exactly ${wordsPerPart} words and beginning with a short subheading. Base it on the following summary and key points.\nSummary: ${summary}\nKey points: ${keyPoints.join("; ")}`;
+    bookType === "Ebook" ? 700 : bookType === "Short Book" ? 1000 : 1500;
 
-  const model = new ChatOpenAI({
-    modelName: "gpt-4o-mini",
-    temperature: 0.7,
-    streaming: true,
-    openAIApiKey: process.env.OPEN_AI_KEY,
-  });
+  const prompt = `You are a professional book writer. Write chapter ${chapterIndex} titled "${chapterTitle}" for the ${bookType} "${title}". Divide the chapter into 4 parts, each exactly ${wordsPerPart} words and beginning with a short subheading. Base it on the following summary and key points.\nSummary: ${summary}\nKey points: ${keyPoints.join("; ")}`;
 
   const encoder = new TextEncoder();
   let content = "";
@@ -36,20 +32,41 @@ export const POST = async (req: Request) => {
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        for await (const chunk of model.stream(prompt)) {
-          const token = chunk.content ?? "";
-          content += token;
-          controller.enqueue(encoder.encode(`data: ${token}\n\n`));
-        }
+        const model = new ChatOpenAI({
+          modelName: "gpt-4o-mini",
+          temperature: 0.7,
+          streaming: true,
+          openAIApiKey: process.env.OPEN_AI_KEY,
+          callbackManager: CallbackManager.fromHandlers({
+            async handleLLMNewToken(token) {
+              content += token;
+              controller.enqueue(encoder.encode(`data: ${token}\n\n`));
+            },
+            async handleLLMEnd() {
+              controller.enqueue(encoder.encode("event: done\n\n"));
+              controller.close();
 
-        book.chapters.push({ idx: chapterIndex, title: chapterTitle, keyPoints, aiContent: content });
-        if (book.chapterCount && book.chapters.length >= book.chapterCount) {
-          book.status = "generated";
-        }
-        await book.save();
+              book.chapters.push({
+                idx: chapterIndex,
+                title: chapterTitle,
+                keyPoints,
+                aiContent: content,
+              });
 
-        controller.enqueue(encoder.encode("event: done\n\n"));
-        controller.close();
+              if (book.chapterCount && book.chapters.length >= book.chapterCount) {
+                book.status = "generated";
+              }
+
+              await book.save();
+            },
+            async handleLLMError(err) {
+              controller.error(err);
+            },
+          }),
+        });
+
+        // ✅ Correct way to call the model
+        await model.call([new HumanMessage(prompt)]);
       } catch (err) {
         controller.error(err);
       }
