@@ -209,6 +209,11 @@ a.primary {
   height: 50px;
 }
 
+.error {
+  color: red;
+  margin-top: 0.5rem;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

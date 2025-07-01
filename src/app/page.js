@@ -5,10 +5,28 @@ import Image from "next/image";
 import styles from "./page.module.css";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [showInput, setShowInput] = useState(false);
   const [uuid, setUuid] = useState("");
+  const [error, setError] = useState("");
+  const router = useRouter();
+
+  const handleContinue = async () => {
+    setError("");
+    if (!uuid) return;
+    try {
+      const res = await fetch(`/api/book/chat?bookId=${uuid}`);
+      if (res.ok) {
+        router.push(`/home/${uuid}`);
+      } else {
+        setError("Book not found");
+      }
+    } catch (err) {
+      setError("Failed to load book");
+    }
+  };
 
   return (
     <div className={styles.page}>
@@ -34,12 +52,14 @@ export default function Home() {
               className={styles.oldBookInput}
             />
             {uuid && (
-              <Link href={`/home/${uuid}`}>
-                <button className={`${styles.secondary} ${styles.continueBtn}`}>
+                <button
+                  onClick={handleContinue}
+                  className={`${styles.secondary} ${styles.continueBtn}`}
+                >
                   Continue with this Book
                 </button>
-              </Link>
             )}
+            {error && <p className={styles.error}>{error}</p>}
           </div>
         )}
 
