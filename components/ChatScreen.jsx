@@ -576,7 +576,7 @@ const getRequiredKeyPoints = () => {
     let current = null;
 
     const isChapterLine = (l) => {
-      const cleaned = l.replace(/^[-*\s]+/, '').toLowerCase();
+      const cleaned = l.replace(/^[-*#\s]+/, '').toLowerCase();
       return /^(?:chapter\s*\d+|\d+)/.test(cleaned);
     };
 
