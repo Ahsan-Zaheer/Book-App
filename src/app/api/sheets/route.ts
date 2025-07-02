@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "../../../../utils/db";
 import { Book } from "../../../../models/book";
+// Import the User model so mongoose registers the schema before populate is used
+import "../../../../models/user";
 
 // Ensure this route always runs dynamically so it is accessible
 // without any client state such as localStorage.
