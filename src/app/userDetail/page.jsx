@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from '../page.module.css';
 import { createUser } from '../../../utils/api';
+import  Image  from 'next/image';
+import logo from '../../../assets/logo.png'; 
 
 export default function UserDetail() {
   const router = useRouter();
@@ -34,6 +36,8 @@ export default function UserDetail() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
+        <Image src={logo} alt="Logo" width={150}  />
+        <h1 className={styles.title}>Please Fill in the form to continue with the app</h1>
         <input
           className={styles.oldBookInput}
           type="text"
@@ -48,7 +52,7 @@ export default function UserDetail() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-        <button className={styles.secondary} onClick={handleSubmit}>
+        <button className={styles.btn1} onClick={handleSubmit}>
           Continue
         </button>
       </main>
