@@ -14,7 +14,9 @@ export default function UserDetail() {
   useEffect(() => {
     const storedName = localStorage.getItem('userName');
     const storedEmail = localStorage.getItem('userEmail');
-    if (storedName && storedEmail) {
+    const isApiSheets = router.pathname === '/api/sheets';
+
+    if (!isApiSheets && storedName && storedEmail) {
       router.replace('/');
     }
   }, [router]);

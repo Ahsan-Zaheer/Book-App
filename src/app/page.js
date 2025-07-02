@@ -17,7 +17,8 @@ export default function Home() {
   useEffect(() => {
     const name = localStorage.getItem('userName');
     const email = localStorage.getItem('userEmail');
-    if (!name || !email) {
+    const publicRoutes = ['/sheets'];
+    if (!publicRoutes.includes(router.pathname) && (!name || !email)) {
       router.replace('/userDetail');
     }
   }, [router]);
