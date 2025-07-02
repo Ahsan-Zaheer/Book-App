@@ -588,7 +588,7 @@ const getRequiredKeyPoints = () => {
         if (current) chapters.push(current);
 
         let rest = line
-          .replace(/^(?:#+\s*)?(?:chapter\s*\d+|\d+)[).:\-\s]*?/i, '')
+          .replace(/^(?:#+\s*)?(?:chapter\s*\d+|\d+)[).:\-\s]*/i, '')
           .replace(/\*\*/g, '')
           .trim();
         let title = rest;
