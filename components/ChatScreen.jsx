@@ -763,16 +763,15 @@ const getRequiredKeyPoints = () => {
   };
   const formatMessageText = (text) => {
     if (!text || typeof text !== 'string') return text;
-<<<<<<< HEAD
+
 // Remove Markdown-style bold markers and stray hash symbols
 let sanitized = text.replace(/\*\*/g, '').replace(/#/g, '');
-=======
->>>>>>> 8ba4b04ef85b2b8833fed5eca774009fb90027d9
+
 
     // Remove simple markdown markers and stray hashes
     let sanitized = text.replace(/\*\*/g, '').replace(/#/g, '');
 
-<<<<<<< HEAD
+
 // Put chapter titles on their own line (single line per chapter)
 sanitized = sanitized.replace(
   /\s*(Chapter\s*\d+\s*(?:[:\-])?\s*[^\n]*)\s*/gi,
@@ -830,7 +829,7 @@ sanitized = sanitized.replace(/\n{3,}/g, '\n\n').trim();
           )
         )}
       </>
-=======
+
     // Normalize chapter/part headings like "Part2" or "Part-2" -> "Part 2"
     sanitized = sanitized
       .replace(/(Chapter)\s*[-:]?\s*(\d+)/gi, '$1 $2')
@@ -840,7 +839,7 @@ sanitized = sanitized.replace(/\n{3,}/g, '\n\n').trim();
     sanitized = sanitized.replace(
       /(Chapter\s*\d+\s*(?:[:\-])?\s*[^\n]+)/gi,
       '\n$1\n'
->>>>>>> 8ba4b04ef85b2b8833fed5eca774009fb90027d9
+
     );
     sanitized = sanitized.replace(
       /(Part\s*\d+\s*(?:[:\-])?\s*[^\n]+)/gi,
