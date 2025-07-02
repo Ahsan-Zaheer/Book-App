@@ -773,13 +773,13 @@ sanitized = sanitized
 
 // ✅ Fix Chapter titles: Put the whole "Chapter X: Title" on its own line
 sanitized = sanitized.replace(
-  /(Chapter\s*\d+\s*:\s*[^\n]+?)(?=\s*Part|\s*[A-Z])/g,
+  /(Chapter\s*\d+\s*:\s*(?:[^\s]+\s*){1,5})/g,
   '\n$1\n'
 );
 
 // ✅ Fix Part titles: Put the whole "Part X: Title" on its own line
 sanitized = sanitized.replace(
-  /(Part\s*\d+\s*:\s*[^\n]+?)(?=\s*[A-Z])/g,
+  /(Part\s*\d+\s*:\s*(?:[^\s]+\s*){1,5})/g,
   '\n$1\n'
 );
 
