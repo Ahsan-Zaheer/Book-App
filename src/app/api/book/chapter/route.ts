@@ -27,7 +27,7 @@ export const POST = async (req: Request) => {
   const prompt = `You are a professional book writer. Write chapter ${chapterIndex} titled "${chapterTitle}" for the ${bookType} "${title}".\n` +
     `Start the chapter with \"Chapter ${chapterIndex}: ${chapterTitle}\" on its own line. ` +
     `Divide the chapter into 4 parts, each exactly ${wordsPerPart} words. ` +
-    `Each part must begin on a new line with a heading in the format \"Part X: Title\".` +
+    `Each part must begin on a new line with a heading in the format \"Part X: Title : \".` +
     ` Use the following summary and key points.\nSummary: ${summary}\nKey points: ${keyPoints.join("; ")}`;
 
   const encoder = new TextEncoder();
