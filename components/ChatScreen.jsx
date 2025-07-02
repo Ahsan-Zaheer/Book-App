@@ -31,7 +31,6 @@ export default function ChatScreen({ initialBookId = null }) {
   const [refinedSummary, setRefinedSummary] = useState('');
   const [summary, setSummary] = useState('');
   const [currentChapter, setCurrentChapter] = useState(1);
-  const [chapterTitleOptions, setChapterTitleOptions] = useState([]);
   const [hasKeyPoints, setHasKeyPoints] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isMultiline, setIsMultiline] = useState(false);
@@ -543,7 +542,6 @@ const getRequiredKeyPoints = () => {
       setKeyPoints(getInitialKeyPoints());
       setStep('keypoints');
       setUseSimpleInput(false);
-      setUseSimpleInput(false);
     } else {
       
       // const count = parseInt(chapterCount);
@@ -749,7 +747,6 @@ const getRequiredKeyPoints = () => {
     setSummary('');
     setRefinedSummary('');
     setTitleOptions([]);
-    setChapterTitleOptions([]);
     setCurrentChapter(1);
     setOutline([]);
     setHasKeyPoints(false);
