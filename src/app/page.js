@@ -1,6 +1,6 @@
 'use client'; // needed for state in Next.js 13+ app directory
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from "./page.module.css";
 import { Icon } from "@iconify/react";
 import Link from "next/link";
@@ -13,6 +13,14 @@ export default function Home() {
   const [uuid, setUuid] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
+
+  useEffect(() => {
+    const name = localStorage.getItem('userName');
+    const email = localStorage.getItem('userEmail');
+    if (!name || !email) {
+      router.replace('/userDetail');
+    }
+  }, [router]);
 
   const handleContinue = async () => {
     setError("");
