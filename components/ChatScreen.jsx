@@ -763,14 +763,16 @@ const getRequiredKeyPoints = () => {
   };
   const formatMessageText = (text) => {
     if (!text || typeof text !== 'string') return text;
+<<<<<<< HEAD
 // Remove Markdown-style bold markers and stray hash symbols
 let sanitized = text.replace(/\*\*/g, '').replace(/#/g, '');
+=======
+>>>>>>> 8ba4b04ef85b2b8833fed5eca774009fb90027d9
 
-// Normalize spacing for chapter and part headers like "Part2" or "Part-2" → "Part 2"
-sanitized = sanitized
-  .replace(/(Chapter)\s*[-:]?\s*(\d+)/gi, '$1 $2')
-  .replace(/(Part)\s*[-:]?\s*(\d+)/gi, '$1 $2');
+    // Remove simple markdown markers and stray hashes
+    let sanitized = text.replace(/\*\*/g, '').replace(/#/g, '');
 
+<<<<<<< HEAD
 // Put chapter titles on their own line (single line per chapter)
 sanitized = sanitized.replace(
   /\s*(Chapter\s*\d+\s*(?:[:\-])?\s*[^\n]*)\s*/gi,
@@ -828,7 +830,76 @@ sanitized = sanitized.replace(/\n{3,}/g, '\n\n').trim();
           )
         )}
       </>
+=======
+    // Normalize chapter/part headings like "Part2" or "Part-2" -> "Part 2"
+    sanitized = sanitized
+      .replace(/(Chapter)\s*[-:]?\s*(\d+)/gi, '$1 $2')
+      .replace(/(Part)\s*[-:]?\s*(\d+)/gi, '$1 $2');
+
+    // Put chapter and part titles on their own lines for easier parsing
+    sanitized = sanitized.replace(
+      /(Chapter\s*\d+\s*(?:[:\-])?\s*[^\n]+)/gi,
+      '\n$1\n'
+>>>>>>> 8ba4b04ef85b2b8833fed5eca774009fb90027d9
     );
+    sanitized = sanitized.replace(
+      /(Part\s*\d+\s*(?:[:\-])?\s*[^\n]+)/gi,
+      '\n$1\n'
+    );
+
+    // Optional spacing between jammed sentences
+    sanitized = sanitized.replace(/([a-z])([A-Z])/g, '$1 $2');
+
+    // Collapse excessive newlines
+    sanitized = sanitized.replace(/\n{3,}/g, '\n\n').trim();
+
+    const lines = sanitized.split(/\n+/);
+    const elements = [];
+    let listItems = [];
+    const pushList = () => {
+      if (listItems.length) {
+        elements.push(
+          <ol key={`list-${elements.length}`} className="mb-2">
+            {listItems.map((it, i) => (
+              <li key={i}>{it}</li>
+            ))}
+          </ol>
+        );
+        listItems = [];
+      }
+    };
+
+    lines.forEach((line, idx) => {
+      const trimmed = line.trim();
+      if (!trimmed) return;
+      if (/^Chapter\s*\d+/i.test(trimmed)) {
+        pushList();
+        elements.push(
+          <h2 key={`ch-${idx}`} className="chapter-title">
+            {trimmed}
+          </h2>
+        );
+      } else if (/^Part\s*\d+/i.test(trimmed)) {
+        pushList();
+        elements.push(
+          <h3 key={`part-${idx}`} className="part-title">
+            {trimmed}
+          </h3>
+        );
+      } else if (/^\d+\.\s/.test(trimmed)) {
+        listItems.push(trimmed.replace(/^\d+\.\s*/, ''));
+      } else {
+        pushList();
+        elements.push(
+          <p key={`p-${idx}`} className="mb-2">
+            {trimmed}
+          </p>
+        );
+      }
+    });
+    pushList();
+
+    return <div className="chapter-content">{elements}</div>;
   };
 
     
