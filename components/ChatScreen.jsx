@@ -763,69 +763,78 @@ const getRequiredKeyPoints = () => {
   };
   const formatMessageText = (text) => {
     if (!text || typeof text !== 'string') return text;
-   // Remove Markdown-style bold markers and stray hash symbols
-let sanitized = text.replace(/\*\*/g, '').replace(/#/g, '');
 
-// Normalize spacing for chapter and part headers like "Part2" or "Part-2" → "Part 2"
-sanitized = sanitized
-  .replace(/(Chapter)\s*[-:]?\s*(\d+)/gi, '$1 $2')
-  .replace(/(Part)\s*[-:]?\s*(\d+)/gi, '$1 $2');
+    // Remove simple markdown markers and stray hashes
+    let sanitized = text.replace(/\*\*/g, '').replace(/#/g, '');
 
-// Put chapter and part titles on their own line for reliable detection
-sanitized = sanitized.replace(
-  /(Chapter\s*\d+\s*(?:[:\-])?\s*[^\n]+)/gi,
-  '\n$1\n'
-);
-sanitized = sanitized.replace(
-  /(Part\s*\d+\s*(?:[:\-])?\s*[^\n]+)/gi,
-  '\n$1\n'
-);
+    // Normalize chapter/part headings like "Part2" or "Part-2" -> "Part 2"
+    sanitized = sanitized
+      .replace(/(Chapter)\s*[-:]?\s*(\d+)/gi, '$1 $2')
+      .replace(/(Part)\s*[-:]?\s*(\d+)/gi, '$1 $2');
 
-// Optional: add space between sentences if jammed
-sanitized = sanitized.replace(/([a-z])([A-Z])/g, '$1 $2');
-
-// Clean up multiple newlines
-sanitized = sanitized.replace(/\n{3,}/g, '\n\n').trim();
-
-
-
-
-
-    // Match lines that start with "1. ", "2. ", etc.
-    const numberedListRegex = /^(\d+\.\s.*)$/gm;
-    const parts = sanitized.split(numberedListRegex);
-    const isNumberedItem = /^\d+\.\s.*$/;
-
-    return (
-      <>
-        {parts.map((part, idx) =>
-          isNumberedItem.test(part.trim()) ? (
-            <React.Fragment key={idx}>
-              {part}
-              <br />
-            </React.Fragment>
-          ) : (
-            part.split(/\n/).map((line, jdx) => {
-              if (!line.trim()) return null;
-              if (/^Chapter\s*\d+/i.test(line) || /^Part\s*\d+/i.test(line)) {
-                return (
-                  <React.Fragment key={`${idx}-${jdx}`}>
-                    <strong>{line.trim()}</strong>
-                    <br />
-                  </React.Fragment>
-                );
-              }
-              return (
-                <React.Fragment key={`${idx}-${jdx}`}>
-                  {line}
-                  <br />
-                </React.Fragment>
-              );
-            })
-          )
-        )}
-      </>
+    // Put chapter and part titles on their own lines for easier parsing
+    sanitized = sanitized.replace(
+      /(Chapter\s*\d+\s*(?:[:\-])?\s*[^\n]+)/gi,
+      '\n$1\n'
     );
+    sanitized = sanitized.replace(
+      /(Part\s*\d+\s*(?:[:\-])?\s*[^\n]+)/gi,
+      '\n$1\n'
+    );
+
+    // Optional spacing between jammed sentences
+    sanitized = sanitized.replace(/([a-z])([A-Z])/g, '$1 $2');
+
+    // Collapse excessive newlines
+    sanitized = sanitized.replace(/\n{3,}/g, '\n\n').trim();
+
+    const lines = sanitized.split(/\n+/);
+    const elements = [];
+    let listItems = [];
+    const pushList = () => {
+      if (listItems.length) {
+        elements.push(
+          <ol key={`list-${elements.length}`} className="mb-2">
+            {listItems.map((it, i) => (
+              <li key={i}>{it}</li>
+            ))}
+          </ol>
+        );
+        listItems = [];
+      }
+    };
+
+    lines.forEach((line, idx) => {
+      const trimmed = line.trim();
+      if (!trimmed) return;
+      if (/^Chapter\s*\d+/i.test(trimmed)) {
+        pushList();
+        elements.push(
+          <h2 key={`ch-${idx}`} className="chapter-title">
+            {trimmed}
+          </h2>
+        );
+      } else if (/^Part\s*\d+/i.test(trimmed)) {
+        pushList();
+        elements.push(
+          <h3 key={`part-${idx}`} className="part-title">
+            {trimmed}
+          </h3>
+        );
+      } else if (/^\d+\.\s/.test(trimmed)) {
+        listItems.push(trimmed.replace(/^\d+\.\s*/, ''));
+      } else {
+        pushList();
+        elements.push(
+          <p key={`p-${idx}`} className="mb-2">
+            {trimmed}
+          </p>
+        );
+      }
+    });
+    pushList();
+
+    return <div className="chapter-content">{elements}</div>;
   };
 
     
