@@ -544,8 +544,19 @@ const getRequiredKeyPoints = () => {
       setUseSimpleInput(false);
       setUseSimpleInput(false);
     } else {
-      // regenerate outline using stored chapter count
-      await sendMessage(String(chapterCount), 'chapters');
+      // Regenerate outline using the previously selected chapter count
+      const count = parseInt(chapterCount);
+      if (!count || isNaN(count) || count < 1 || count > 50) {
+        console.warn('Invalid chapterCount in outline regeneration:', chapterCount);
+        setMessages((prev) => [
+          ...prev,
+          { id: generateId(), sender: 'bot', text: 'Please enter the number of chapters first (1–50).' },
+        ]);
+        setStep('chapters');
+        return;
+      }
+
+      await sendMessage(String(count), 'chapters');
     }
   };
 
