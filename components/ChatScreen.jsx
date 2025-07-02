@@ -764,8 +764,13 @@ const getRequiredKeyPoints = () => {
   const formatMessageText = (text) => {
     if (!text || typeof text !== 'string') return text;
 
-    // Remove Markdown-style bold markers
-    let sanitized = text.replace(/\*\*/g, '');
+    // Remove Markdown-style bold markers and stray hash symbols
+    let sanitized = text.replace(/\*\*/g, '').replace(/#/g, '');
+
+    // Normalize spacing for chapter and part headers
+    sanitized = sanitized
+      .replace(/(Chapter)\s*(\d+)/gi, '$1 $2')
+      .replace(/(Part)\s*(\d+)/gi, '$1 $2');
 
     // Ensure chapter and part titles start on their own lines
     sanitized = sanitized
