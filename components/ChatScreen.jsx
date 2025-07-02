@@ -520,6 +520,7 @@ const getRequiredKeyPoints = () => {
     const outlineToUse = chaptersArg || outline;
 
     if (useIt) {
+      console.log("📘 Using outline:", outlineToUse);
 
       const first = outlineToUse[0];
       console.log("📗 First chapter:", first);
@@ -541,8 +542,9 @@ const getRequiredKeyPoints = () => {
       setKeyPoints(getInitialKeyPoints());
       setStep('keypoints');
       setUseSimpleInput(false);
+      setUseSimpleInput(false);
     } else {
-      
+      // Regenerate outline using the previously selected chapter count
       const count = parseInt(chapterCount);
       if (!count || isNaN(count) || count < 1 || count > 50) {
         console.warn('Invalid chapterCount in outline regeneration:', chapterCount);
@@ -563,9 +565,7 @@ const getRequiredKeyPoints = () => {
       `Provide an outline of ${count} chapters for the ${bookType} "${selectedTitle}" based on this summary:\n${summary}. Each chapter should have a title followed by a brief concept of the chapter in no more than two lines.`
     );
 
-    console.log("📖 Raw outline answer:", answer);
-    
-
+    console.log("🧠 Outline response:", answer);
 
     const lines = answer
       .split(/\n|\r/)
@@ -575,10 +575,7 @@ const getRequiredKeyPoints = () => {
     const chapters = [];
     let current = null;
 
-    const isChapterLine = (l) => {
-      const cleaned = l.replace(/^[-*#\s]+/, '').toLowerCase();
-      return /^(?:chapter\s*\d+|\d+)/.test(cleaned);
-    };
+    const isChapterLine = (l) => /^(?:#+\s*)?(?:\d+\.\s*)?(?:chapter\s*\d+)/i.test(l);
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
@@ -587,10 +584,7 @@ const getRequiredKeyPoints = () => {
       if (isChapterLine(line)) {
         if (current) chapters.push(current);
 
-        let rest = line
-          .replace(/^(?:#+\s*)?(?:chapter\s*\d+|\d+)[).:\-\s]*?/i, '')
-          .replace(/\*\*/g, '')
-          .trim();
+        let rest = line.replace(/^(?:#+\s*)?(?:\d+\.\s*)?(?:chapter\s*\d+[:.-]?\s*)/i, '').replace(/\*\*/g, '').trim();
         let title = rest;
         let concept = '';
 
@@ -623,6 +617,7 @@ const getRequiredKeyPoints = () => {
     console.log("✅ Final parsed chapters array:", finalChapters);
     return finalChapters;
   };
+
 
 
 
