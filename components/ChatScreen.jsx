@@ -763,7 +763,7 @@ const getRequiredKeyPoints = () => {
   };
   const formatMessageText = (text) => {
     if (!text || typeof text !== 'string') return text;
-   // Remove Markdown-style bold markers and stray hash symbols
+// Remove Markdown-style bold markers and stray hash symbols
 let sanitized = text.replace(/\*\*/g, '').replace(/#/g, '');
 
 // Normalize spacing for chapter and part headers like "Part2" or "Part-2" → "Part 2"
@@ -771,21 +771,24 @@ sanitized = sanitized
   .replace(/(Chapter)\s*[-:]?\s*(\d+)/gi, '$1 $2')
   .replace(/(Part)\s*[-:]?\s*(\d+)/gi, '$1 $2');
 
-// Put chapter and part titles on their own line for reliable detection
+// Put chapter titles on their own line (single line per chapter)
 sanitized = sanitized.replace(
-  /(Chapter\s*\d+\s*(?:[:\-])?\s*[^\n]+)/gi,
-  '\n$1\n'
-);
-sanitized = sanitized.replace(
-  /(Part\s*\d+\s*(?:[:\-])?\s*[^\n]+)/gi,
+  /\s*(Chapter\s*\d+\s*(?:[:\-])?\s*[^\n]*)\s*/gi,
   '\n$1\n'
 );
 
-// Optional: add space between sentences if jammed
+// Put part titles on a new line and ensure they start a new block
+sanitized = sanitized.replace(
+  /\s*(Part\s*\d+\s*(?:[:\-])?\s*[^\n]*)\s*/gi,
+  '\n$1\n'
+);
+
+// Optional: add space between jammed sentences (e.g., "...day.He..." → "...day. He...")
 sanitized = sanitized.replace(/([a-z])([A-Z])/g, '$1 $2');
 
 // Clean up multiple newlines
 sanitized = sanitized.replace(/\n{3,}/g, '\n\n').trim();
+
 
 
 
