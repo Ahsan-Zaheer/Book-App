@@ -92,7 +92,7 @@ export default function ChatScreen({ initialBookId = null }) {
       <div>
         <p>Great! To get started, I’ll need a brief book summary—just 3 to 6 sentences that describe the main message or journey you want to share in your book.</p>
         <p>Once you provide that, I’ll:</p>
-        <ul className="d-flex flex-wrap gap-2">
+        <ul className="d-flex flex-column flex-wrap gap-2">
           <li>Refine your summary into a clean and compelling version.</li>
           <li>Give you 10 title and subtitle suggestions to consider.</li>
           <li>Help you develop chapter ideas and an outline if you’d like.</li>
@@ -516,7 +516,7 @@ const getRequiredKeyPoints = () => {
   inputRef.current?.focus();
   };
 
-  const handleOutlineDecision = async (useIt, chaptersArg = null) => {
+   const handleOutlineDecision = async (useIt, chaptersArg = null) => {
     const outlineToUse = chaptersArg || outline;
 
     if (useIt) {
@@ -765,12 +765,7 @@ const getRequiredKeyPoints = () => {
     if (!text || typeof text !== 'string') return text;
 
     // Remove Markdown-style bold markers
-    let sanitized = text.replace(/\*\*/g, '');
-
-    // Ensure chapter and part headings each start on a new line
-    sanitized = sanitized
-      .replace(/(?<!\n)(Chapter\s*\d+[^\n]*)/gi, '\n$1\n')
-      .replace(/(?<!\n)(Part\s*\d+[^\n]*)/gi, '\n$1\n');
+    const sanitized = text.replace(/\*\*/g, '');
 
     // Match lines that start with "1. ", "2. ", etc.
     const numberedListRegex = /^(\d+\.\s.*)$/gm;
@@ -787,24 +782,14 @@ const getRequiredKeyPoints = () => {
           ) : (
             part.split(/\n/).map((line, jdx) => {
               if (!line.trim()) return null;
-              const trimmed = line.trim();
-              if (/^Chapter\s*\d+/i.test(trimmed)) {
-                return (
-                  <h1 key={`${idx}-${jdx}`} className="chapter-title">
-                    {trimmed}
-                  </h1>
-                );
-              }
-              if (/^Part\s*\d+/i.test(trimmed)) {
-                return (
-                  <h3 key={`${idx}-${jdx}`} className="part-title">
-                    {trimmed}
-                  </h3>
-                );
-              }
-              return (
+              return /^Part\s*\d+/i.test(line) ? (
                 <React.Fragment key={`${idx}-${jdx}`}>
-                  {trimmed}
+                  <strong>{line.trim()}</strong>
+                  <br />
+                </React.Fragment>
+              ) : (
+                <React.Fragment key={`${idx}-${jdx}`}>
+                  {line}
                   <br />
                 </React.Fragment>
               );
