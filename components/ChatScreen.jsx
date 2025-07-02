@@ -67,7 +67,7 @@ export default function ChatScreen({ initialBookId = null }) {
     data: { outline: outlineData },
     custom: (
       <div>
-        <p>Here is a suggested outline:</p>
+        <p>Here is a suggested outline for chapters and their contents:</p>
         <ol>
           {outlineData.map((ch, idx) => (
             <li key={idx}>
