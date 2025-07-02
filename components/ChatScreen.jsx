@@ -782,14 +782,24 @@ const getRequiredKeyPoints = () => {
           ) : (
             part.split(/\n/).map((line, jdx) => {
               if (!line.trim()) return null;
-              return /^Part\s*\d+/i.test(line) ? (
+              const trimmed = line.trim();
+              if (/^Chapter\s*\d+/i.test(trimmed)) {
+                return (
+                  <h1 key={`${idx}-${jdx}`} className="chapter-title">
+                    {trimmed}
+                  </h1>
+                );
+              }
+              if (/^Part\s*\d+/i.test(trimmed)) {
+                return (
+                  <h3 key={`${idx}-${jdx}`} className="part-title">
+                    {trimmed}
+                  </h3>
+                );
+              }
+              return (
                 <React.Fragment key={`${idx}-${jdx}`}>
-                  <strong>{line.trim()}</strong>
-                  <br />
-                </React.Fragment>
-              ) : (
-                <React.Fragment key={`${idx}-${jdx}`}>
-                  {line}
+                  {trimmed}
                   <br />
                 </React.Fragment>
               );
