@@ -517,7 +517,7 @@ const getRequiredKeyPoints = () => {
   inputRef.current?.focus();
   };
 
-  const handleOutlineDecision = async (useIt, chaptersArg = null, num) => {
+  const handleOutlineDecision = async (useIt, chaptersArg = null, num = chapterCount) => {
     const outlineToUse = chaptersArg || outline;
 
     if (useIt) {
@@ -573,7 +573,10 @@ const getRequiredKeyPoints = () => {
     const chapters = [];
     let current = null;
 
-    const isChapterLine = (l) => /^(?:#+\s*)?(?:\d+\.\s*)?(?:chapter\s*\d+)/i.test(l);
+    const isChapterLine = (l) => {
+      const cleaned = l.replace(/^[-*\s]+/, '').toLowerCase();
+      return /^(?:chapter\s*\d+|\d+)/.test(cleaned);
+    };
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
@@ -582,7 +585,10 @@ const getRequiredKeyPoints = () => {
       if (isChapterLine(line)) {
         if (current) chapters.push(current);
 
-        let rest = line.replace(/^(?:#+\s*)?(?:\d+\.\s*)?(?:chapter\s*\d+[:.-]?\s*)/i, '').replace(/\*\*/g, '').trim();
+        let rest = line
+          .replace(/^(?:#+\s*)?(?:chapter\s*\d+|\d+)[).:\-\s]*?/i, '')
+          .replace(/\*\*/g, '')
+          .trim();
         let title = rest;
         let concept = '';
 
