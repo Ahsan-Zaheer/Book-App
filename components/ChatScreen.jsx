@@ -85,6 +85,24 @@ export default function ChatScreen({ initialBookId = null }) {
     ),
   });
 
+  const createSummaryPromptMessage = (id) => ({
+    id,
+    sender: 'bot',
+    customType: 'summaryPrompt',
+    custom: (
+      <div>
+        <p>Great! To get started, I’ll need a brief book summary—just 3 to 6 sentences that describe the main message or journey you want to share in your book.</p>
+        <p>Once you provide that, I’ll:</p>
+        <ul className="d-flex flex-wrap gap-2">
+          <li>Refine your summary into a clean and compelling version.</li>
+          <li>Give you 10 title and subtitle suggestions to consider.</li>
+          <li>Help you develop chapter ideas and an outline if you’d like.</li>
+        </ul>
+        <p>👉 Please go ahead and type or paste your book summary when you're ready.</p>
+      </div>
+    ),
+  });
+
   const restoreMessage = (msg, bookIdArg, count) => {
     if (msg.customType === 'titleSuggestions' && msg.data) {
       setRefinedSummary(msg.data.refinedSummary || '');
@@ -94,8 +112,11 @@ export default function ChatScreen({ initialBookId = null }) {
     if (msg.customType === 'outline' && msg.data) {
       setOutline(msg.data.outline || []);
       console.log( "Count in restoreMessage:", count);
-      
+
       return createOutlineMessage(msg.id, msg.data.outline || [] , count);
+    }
+    if (msg.customType === 'summaryPrompt') {
+      return createSummaryPromptMessage(msg.id);
     }
     return msg;
   };
@@ -283,22 +304,7 @@ export default function ChatScreen({ initialBookId = null }) {
       setTimeout(() => {
         setMessages((prev) => [
           ...prev,
-          {
-            id: generateId(),
-            sender: 'bot',
-            custom: (
-              <div>
-                <p>Great! To get started, I’ll need a brief book summary—just 3 to 6 sentences that describe the main message or journey you want to share in your book.</p>
-                <p>Once you provide that, I’ll:</p>
-                <ul className="d-flex flex-wrap gap-2">
-                  <li>Refine your summary into a clean and compelling version.</li>
-                  <li>Give you 10 title and subtitle suggestions to consider.</li>
-                  <li>Help you develop chapter ideas and an outline if you’d like.</li>
-                </ul>
-                <p>👉 Please go ahead and type or paste your book summary when you're ready.</p>
-              </div>
-            ),
-          },
+          createSummaryPromptMessage(generateId()),
         ]);
       }, 400);
       setStep('summary');
