@@ -765,7 +765,12 @@ const getRequiredKeyPoints = () => {
     if (!text || typeof text !== 'string') return text;
 
     // Remove Markdown-style bold markers
-    const sanitized = text.replace(/\*\*/g, '');
+    let sanitized = text.replace(/\*\*/g, '');
+
+    // Ensure chapter and part headings each start on a new line
+    sanitized = sanitized
+      .replace(/(?<!\n)(Chapter\s*\d+[^\n]*)/gi, '\n$1\n')
+      .replace(/(?<!\n)(Part\s*\d+[^\n]*)/gi, '\n$1\n');
 
     // Match lines that start with "1. ", "2. ", etc.
     const numberedListRegex = /^(\d+\.\s.*)$/gm;
