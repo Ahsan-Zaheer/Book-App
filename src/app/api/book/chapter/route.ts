@@ -24,7 +24,7 @@ export const POST = async (req: Request) => {
   const wordsPerPart =
     bookType === "Ebook" ? 700 : bookType === "Short Book" ? 1000 : 1500;
 
-  const prompt = `You are a professional book writer. Write chapter ${chapterIndex} titled "${chapterTitle}" for the ${bookType} "${title}". Divide the chapter into 4 parts, each exactly ${wordsPerPart} words and beginning with a short subheading. Base it on the following summary and key points.\nSummary: ${summary}\nKey points: ${keyPoints.join("; ")}`;
+  const prompt = `You are a professional book writer. Write chapter ${chapterIndex} titled "${chapterTitle}" for the ${bookType} "${title}". Divide the chapter into 4 parts, each exactly ${wordsPerPart} words. Each part must begin with a short title (for example, \"Part 1: Title\"). Base it on the following summary and key points.\nSummary: ${summary}\nKey points: ${keyPoints.join("; ")}`;
 
   const encoder = new TextEncoder();
   let content = "";
