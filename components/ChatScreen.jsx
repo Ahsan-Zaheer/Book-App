@@ -796,11 +796,12 @@ sanitized = sanitized.replace(/\n{3,}/g, '\n\n').trim();
     // Match lines that start with "1. ", "2. ", etc.
     const numberedListRegex = /^(\d+\.\s.*)$/gm;
     const parts = sanitized.split(numberedListRegex);
+    const isNumberedItem = /^\d+\.\s.*$/;
 
     return (
       <>
         {parts.map((part, idx) =>
-          numberedListRegex.test(part) ? (
+          isNumberedItem.test(part.trim()) ? (
             <React.Fragment key={idx}>
               {part}
               <br />
