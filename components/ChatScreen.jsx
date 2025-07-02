@@ -766,20 +766,18 @@ const getRequiredKeyPoints = () => {
    // Remove Markdown-style bold markers and stray hash symbols
 let sanitized = text.replace(/\*\*/g, '').replace(/#/g, '');
 
-// Normalize spacing for chapter and part headers like "Part2" → "Part 2"
+// Normalize spacing for chapter and part headers like "Part2" or "Part-2" → "Part 2"
 sanitized = sanitized
-  .replace(/(Chapter)\s*(\d+)/gi, '$1 $2')
-  .replace(/(Part)\s*(\d+)/gi, '$1 $2');
+  .replace(/(Chapter)\s*[-:]?\s*(\d+)/gi, '$1 $2')
+  .replace(/(Part)\s*[-:]?\s*(\d+)/gi, '$1 $2');
 
-// ✅ Fix Chapter titles: Put the whole "Chapter X: Title" on its own line
+// Put chapter and part titles on their own line for reliable detection
 sanitized = sanitized.replace(
-  /(Chapter\s*\d+\s*:\s*(?:[^\s]+\s*){1,5})/g,
+  /(Chapter\s*\d+\s*(?:[:\-])?\s*[^\n]+)/gi,
   '\n$1\n'
 );
-
-// ✅ Fix Part titles: Put the whole "Part X: Title" on its own line
 sanitized = sanitized.replace(
-  /(Part\s*\d+\s*:\s*(?:[^\s]+\s*){1,5})/g,
+  /(Part\s*\d+\s*(?:[:\-])?\s*[^\n]+)/gi,
   '\n$1\n'
 );
 
