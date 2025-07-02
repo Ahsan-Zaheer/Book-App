@@ -763,21 +763,35 @@ const getRequiredKeyPoints = () => {
   };
   const formatMessageText = (text) => {
     if (!text || typeof text !== 'string') return text;
+   // Remove Markdown-style bold markers and stray hash symbols
+let sanitized = text.replace(/\*\*/g, '').replace(/#/g, '');
 
-    // Remove Markdown-style bold markers and stray hash symbols
-    let sanitized = text.replace(/\*\*/g, '').replace(/#/g, '');
+// Normalize spacing for chapter and part headers like "Part2" → "Part 2"
+sanitized = sanitized
+  .replace(/(Chapter)\s*(\d+)/gi, '$1 $2')
+  .replace(/(Part)\s*(\d+)/gi, '$1 $2');
 
-    // Normalize spacing for chapter and part headers
-    sanitized = sanitized
-      .replace(/(Chapter)\s*(\d+)/gi, '$1 $2')
-      .replace(/(Part)\s*(\d+)/gi, '$1 $2');
+// ✅ Fix Chapter titles: Put the whole "Chapter X: Title" on its own line
+sanitized = sanitized.replace(
+  /(Chapter\s*\d+\s*:\s*[^\n]+?)(?=\s*Part|\s*[A-Z])/g,
+  '\n$1\n'
+);
 
-    // Ensure chapter and part titles start on their own lines
-    sanitized = sanitized
-      .replace(/\s*(Chapter\s*\d+)/gi, '\n$1')
-      .replace(/\s*(Part\s*\d+)/gi, '\n$1')
-      .replace(/\n{2,}/g, '\n')
-      .trim();
+// ✅ Fix Part titles: Put the whole "Part X: Title" on its own line
+sanitized = sanitized.replace(
+  /(Part\s*\d+\s*:\s*[^\n]+?)(?=\s*[A-Z])/g,
+  '\n$1\n'
+);
+
+// Optional: add space between sentences if jammed
+sanitized = sanitized.replace(/([a-z])([A-Z])/g, '$1 $2');
+
+// Clean up multiple newlines
+sanitized = sanitized.replace(/\n{3,}/g, '\n\n').trim();
+
+
+
+
 
     // Match lines that start with "1. ", "2. ", etc.
     const numberedListRegex = /^(\d+\.\s.*)$/gm;
