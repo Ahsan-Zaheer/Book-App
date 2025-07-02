@@ -343,10 +343,19 @@
 .chapter-title {
   margin-top: 1rem;
   margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
 }
 
 .part-title {
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
   margin-bottom: 0.25rem;
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.chapter-content p {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
 }
 
