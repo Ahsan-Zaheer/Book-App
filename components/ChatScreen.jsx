@@ -639,13 +639,21 @@ const getRequiredKeyPoints = () => {
         keyPoints,
       });
 
+      let fullText = '';
       for await (const chunk of stream) {
+        fullText += chunk;
         setMessages((prev) =>
           prev.map((m) =>
             m.id === loadingId ? { ...m, text: (m.text || '') + chunk } : m
           )
         );
       }
+
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === loadingId ? { ...m, text: fullText, custom: formatMessageText(fullText) } : m
+        )
+      );
 
       const next = currentChapter + 1;
       if (next <= chapterCount) {

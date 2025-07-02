@@ -4,6 +4,7 @@ import { Book } from "../../../../../models/book";
 import { ChatOpenAI } from "@langchain/openai";
 import { CallbackManager } from "@langchain/core/callbacks/manager"; // ✅ Import this
 import { HumanMessage } from "@langchain/core/messages"; // ✅ Needed for .call()
+import { formatChapterText } from "../../../../../utils/format";
 
 export const POST = async (req: Request) => {
   const { bookId, bookType, summary, title, chapterIndex, chapterTitle, keyPoints } = await req.json();
@@ -50,11 +51,13 @@ export const POST = async (req: Request) => {
               controller.enqueue(encoder.encode("event: done\n\n"));
               controller.close();
 
+              const formatted = formatChapterText(content);
+
               book.chapters.push({
                 idx: chapterIndex,
                 title: chapterTitle,
                 keyPoints,
-                aiContent: content,
+                aiContent: formatted,
               });
 
               if (book.chapterCount && book.chapters.length >= book.chapterCount) {
