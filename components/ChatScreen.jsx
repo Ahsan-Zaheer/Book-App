@@ -60,7 +60,8 @@ export default function ChatScreen({ initialBookId = null }) {
     ),
   });
 
-  const createOutlineMessage = (id, outlineData) => ({
+  const createOutlineMessage = (id, outlineData, num) => ({
+
     id,
     sender: 'bot',
     customType: 'outline',
@@ -78,13 +79,13 @@ export default function ChatScreen({ initialBookId = null }) {
         </ol>
         <div className="d-flex gap-2 mt-2">
           <button className="selection" onClick={() => handleOutlineDecision(true, outlineData)}>Go ahead with this</button>
-          <button className="selection" onClick={() => handleOutlineDecision(false)}>Generate another suggestion</button>
+          <button className="selection" onClick={() => handleOutlineDecision(false, null, num)}>Generate another suggestion</button>
         </div>
       </div>
     ),
   });
 
-  const restoreMessage = (msg, bookIdArg) => {
+  const restoreMessage = (msg, bookIdArg, count) => {
     if (msg.customType === 'titleSuggestions' && msg.data) {
       setRefinedSummary(msg.data.refinedSummary || '');
       setTitleOptions(msg.data.titles || []);
@@ -92,7 +93,9 @@ export default function ChatScreen({ initialBookId = null }) {
     }
     if (msg.customType === 'outline' && msg.data) {
       setOutline(msg.data.outline || []);
-      return createOutlineMessage(msg.id, msg.data.outline || []);
+      console.log( "Count in restoreMessage:", count);
+      
+      return createOutlineMessage(msg.id, msg.data.outline || [] , count);
     }
     return msg;
   };
@@ -104,6 +107,7 @@ export default function ChatScreen({ initialBookId = null }) {
       setIsLoadingChat(true);
       try {
         const stored = await loadChatState(initialBookId);
+        console.log("old book", stored.chapterCount);
         if (stored) {
           if (stored.step) setStep(stored.step);
           if (stored.bookType) setBookType(stored.bookType);
@@ -123,7 +127,7 @@ export default function ChatScreen({ initialBookId = null }) {
           if (Array.isArray(stored.titleOptions)) setTitleOptions(stored.titleOptions);
 
           let restoredMessages = Array.isArray(stored.messages)
-            ? stored.messages.map((m) => restoreMessage(m, initialBookId))
+            ? stored.messages.map((m) => restoreMessage(m, initialBookId, stored.chapterCount))
             : [];
 
           setMessages(restoredMessages);
@@ -240,7 +244,7 @@ export default function ChatScreen({ initialBookId = null }) {
           if (Array.isArray(stored.titleOptions)) setTitleOptions(stored.titleOptions);
 
           const restoredMessages = Array.isArray(stored.messages)
-            ? stored.messages.map((m) => restoreMessage(m, id))
+            ? stored.messages.map((m) => restoreMessage(m, id , stored.chapterCount))
             : [];
 
           setMessages(restoredMessages);
@@ -366,7 +370,7 @@ export default function ChatScreen({ initialBookId = null }) {
               setMessages((prev) =>
                 prev.map((m) =>
                   m.id === loadingId
-                    ? createOutlineMessage(loadingId, outlineData)
+                    ? createOutlineMessage(loadingId, outlineData , num)
                     : m
                 )
               );
@@ -481,8 +485,7 @@ const getRequiredKeyPoints = () => {
       { id: generateId(), sender: 'user', text: `I like "${title}"` },
     ]);
     try {
-      console.log("Saving title:", title);
-      console.log("Book ID:", bookIdArg);
+   
       await saveTitle(bookIdArg, title);
 
       ensureTitleInStorage(bookIdArg, cleanTitle);
@@ -503,24 +506,16 @@ const getRequiredKeyPoints = () => {
     inputRef.current?.focus();
   };
 
-  const handleChapterSelect = (chapterName) => {
-    const cleanName = chapterName.replace(/\*\*/g, '').trim();
-    setSelectedChapter(cleanName);
-    setInput(cleanName);
-    inputRef.current?.focus();
-  };
-
   const handleTypeSelect = (type) => {
   setBookType(type);
   setInput(`I want to write a ${type}`);
   inputRef.current?.focus();
   };
 
-  const handleOutlineDecision = async (useIt, chaptersArg = null) => {
+  const handleOutlineDecision = async (useIt, chaptersArg = null, num) => {
     const outlineToUse = chaptersArg || outline;
 
     if (useIt) {
-      console.log("📘 Using outline:", outlineToUse);
 
       const first = outlineToUse[0];
       console.log("📗 First chapter:", first);
@@ -544,19 +539,19 @@ const getRequiredKeyPoints = () => {
       setUseSimpleInput(false);
       setUseSimpleInput(false);
     } else {
-      // Regenerate outline using the previously selected chapter count
-      const count = parseInt(chapterCount);
-      if (!count || isNaN(count) || count < 1 || count > 50) {
-        console.warn('Invalid chapterCount in outline regeneration:', chapterCount);
-        setMessages((prev) => [
-          ...prev,
-          { id: generateId(), sender: 'bot', text: 'Please enter the number of chapters first (1–50).' },
-        ]);
-        setStep('chapters');
-        return;
-      }
+      
+      // const count = parseInt(chapterCount);
+      // if (!count || isNaN(count) || count < 1 || count > 50) {
+      //   console.warn('Invalid chapterCount in outline regeneration:', chapterCount);
+      //   setMessages((prev) => [
+      //     ...prev,
+      //     { id: generateId(), sender: 'bot', text: 'Please enter the number of chapters first (1–50).' },
+      //   ]);
+      //   setStep('chapters');
+      //   return;
+      // }
 
-      await sendMessage(String(count), 'chapters');
+      await sendMessage(String(num), 'chapters');
     }
   };
 
@@ -565,7 +560,6 @@ const getRequiredKeyPoints = () => {
       `Provide an outline of ${count} chapters for the ${bookType} "${selectedTitle}" based on this summary:\n${summary}. Each chapter should have a title followed by a brief concept of the chapter in no more than two lines.`
     );
 
-    console.log("🧠 Outline response:", answer);
 
     const lines = answer
       .split(/\n|\r/)
@@ -618,26 +612,7 @@ const getRequiredKeyPoints = () => {
     return finalChapters;
   };
 
-// Example of calling both together
-const generateAndUseOutline = async () => {
-  const chapters = await getOutlineSuggestions(chapterCount);
-  setOutline(chapters); // keep state if needed elsewhere
-  handleOutlineDecision(true, chapters);
-};
 
-
-
-  const getChapterTitleSuggestions = async (chapterIdx) => {
-    const answer = await askQuestion(
-      `Provide 5 title suggestions for chapter ${chapterIdx} of the ${bookType} \"${selectedTitle}\" based on this summary:\n${summary}`
-    );
-    const titles = answer
-      .split(/\n|\r/)
-      .map((t) => t.trim())
-      .filter((t) => /^\d+\./.test(t))
-      .map((t) => t.replace(/^\d+\.\s*/, '').replace(/\*\*/g, '').trim());
-    return titles;
-  };
 
   const generateChapterContent = async (chapterTitle) => {
     const loadingId = generateId();
