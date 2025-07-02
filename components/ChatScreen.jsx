@@ -59,7 +59,7 @@ export default function ChatScreen({ initialBookId = null }) {
     ),
   });
 
-  const createOutlineMessage = (id, outlineData, num) => ({
+  const createOutlineMessage = (id, outlineData) => ({
 
     id,
     sender: 'bot',
@@ -78,7 +78,7 @@ export default function ChatScreen({ initialBookId = null }) {
         </ol>
         <div className="d-flex gap-2 mt-2">
           <button className="selection" onClick={() => handleOutlineDecision(true, outlineData)}>Go ahead with this</button>
-          <button className="selection" onClick={() => handleOutlineDecision(false, null, num)}>Generate another suggestion</button>
+          <button className="selection" onClick={() => handleOutlineDecision(false, null)}>Generate another suggestion</button>
         </div>
       </div>
     ),
@@ -102,7 +102,7 @@ export default function ChatScreen({ initialBookId = null }) {
     ),
   });
 
-  const restoreMessage = (msg, bookIdArg, count) => {
+  const restoreMessage = (msg, bookIdArg) => {
     if (msg.customType === 'titleSuggestions' && msg.data) {
       setRefinedSummary(msg.data.refinedSummary || '');
       setTitleOptions(msg.data.titles || []);
@@ -110,9 +110,8 @@ export default function ChatScreen({ initialBookId = null }) {
     }
     if (msg.customType === 'outline' && msg.data) {
       setOutline(msg.data.outline || []);
-      console.log( "Count in restoreMessage:", count);
 
-      return createOutlineMessage(msg.id, msg.data.outline || [] , count);
+      return createOutlineMessage(msg.id, msg.data.outline || []);
     }
     if (msg.customType === 'summaryPrompt') {
       return createSummaryPromptMessage(msg.id);
@@ -375,7 +374,7 @@ export default function ChatScreen({ initialBookId = null }) {
               setMessages((prev) =>
                 prev.map((m) =>
                   m.id === loadingId
-                    ? createOutlineMessage(loadingId, outlineData , num)
+                    ? createOutlineMessage(loadingId, outlineData)
                     : m
                 )
               );
@@ -517,7 +516,7 @@ const getRequiredKeyPoints = () => {
   inputRef.current?.focus();
   };
 
-  const handleOutlineDecision = async (useIt, chaptersArg = null, num = chapterCount) => {
+  const handleOutlineDecision = async (useIt, chaptersArg = null) => {
     const outlineToUse = chaptersArg || outline;
 
     if (useIt) {
@@ -544,18 +543,18 @@ const getRequiredKeyPoints = () => {
       setUseSimpleInput(false);
     } else {
       
-      // const count = parseInt(chapterCount);
-      // if (!count || isNaN(count) || count < 1 || count > 50) {
-      //   console.warn('Invalid chapterCount in outline regeneration:', chapterCount);
-      //   setMessages((prev) => [
-      //     ...prev,
-      //     { id: generateId(), sender: 'bot', text: 'Please enter the number of chapters first (1–50).' },
-      //   ]);
-      //   setStep('chapters');
-      //   return;
-      // }
+      const count = parseInt(chapterCount);
+      if (!count || isNaN(count) || count < 1 || count > 50) {
+        console.warn('Invalid chapterCount in outline regeneration:', chapterCount);
+        setMessages((prev) => [
+          ...prev,
+          { id: generateId(), sender: 'bot', text: 'Please enter the number of chapters first (1–50).' },
+        ]);
+        setStep('chapters');
+        return;
+      }
 
-      await sendMessage(String(num), 'chapters');
+      await sendMessage(String(count), 'chapters');
     }
   };
 
@@ -563,6 +562,9 @@ const getRequiredKeyPoints = () => {
     const answer = await askQuestion(
       `Provide an outline of ${count} chapters for the ${bookType} "${selectedTitle}" based on this summary:\n${summary}. Each chapter should have a title followed by a brief concept of the chapter in no more than two lines.`
     );
+
+    console.log("📖 Raw outline answer:", answer);
+    
 
 
     const lines = answer
