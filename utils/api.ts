@@ -17,10 +17,10 @@ export const askQuestion = async (question) => {
 
 }
 
-export const createBook = async (summary) => {
+export const createBook = async (summary, authorId) => {
     const res = await fetch(new Request(createUrl('/api/book/summary'), {
         method: 'POST',
-        body: JSON.stringify({ summary }),
+        body: JSON.stringify({ summary, authorId }),
     }));
     if(res.ok) {
         const data = await res.json();
@@ -118,5 +118,28 @@ export const saveChatState = async (bookId, state) => {
         return data.data;
     } else {
         throw new Error('Failed to save chat');
+    }
+};
+
+export const createUser = async (name, email) => {
+    const res = await fetch(new Request(createUrl('/api/user'), {
+        method: 'POST',
+        body: JSON.stringify({ name, email }),
+    }));
+    if(res.ok){
+        const data = await res.json();
+        return data.data;
+    } else {
+        throw new Error('Failed to create user');
+    }
+};
+
+export const fetchSheets = async () => {
+    const res = await fetch(createUrl('/api/sheets'));
+    if(res.ok){
+        const data = await res.json();
+        return data.data;
+    } else {
+        throw new Error('Failed to load sheets');
     }
 };

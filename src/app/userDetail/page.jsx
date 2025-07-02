@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from '../page.module.css';
+import { createUser } from '../../../utils/api';
 
 export default function UserDetail() {
   const router = useRouter();
@@ -16,9 +17,15 @@ export default function UserDetail() {
     }
   }, [router]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name || !email) return;
+    try {
+      const user = await createUser(name, email);
+      localStorage.setItem('userId', user._id);
+    } catch (err) {
+      console.error('Failed to save user', err);
+    }
     localStorage.setItem('userName', name);
     localStorage.setItem('userEmail', email);
     router.push('/');
