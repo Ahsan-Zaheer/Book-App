@@ -765,7 +765,14 @@ const getRequiredKeyPoints = () => {
     if (!text || typeof text !== 'string') return text;
 
     // Remove Markdown-style bold markers
-    const sanitized = text.replace(/\*\*/g, '');
+    let sanitized = text.replace(/\*\*/g, '');
+
+    // Ensure chapter and part titles start on their own lines
+    sanitized = sanitized
+      .replace(/\s*(Chapter\s*\d+)/gi, '\n$1')
+      .replace(/\s*(Part\s*\d+)/gi, '\n$1')
+      .replace(/\n{2,}/g, '\n')
+      .trim();
 
     // Match lines that start with "1. ", "2. ", etc.
     const numberedListRegex = /^(\d+\.\s.*)$/gm;
@@ -774,7 +781,7 @@ const getRequiredKeyPoints = () => {
     return (
       <>
         {parts.map((part, idx) =>
-          part.match(numberedListRegex) ? (
+          numberedListRegex.test(part) ? (
             <React.Fragment key={idx}>
               {part}
               <br />
@@ -782,12 +789,15 @@ const getRequiredKeyPoints = () => {
           ) : (
             part.split(/\n/).map((line, jdx) => {
               if (!line.trim()) return null;
-              return /^Part\s*\d+/i.test(line) ? (
-                <React.Fragment key={`${idx}-${jdx}`}>
-                  <strong>{line.trim()}</strong>
-                  <br />
-                </React.Fragment>
-              ) : (
+              if (/^Chapter\s*\d+/i.test(line) || /^Part\s*\d+/i.test(line)) {
+                return (
+                  <React.Fragment key={`${idx}-${jdx}`}>
+                    <strong>{line.trim()}</strong>
+                    <br />
+                  </React.Fragment>
+                );
+              }
+              return (
                 <React.Fragment key={`${idx}-${jdx}`}>
                   {line}
                   <br />
