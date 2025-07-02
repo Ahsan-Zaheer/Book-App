@@ -316,7 +316,8 @@ export default function ChatScreen({ initialBookId = null }) {
 
       try {
 
-        const created = await createBook(currentInput);
+        const userId = localStorage.getItem('userId') || null;
+        const created = await createBook(currentInput, userId);
         const newBookId = created._id;
         setBookId(newBookId);
 

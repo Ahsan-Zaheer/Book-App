@@ -14,7 +14,8 @@ const ChapterSchema = new mongoose.Schema({
 const BookSchema = new mongoose.Schema({
   summary: String,
   suggestedTitle: String,
-  status: { 
+  author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  status: {
     type: String, 
     enum: ['draft', 'generating', 'generated', 'published'],
     lowercase: true
