@@ -12,6 +12,7 @@ export const GET = async () => {
   await connectToDatabase();
   const books = await Book.find({ author: { $ne: null } })
     .populate('author')
+    .populate('chapters')
     .lean();
 
   const data = books.map((b: any) => ({
