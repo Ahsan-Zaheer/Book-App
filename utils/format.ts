@@ -3,22 +3,31 @@ export function formatChapterText(text: string): string {
 
   let sanitized = text.replace(/\*\*/g, "").replace(/#/g, "");
 
-  // Standardise "Chapter X" and "Part X" spacing
+  // Standardize spacing for "Chapter X" and "Part X"
   sanitized = sanitized
     .replace(/(Chapter)\s*[-:]?\s*(\d+)/gi, "$1 $2")
     .replace(/(Part)\s*[-:]?\s*(\d+)/gi, "$1 $2");
 
-  // Bold chapter titles and ensure they start on a new line
+  // Ensure "Chapter" and "Part" headings are on new lines
+  sanitized = sanitized.replace(/([^\n])(\s*)(Chapter\s+\d+)/gi, "$1\n\n$3");
+  sanitized = sanitized.replace(/([^\n])(\s*)(Part\s+\d+)/gi, "$1\n\n$3");
+
+    // ✅ Bold full Chapter headings
   sanitized = sanitized.replace(
-    /(Chapter\s*\d+\s*(?:[:\-])?\s*[^\n]+)/gi,
+    /\n?(Chapter\s*\d+\s*[:\-]?\s*[^\n]*)/gi,
     "\n**$1**\n"
   );
 
-  // Ensure each part heading begins on a new line
+  // ✅ Bold full Part headings (same format as Chapter)
   sanitized = sanitized.replace(
-    /(Part\s*\d+\s*(?:[:\-])?\s*[^\n]+)/gi,
-    "\n$1\n"
+    /\n?(Part\s*\d+\s*[:\-]?\s*[^\n]*)/gi,
+    "\n**$1**\n"
   );
+
+
+  // ✅ Add triple space after the last colon in Part titles
+  sanitized = sanitized.replace(/(Part\s+\d+:[^:]*:)(\s*)/g, "$1   ");
+
 
   return sanitized.trim();
 }

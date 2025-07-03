@@ -42,7 +42,7 @@ export default function Sidebar() {
       {/* Header with Logo and Toggle */}
       <div className="sidebar-header d-flex justify-content-between align-items-center mb-4">
         {!isCollapsed && (
-          <h2 className="fw-bold d-flex justify-content-end align-items-end" style={{ color: '#0f01ff', fontSize: "30px" }}> <Link href="/" style={{ color: '#0f01ff' }}> <Image src={logo} width={100} alt="logo"/>  </Link>  <span className="beta">beta</span></h2>
+          <h2 className="fw-bold d-flex justify-content-end align-items-end" style={{ color: '#0f01ff', fontSize: "30px" }}> <Link href="/" style={{ color: '#0f01ff' }}> <Image src={logo} width={130} alt="logo"/>  </Link>  <span className="beta">beta</span></h2>
         )}
         <button className="toggle-btn" onClick={toggleSidebar}>
           <Icon icon={isCollapsed ? "line-md:arrow-right" : "humbleicons:bars"} width="24" />

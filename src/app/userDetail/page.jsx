@@ -38,7 +38,7 @@ export default function UserDetail() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <Image src={logo} alt="Logo" width={150}  />
+        <Image src={logo} alt="Logo" width={180}  />
         <h1 className={styles.title}>Please Fill in the form to continue with the app</h1>
         <input
           className={styles.oldBookInput}

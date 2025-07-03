@@ -41,7 +41,7 @@ export default function Home() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <Image src={logo} alt="Logo" width={150}  />
+        <Image src={logo} alt="Logo" width={200}  />
         <h1 className={styles.title}>Let&apos;s start writing your new book</h1>
 
 
