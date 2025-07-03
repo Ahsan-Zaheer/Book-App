@@ -25,11 +25,19 @@ export const POST = async (req: Request) => {
   const wordsPerPart =
     bookType === "Ebook" ? 700 : bookType === "Short Book" ? 1000 : 1500;
 
-  const prompt = `You are a professional book writer. Write chapter ${chapterIndex} titled "${chapterTitle}" for the ${bookType} "${title}".\n` +
-    `Start the chapter with \"Chapter ${chapterIndex}: ${chapterTitle}\" on its own line. ` +
-    `Divide the chapter into 4 parts, each exactly ${wordsPerPart} words. ` +
-    `Each part must begin on a new line with a heading in the format \"Part X: Title : \".` +
-    ` Use the following summary and key points.\nSummary: ${summary}\nKey points: ${keyPoints.join("; ")}`;
+  const prompt = `You are a professional book writer. Write Chapter ${chapterIndex} titled "${chapterTitle}" for the ${bookType} "${title}".\n\n` +
+  "Strictly follow this structure:\n" +
+  "1. Start the chapter with this exact line (no extra characters, no quotes):\n" +
+  `   Chapter ${chapterIndex}: ${chapterTitle}\n` +
+  `2. Divide the chapter into exactly 4 parts. Each part must:\n` +
+  `   - Have MORE THAN ${wordsPerPart} WORDS.\n` +
+  `   - Begin on a new line\n` +
+  `   - Start with a heading in this exact format (including colon at the end):\n` +
+  `     Part X: Title:\n` +
+  "Do not skip or alter any colons. Do not change the heading format. Follow the format exactly.\n\n " +
+  "Use the following content to guide your writing:\n" +
+  `  Summary: ${summary}\n` +
+  `  Key points: ${keyPoints.join("; ")}\n`;
 
   const encoder = new TextEncoder();
   let content = "";

@@ -524,7 +524,6 @@ const getRequiredKeyPoints = () => {
       console.log("📘 Using outline:", outlineToUse);
 
       const first = outlineToUse[0];
-      console.log("📗 First chapter:", first);
 
       if (!first) {
         console.warn("⚠️ Outline is missing or malformed:", outlineToUse);
@@ -566,7 +565,6 @@ const getRequiredKeyPoints = () => {
       `Provide an outline of ${count} chapters for the ${bookType} "${selectedTitle}" based on this summary:\n${summary}. Each chapter should have a title followed by a brief concept of the chapter in no more than two lines.`
     );
 
-    console.log("🧠 Outline response:", answer);
 
     const lines = answer
       .split(/\n|\r/)
@@ -604,10 +602,8 @@ const getRequiredKeyPoints = () => {
         }
 
         current = { title, concept };
-        console.log(`📌 Found chapter line, extracted title: ${title}`);
       } else if (current && !current.concept) {
         current.concept = line.replace(/\*\*/g, '').trim();
-        console.log(`🧩 Added concept continuation: ${current.concept}`);
       } else {
         console.warn(`⚠️ Ignored line (not matched): ${line}`);
       }
@@ -772,27 +768,25 @@ const getRequiredKeyPoints = () => {
   };
   const formatMessageText = (text) => {
     if (!text || typeof text !== 'string') return text;
+    
 
-// Remove Markdown-style bold markers and stray hash symbols
-let sanitized = text.replace(/\*\*/g, '').replace(/#/g, '');
+    
+  let sanitized = text.replace(/\*\*/g, '').replace(/#/g, '');
 
-// Put chapter titles on their own line (single line per chapter)
-sanitized = sanitized.replace(
-  /\s*(Chapter\s*\d+\s*(?:[:\-])?\s*[^\n]*)\s*/gi,
+  // Standardise "Chapter X" and "Part X" spacing
+  sanitized = sanitized
+    .replace(/(Chapter)\s*[-:]?\s*(\d+)/gi, '$1 $2')
+  .replace(/(Part)\s*[-:]?\s*(\d+)/gi, '$1 $2');
+
+  sanitized = sanitized.replace(
+  /(Chapter\s*\d+\s*(?:[:\-])?\s*[^\n]+)/gi,
+    '\n$1\n'
+  );
+
+  sanitized = sanitized.replace(
+  /(Chapter\s*\d+\s*(?:[:\-])?\s*[^\n]+)/gi,
   '\n$1\n'
-);
-
-// Put part titles on a new line and ensure they start a new block
-sanitized = sanitized.replace(
-  /\s*(Part\s*\d+\s*(?:[:\-])?\s*[^\n]*)\s*/gi,
-  '\n$1\n'
-);
-
-// Optional: add space between jammed sentences (e.g., "...day.He..." → "...day. He...")
-sanitized = sanitized.replace(/([a-z])([A-Z])/g, '$1 $2');
-
-// Clean up multiple newlines
-sanitized = sanitized.replace(/\n{3,}/g, '\n\n').trim();
+  );
 
 
 
