@@ -5,6 +5,7 @@ import '../stylesheets/style.css';
 import { Icon } from '@iconify/react';
 
 import { askQuestion, saveTitle, createBook, generateChapterStream, loadChatState, saveChatState } from '../utils/api';
+import { formatChapterText } from '../utils/format';
 
 const generateId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
@@ -768,30 +769,8 @@ const getRequiredKeyPoints = () => {
   };
   const formatMessageText = (text) => {
     if (!text || typeof text !== 'string') return text;
-    
 
-    
-  let sanitized = text.replace(/\*\*/g, '').replace(/#/g, '');
-
-  // Standardise "Chapter X" and "Part X" spacing
-  sanitized = sanitized
-    .replace(/(Chapter)\s*[-:]?\s*(\d+)/gi, '$1 $2')
-  .replace(/(Part)\s*[-:]?\s*(\d+)/gi, '$1 $2');
-
-  sanitized = sanitized.replace(
-  /(Chapter\s*\d+\s*(?:[:\-])?\s*[^\n]+)/gi,
-    '\n$1\n'
-  );
-
-  sanitized = sanitized.replace(
-  /(Chapter\s*\d+\s*(?:[:\-])?\s*[^\n]+)/gi,
-  '\n$1\n'
-  );
-
-
-
-
-
+    const sanitized = formatChapterText(text);
 
     // Match lines that start with "1. ", "2. ", etc.
     const numberedListRegex = /^(\d+\.\s.*)$/gm;
@@ -809,17 +788,26 @@ const getRequiredKeyPoints = () => {
           ) : (
             part.split(/\n/).map((line, jdx) => {
               if (!line.trim()) return null;
-              if (/^Chapter\s*\d+/i.test(line) || /^Part\s*\d+/i.test(line)) {
+              const cleaned = line.replace(/\*\*/g, '').trim();
+              if (/^Chapter\s*\d+/i.test(cleaned)) {
                 return (
                   <React.Fragment key={`${idx}-${jdx}`}>
-                    <strong>{line.trim()}</strong>
+                    <strong>{cleaned}</strong>
+                    <br />
+                  </React.Fragment>
+                );
+              }
+              if (/^Part\s*\d+/i.test(cleaned)) {
+                return (
+                  <React.Fragment key={`${idx}-${jdx}`}>
+                    {cleaned}
                     <br />
                   </React.Fragment>
                 );
               }
               return (
                 <React.Fragment key={`${idx}-${jdx}`}>
-                  {line}
+                  {cleaned}
                   <br />
                 </React.Fragment>
               );
