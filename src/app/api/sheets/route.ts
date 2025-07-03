@@ -15,10 +15,12 @@ export const GET = async () => {
     .lean();
 
   const data = books.map((b: any) => ({
+    bookId: b._id.toString() || '',
     title: b.suggestedTitle || '',
     summary: b.summary || '',
     name: b.author?.name || '',
     email: b.author?.email || '',
+    chapterNames: b.chapters.map((c: any) => c.title) || [],
   }));
 
   return NextResponse.json({ data });
