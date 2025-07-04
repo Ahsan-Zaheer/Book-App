@@ -26,7 +26,7 @@ export const POST = async (req: Request) => {
   const prompt = `You are a professional book writer. Write a ${bookType} titled "${title}" based on the following summary and key points. The book must have ${chapterCount} chapters with each part exactly ${wordsPerPart} words. \nSummary: ${summary}\nKey points: ${keyPoints.join("; ")}`;
 
   const model = new ChatOpenAI({
-    modelName: "gpt-4o-mini",
+    modelName: "gpt-4.1",
     temperature: 0.7,
     openAIApiKey: process.env.OPEN_AI_KEY,
   });

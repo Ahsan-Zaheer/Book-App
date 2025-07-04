@@ -47,7 +47,7 @@ export const POST = async (req: Request) => {
     async start(controller) {
       try {
         const model = new ChatOpenAI({
-          modelName: "gpt-4o-mini",
+          modelName: "gpt-4.1",
           temperature: 0.7,
           streaming: true,
           openAIApiKey: process.env.OPEN_AI_KEY,
