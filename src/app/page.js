@@ -45,7 +45,7 @@ export default function Home() {
         <h1 className={styles.title}>Let&apos;s start writing your new book</h1>
 
 
-        <div className={styles.ctas}>
+        <div className={`${styles.ctas} ${showInput ? 'flex-column' : ''}`}>
           <Link className={styles.primary} href="/home">
             <Icon icon="streamline-ultimate:pen-write" />
             Write New Book
@@ -63,7 +63,7 @@ export default function Home() {
             {uuid && (
                 <button
                   onClick={handleContinue}
-                  className={`${styles.secondary} ${styles.continueBtn} ms-3`}
+                  className={`${styles.secondary} ${styles.continueBtn} ms-lg-3`}
                 >
                   Continue with this Book
                 </button>

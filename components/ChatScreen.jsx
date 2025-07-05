@@ -187,6 +187,7 @@ export default function ChatScreen({ initialBookId = null }) {
   // Persist chat history and state whenever relevant data changes.
   // Throttle updates to avoid sending a request on every streaming chunk.
   const saveTimeout = useRef(null);
+  
   useEffect(() => {
     if (!bookId) return;
     const serializableMessages = messages.map((msg) => {
@@ -246,6 +247,12 @@ export default function ChatScreen({ initialBookId = null }) {
     const currentInput = messageText;
     setMessages((prev) => [...prev, userMsg]);
     setInput('');
+
+    setInput('');
+    if (inputRef.current) {
+      inputRef.current.style.height = "auto";
+    }
+
 
     if (currentStep === 'outline') {
       setMessages((prev) => [
@@ -384,40 +391,41 @@ export default function ChatScreen({ initialBookId = null }) {
               await generateChapterContent(chapterTitle);
               setIsGenerating(false);
             }
-          } else if (currentStep === 'keypoints' && useSimpleInput) {
-            const simplePoints = currentInput
-              .split(/[;\n]+/)
-              .map((p) => p.trim())
-              .filter(Boolean);
-            if (simplePoints.length < getRequiredKeyPoints()) {
-              setMessages((prev) => [
-                ...prev,
-                {
-                  id: generateId(),
-                  sender: 'bot',
-                  text: `Please enter at least ${getRequiredKeyPoints()} key points.`,
-                },
-              ]);
-              return;
-            }
-
-            const formattedKeyPoints = simplePoints
-              .map((kp, i) => `${i + 1}. ${kp}`)
-              .join('\n');
+        } else if (currentStep === 'keypoints' && useSimpleInput) {
+          const simplePoints = currentInput
+            .split(/[;\n]+/)
+            .map((p) => p.trim())
+            .filter(Boolean);
+          if (simplePoints.length < getRequiredKeyPoints()) {
             setMessages((prev) => [
               ...prev,
               {
                 id: generateId(),
-                sender: 'user',
-                text: `Here are my key points:\n${formattedKeyPoints}`,
+                sender: 'bot',
+                text: `Please enter at least ${getRequiredKeyPoints()} key points.`,
               },
             ]);
-            setHasKeyPoints(true);
-            setKeyPoints(simplePoints);
-            setIsGenerating(true);
-            await generateChapterContent(selectedChapter || currentInput);
-            setIsGenerating(false);
+            return;
           }
+
+          const formattedKeyPoints = simplePoints
+            .map((kp, i) => `${i + 1}. ${kp}`)
+            .join('\n');
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: generateId(),
+              sender: 'user',
+              text: `Here are my key points:\n${formattedKeyPoints}`,
+            },
+          ]);
+          setHasKeyPoints(true);
+          setKeyPoints(simplePoints); // <-- This is async, but you call generateChapterContent below!
+          setIsGenerating(true);
+          await generateChapterContent(selectedChapter || currentInput, simplePoints);
+          setIsGenerating(false);
+        }
+
   };
 
 const getRequiredKeyPoints = () => {
@@ -483,7 +491,6 @@ const getRequiredKeyPoints = () => {
       ]);
       setKeyPoints(getInitialKeyPoints());
       setStep('keypoints');
-      setUseSimpleInput(false);
       setUseSimpleInput(false);
     } else {
       // Regenerate outline using the previously selected chapter count
@@ -564,7 +571,7 @@ const getRequiredKeyPoints = () => {
 
 
 
-  const generateChapterContent = async (chapterTitle) => {
+  const generateChapterContent = async (chapterTitle, _keyPoints = null) => {
     const loadingId = generateId();
     setMessages((prev) => [
       ...prev,
@@ -579,7 +586,7 @@ const getRequiredKeyPoints = () => {
         title: selectedTitle,
         chapterIndex: currentChapter,
         chapterTitle,
-        keyPoints,
+        keyPoints: _keyPoints ?? keyPoints, 
       });
 
       let fullText = '';
@@ -776,8 +783,8 @@ const getRequiredKeyPoints = () => {
       )}
       {isFirstPrompt ? (
         <div className="d-flex flex-column justify-content-center align-items-center text-center flex-grow-1">
-          <h2 className="mb-4"> What kind of book do you want to write?</h2>
-          <ul className="list-unstyled d-flex flex-wrap gap-2">
+          <h2 className="mb-4 chatTitle"> What kind of book do you want to write?</h2>
+          <ul className="list-unstyled d-flex flex-wrap gap-2 typeList">
                   <li>
                     <button  className={`selection text-start ${selectedBookType === 'Ebook' ? 'selected' : ''}`} onClick={() =>
                       {
@@ -832,7 +839,7 @@ const getRequiredKeyPoints = () => {
               >
                 <div
                   className={`p-3 rounded message ${msg.sender === 'user' ? 'userMsg' : 'botMsg'}`}
-                  style={{ maxWidth: '70%' }}
+                  
                 >
                  {msg.custom ? msg.custom : formatMessageText(msg.text)}
 
@@ -912,7 +919,7 @@ const getRequiredKeyPoints = () => {
             </div>) }
 
           {/* Clear Chat */}
-         <div style={{ position: 'fixed', bottom: '1rem', right: '1rem', zIndex: 1000 }}>
+         <div >
           <button className="btn-clear-chat" onClick={handleClearChat}>
             🧹 Clear Chat
           </button>

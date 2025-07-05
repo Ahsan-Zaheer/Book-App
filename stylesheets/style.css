@@ -205,6 +205,10 @@
   font-size: 1rem;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  position: fixed;
+  bottom: 1rem; 
+  right: 1rem; 
+  z-index: 1000;
 }
 
 .btn-clear-chat:hover {
@@ -274,29 +278,52 @@
   }
   .chatInputBg {
     width: 95%;
+    margin-bottom: 40px;
   }
   .keypointBg {
     width: 95%;
   }
 }
 
-@media (max-width: 768px) {
-  .mainBg {
-    flex-direction: column;
-  }
+@media (max-width: 600px) {
+  
   .sidebar {
-    width: 100%;
-    height: auto;
+    position: fixed;
+    left: 0;
+    height: 100vh;
     margin-left: 0;
-    flex-direction: row;
     padding: 10px;
+    z-index: 100000;
   }
   .sidebar.collapsed {
-    width: 100%;
+ 
     transform: translateX(0);
   }
-  .chatScreen {
-    margin-top: 1rem;
+  .chatScreen{
+    padding: 0px 20px;
+  }
+  
+  .chapter-title{
+    text-align: center;
+
+  }
+  .typeList{
+    justify-content: center;
+    align-items: center;
+  }
+  
+.btn-clear-chat{
+  font-size: 10px;
+  bottom: 10px;
+}
+  .floating-title-bar{
+    left: 34%;
+    font-size: 14px;
+    text-align: center;
+  }
+
+  .keypointBg{
+    margin-bottom: 30px;
   }
 }
 

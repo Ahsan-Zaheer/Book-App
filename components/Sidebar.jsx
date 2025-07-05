@@ -15,6 +15,23 @@ export default function Sidebar() {
   const router = useRouter();
 
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
+  
+  useEffect(() => {
+  const handleResize = () => {
+    if (window.innerWidth <= 600) {
+      setIsCollapsed(true);
+    } else {
+      setIsCollapsed(false);
+    }
+  };
+
+  handleResize();
+
+  window.addEventListener("resize", handleResize);
+
+  return () => window.removeEventListener("resize", handleResize);
+}, []);
+
 
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem("book_titles") || "[]");
