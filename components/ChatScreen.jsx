@@ -47,7 +47,7 @@ export default function ChatScreen({ initialBookId = null }) {
     custom: (
       <div>
         <p>
-          Great! Here is the refined version of your summary: <br /> <br /> <span style={{fontStyle: 'italic'}}>"{refined}"</span><br /> <br /> 6.	Based on your summary, here are some title ideas choose one or enter your own book title
+          Great! Here is the refined version of your summary: <br /> <br /> <span style={{fontStyle: 'italic'}}>"{refined}"</span><br /> <br /> Based on your summary, here are some title ideas choose one or enter your own book title
         </p>
         <ul className="list-unstyled d-flex flex-wrap gap-2">
           {titles.map((t, idx) => (
@@ -513,10 +513,20 @@ const getRequiredKeyPoints = () => {
     }
   };
 
-  const getOutlineSuggestions = async (count) => {
+  const getOutlineSuggestions = async (count, oldOutline = null) => {
+
+    if(oldOutline !== null){
+      const answer = await askQuestion(
+      `This is the old outline that you gave the user ${oldOutline}, user ask for a different one, So, Please Provide an outline of ${count} chapters for the ${bookType} "${selectedTitle}" based on this summary:\n${summary}. Each chapter should have a title followed by a brief concept of the chapter in no more than two lines.`
+    );
+      
+    } else{
+
     const answer = await askQuestion(
       `Provide an outline of ${count} chapters for the ${bookType} "${selectedTitle}" based on this summary:\n${summary}. Each chapter should have a title followed by a brief concept of the chapter in no more than two lines.`
     );
+  
+  }
 
 
     const lines = answer
@@ -613,7 +623,7 @@ const getRequiredKeyPoints = () => {
           {
             id: generateId(),
             sender: 'bot',
-            text: `Great! Let's work on Chapter ${next}: ${nextTitle}. Please enter ${getRequiredKeyPoints()} key points you want to cover.`,
+            text: `Great! Let's work on Chapter ${next}: ${nextTitle}. Please enter ${getRequiredKeyPoints()} Key points you'd like to include in this Chapter:`,
           },
         ]);
         setCurrentChapter(next);

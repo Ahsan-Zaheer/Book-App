@@ -46,7 +46,7 @@ export default function Home() {
         <div className={`mb-2 ${styles.subTitle}`}> Book Writer Pro GPT is a powerful AI-driven system that helps you turn your ideas into a professionally written book in less than 7 days — no writing experience needed. From titles and outlines to full chapters, it does the heavy lifting so you can finally publish your story with confidence</div>
 
 
-        <div className={`${styles.ctas} ${showInput ? 'flex-column' : ''}`}>
+        <div className={`${styles.ctas} `}>
           <Link className={styles.primary} href="/home">
             <Icon icon="streamline-ultimate:pen-write" />
             Write New Book
