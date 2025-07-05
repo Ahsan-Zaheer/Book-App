@@ -47,7 +47,7 @@ export default function ChatScreen({ initialBookId = null }) {
     custom: (
       <div>
         <p>
-          Great! Here is the refined version of your summary: <br /> <br /> <span style={{fontStyle: 'italic'}}>"{refined}"</span><br /> <br /> Based on your summary, here are some title ideas:
+          Great! Here is the refined version of your summary: <br /> <br /> <span style={{fontStyle: 'italic'}}>"{refined}"</span><br /> <br /> 6.	Based on your summary, here are some title ideas choose one or enter your own book title
         </p>
         <ul className="list-unstyled d-flex flex-wrap gap-2">
           {titles.map((t, idx) => (
@@ -380,7 +380,7 @@ export default function ChatScreen({ initialBookId = null }) {
                 {
                   id: generateId(),
                   sender: 'bot',
-                  text: `Awesome! Now, please enter ${getRequiredKeyPoints()} key points you want to cover in your book.`,
+                  text: `Awesome! Now, please enter ${getRequiredKeyPoints()} Key points you'd like to include in this Chapter:`,
                 },
               ]);
               setKeyPoints(getInitialKeyPoints());
@@ -486,7 +486,7 @@ const getRequiredKeyPoints = () => {
         {
           id: generateId(),
           sender: 'bot',
-          text: `Great! Let's start with Chapter 1: ${first.title}. Please enter ${getRequiredKeyPoints()} key points you want to cover.`,
+          text: `Great! Let's start with Chapter 1: ${first.title}. Please enter ${getRequiredKeyPoints()} key points you'd like to include in this Chapter.`,
         },
       ]);
       setKeyPoints(getInitialKeyPoints());
@@ -784,6 +784,7 @@ const getRequiredKeyPoints = () => {
       {isFirstPrompt ? (
         <div className="d-flex flex-column justify-content-center align-items-center text-center flex-grow-1">
           <h2 className="mb-4 chatTitle"> What kind of book do you want to write?</h2>
+          
           <ul className="list-unstyled d-flex flex-wrap gap-2 typeList">
                   <li>
                     <button  className={`selection text-start ${selectedBookType === 'Ebook' ? 'selected' : ''}`} onClick={() =>
@@ -793,7 +794,7 @@ const getRequiredKeyPoints = () => {
                     }}>
                     <strong>Ebook</strong>
                      (40–80 pages)<br />
-                     <small>• 6 chapters<br />• exactly 700 words per chapter part</small>
+                     <small>• Up to 6 Chapters per Book <br />• Up to 2,000 Words per Chapter</small>
                     </button></li>
                   <li>
                     <button  className={`selection text-start ${selectedBookType === 'Short Book' ? 'selected' : ''}`} onClick={() => {
@@ -801,7 +802,7 @@ const getRequiredKeyPoints = () => {
                       setSelectedBookType('Short Book');
                     }}>
                       <strong>Short Book</strong> (80–125 pages)<br />
-                      <small>• 10 chapters<br />• exactly 1,000 words per chapter part</small>
+                      <small>• Up to 10 Chapters per Book<br />• Up to 3,000 Words per Chapter</small>
                     </button></li>
                   <li>
                     <button  className={`selection text-start ${selectedBookType === 'Full Length Book' ? 'selected' : ''}`} onClick={() => {
@@ -810,7 +811,7 @@ const getRequiredKeyPoints = () => {
 
                     }}>
                       <strong>Full Length Book</strong> (125–200 pages)<br />
-                      <small>• 12 chapters<br />• exactly 1,500 words per chapter part</small>
+                      <small>• Up to 12 Chapters per Book<br />• Up to 4,000 Words per Chapter</small>
                     </button></li>
          </ul>
           <div className={`chatInputBg${isMultiline ? " multiline" : ""}`}>

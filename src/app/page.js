@@ -43,6 +43,7 @@ export default function Home() {
       <main className={styles.main}>
         <Image src={logo} alt="Logo" width={200}  />
         <h1 className={styles.title}>Let&apos;s start writing your new book</h1>
+        <div className={`mb-2 ${styles.subTitle}`}> Book Writer Pro GPT is a powerful AI-driven system that helps you turn your ideas into a professionally written book in less than 7 days — no writing experience needed. From titles and outlines to full chapters, it does the heavy lifting so you can finally publish your story with confidence</div>
 
 
         <div className={`${styles.ctas} ${showInput ? 'flex-column' : ''}`}>

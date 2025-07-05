@@ -23,6 +23,9 @@
   flex-wrap: wrap;
 }
 
+.subTitle{
+  max-width: 700px;
+}
 .oldBookInput {
   padding: 0.5rem 1rem;
   font-size: 1rem;
@@ -177,6 +180,11 @@ a.primary:hover {
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
+  }
+  .subTitle{
+    font-size: 14px;
+    text-align: justify;
+    text-align-last: center ;
   }
 }
 
