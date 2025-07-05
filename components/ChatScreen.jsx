@@ -127,7 +127,7 @@ export default function ChatScreen({ initialBookId = null }) {
       setIsLoadingChat(true);
       try {
         const stored = await loadChatState(initialBookId);
-        console.log("old book", stored.chapterCount);
+        console.log("old book", stored.bookType);
         if (stored) {
           if (stored.step) setStep(stored.step);
           if (stored.bookType) setBookType(stored.bookType);
@@ -235,50 +235,6 @@ export default function ChatScreen({ initialBookId = null }) {
     hasKeyPoints,
     outline,
   ]);
-
-
-  // Listen for requests to load a previous chat
-  useEffect(() => {
-    const handler = async (e) => {
-      const id = e.detail?.bookId;
-      if (!id) return;
-      setIsLoadingChat(true);
-      try {
-        const stored = await loadChatState(id);
-        if (stored) {
-          if (stored.step) setStep(stored.step);
-          if (stored.bookType) setBookType(stored.bookType);
-          if (stored.selectedBookType) setSelectedBookType(stored.selectedBookType);
-          if (stored.selectedTitle) {
-            setSelectedTitle(stored.selectedTitle);
-            ensureTitleInStorage(id, stored.selectedTitle);
-          }
-          if (stored.selectedChapter) setSelectedChapter(stored.selectedChapter);
-          if (typeof stored.chapterCount !== 'undefined') setChapterCount(stored.chapterCount);
-          if (stored.summary) setSummary(stored.summary);
-          if (typeof stored.currentChapter !== 'undefined') setCurrentChapter(stored.currentChapter);
-          if (Array.isArray(stored.keyPoints)) setKeyPoints(stored.keyPoints);
-          if (typeof stored.hasKeyPoints === 'boolean') setHasKeyPoints(stored.hasKeyPoints);
-          if (Array.isArray(stored.outline)) setOutline(stored.outline);
-          if (stored.refinedSummary) setRefinedSummary(stored.refinedSummary);
-          if (Array.isArray(stored.titleOptions)) setTitleOptions(stored.titleOptions);
-
-          const restoredMessages = Array.isArray(stored.messages)
-            ? stored.messages.map((m) => restoreMessage(m))
-            : [];
-
-          setMessages(restoredMessages);
-        }
-        setBookId(id);
-      } catch (err) {
-        console.error('Failed to load stored chat', err);
-      } finally {
-        setIsLoadingChat(false);
-      }
-    };
-    window.addEventListener('loadChat', handler);
-    return () => window.removeEventListener('loadChat', handler);
-  }, []);
 
   const sendMessage = async (overrideInput = null, overrideStep = null) => {
     const messageText = overrideInput !== null && overrideInput !== undefined ? overrideInput : input;
@@ -404,7 +360,7 @@ export default function ChatScreen({ initialBookId = null }) {
           } else {
             setMessages((prev) => [
               ...prev,
-              { id: generateId(), sender: 'bot', text: 'Please enter a valid number of chapters (1–50).' },
+              { id: generateId(), sender: 'bot', text: 'Please enter a valid number of chapters.' },
             ]);
           }
           } else if (currentStep === 'chapterTitle') {
@@ -531,12 +487,16 @@ const getRequiredKeyPoints = () => {
       setUseSimpleInput(false);
     } else {
       // Regenerate outline using the previously selected chapter count
+      console.log("🔄 Regenerating outline with chapter count:", chapterCount);
+      console.log("🔄 Current book type:", bookType);
+      
+      
       const count = parseInt(chapterCount);
       if (!count || isNaN(count) || count < 1 || count > 50) {
         console.warn('Invalid chapterCount in outline regeneration:', chapterCount);
         setMessages((prev) => [
           ...prev,
-          { id: generateId(), sender: 'bot', text: 'Please enter the number of chapters first (1–50).' },
+          { id: generateId(), sender: 'bot', text: `How many chapters do you want in your ${bookType}? Usually this type has ${getChapterRange()} chapters.` },
         ]);
         setStep('chapters');
         return;
