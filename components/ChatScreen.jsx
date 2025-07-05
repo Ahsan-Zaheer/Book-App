@@ -347,7 +347,10 @@ export default function ChatScreen({ initialBookId = null }) {
               { id: loadingId, sender: 'bot', text: 'Generating outline...' },
             ]);
             try {
-              const outlineData = await getOutlineSuggestions(num);
+
+              console.log("🔄 Generating outline", outline);
+              
+              const outlineData = await getOutlineSuggestions(num, outline);
               setOutline(outlineData);
               setMessages((prev) =>
                 prev.map((m) =>
@@ -467,61 +470,52 @@ const getRequiredKeyPoints = () => {
   inputRef.current?.focus();
   };
 
-   const handleOutlineDecision = async (useIt, chaptersArg = null) => {
-    const outlineToUse = chaptersArg || outline;
+ const handleOutlineDecision = async (useIt, chaptersArg = null) => {
+  const outlineToUse = chaptersArg || outline;
 
-    if (useIt) {
-      console.log("📘 Using outline:", outlineToUse);
+  if (useIt) {
+    // Accept outline, continue as before
+    const first = outlineToUse[0];
+    if (!first) return;
+    setSelectedChapter(first.title || '');
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: generateId(),
+        sender: 'bot',
+        text: `Great! Let's start with Chapter 1: ${first.title}. Please enter ${getRequiredKeyPoints()} key points you'd like to include in this Chapter.`,
+      },
+    ]);
+    setKeyPoints(getInitialKeyPoints());
+    setStep('keypoints');
+    setUseSimpleInput(false);
+  } else {
+    // ALWAYS prompt for chapter count before generating a new outline
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: generateId(),
+        sender: 'bot',
+        text: `How many chapters do you want in your ${bookType}? Usually this type has ${getChapterRange()} chapters.`,
+      },
+    ]);
+    setStep('chapters');
+    setInput(''); // clear input so user can type a new number
+  }
+};
 
-      const first = outlineToUse[0];
-
-      if (!first) {
-        console.warn("⚠️ Outline is missing or malformed:", outlineToUse);
-        return;
-      }
-
-      setSelectedChapter(first.title || '');
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: generateId(),
-          sender: 'bot',
-          text: `Great! Let's start with Chapter 1: ${first.title}. Please enter ${getRequiredKeyPoints()} key points you'd like to include in this Chapter.`,
-        },
-      ]);
-      setKeyPoints(getInitialKeyPoints());
-      setStep('keypoints');
-      setUseSimpleInput(false);
-    } else {
-      // Regenerate outline using the previously selected chapter count
-      console.log("🔄 Regenerating outline with chapter count:", chapterCount);
-      console.log("🔄 Current book type:", bookType);
-      
-      
-      const count = parseInt(chapterCount);
-      if (!count || isNaN(count) || count < 1 || count > 50) {
-        console.warn('Invalid chapterCount in outline regeneration:', chapterCount);
-        setMessages((prev) => [
-          ...prev,
-          { id: generateId(), sender: 'bot', text: `How many chapters do you want in your ${bookType}? Usually this type has ${getChapterRange()} chapters.` },
-        ]);
-        setStep('chapters');
-        return;
-      }
-
-      await sendMessage(String(count), 'chapters');
-    }
-  };
 
   const getOutlineSuggestions = async (count, oldOutline = null) => {
 
     let answer = await askQuestion(
       `Provide an outline of ${count} chapters for the ${bookType} "${selectedTitle}" based on this summary:\n${summary}. Each chapter should have a title followed by a brief concept of the chapter in no more than two lines.`
     );
-
-    if(oldOutline !== null){
+    
+    console.log("old outline",oldOutline);
+    
+    if(Array.isArray(oldOutline) && oldOutline.length > 0){
       answer = await askQuestion(
-      `The user has requested a different version. Please create a new outline with ${count} chapters for the ${bookType} titled "${selectedTitle}", based on the following summary: ${summary} Each chapter should include a title followed by a brief description, no longer than two lines, summarizing the main concept of the chapter.`
+      `The following outline was already provided: ${oldOutline}.\n\nPlease generate a **completely different** outline with ${count} chapters for the ${bookType} titled "${selectedTitle}", based on this summary:\n${summary}.\n\nAvoid rephrasing or repeating ideas from the previous version. Instead, introduce **new perspectives, alternative structures, or fresh thematic interpretations**. Each chapter should include a distinctive title and a brief concept (max two lines) that stands apart from the prior version.`
     );}
       
    

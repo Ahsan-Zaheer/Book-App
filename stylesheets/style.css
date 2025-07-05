@@ -151,12 +151,14 @@
 }
 
 .userMsg {
+  max-width: 70%;
   background-color: #0f01ff;
   color: white;
 }
 .botMsg {
   background-color: white;
   color: black;
+  max-width: 70%;
 }
 
 .botMsg p {
@@ -324,6 +326,9 @@
 
   .keypointBg{
     margin-bottom: 30px;
+  }
+  .botMsg , .userMsg {
+    max-width: 95%;
   }
 }
 
