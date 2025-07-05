@@ -39,7 +39,7 @@ export default function ChatScreen({ initialBookId = null }) {
   const [isLoadingChat, setIsLoadingChat] = useState(false);
   const [useSimpleInput, setUseSimpleInput] = useState(false);
 
-  const createTitleSuggestionMessage = (id, refined, titles, bookIdArg) => ({
+  const createTitleSuggestionMessage = (id, refined, titles) => ({
     id,
     sender: 'bot',
     customType: 'titleSuggestions',
@@ -52,7 +52,7 @@ export default function ChatScreen({ initialBookId = null }) {
         <ul className="list-unstyled d-flex flex-wrap gap-2">
           {titles.map((t, idx) => (
             <li key={idx}>
-              <button className="selection" onClick={() => handleTitleSelect(t, bookIdArg)}>{t}</button>
+              <button className="selection" onClick={() => handleTitleSelect(t)}>{t}</button>
             </li>
           ))}
         </ul>
@@ -103,11 +103,11 @@ export default function ChatScreen({ initialBookId = null }) {
     ),
   });
 
-  const restoreMessage = (msg, bookIdArg) => {
+  const restoreMessage = (msg) => {
     if (msg.customType === 'titleSuggestions' && msg.data) {
       setRefinedSummary(msg.data.refinedSummary || '');
       setTitleOptions(msg.data.titles || []);
-      return createTitleSuggestionMessage(msg.id, msg.data.refinedSummary, msg.data.titles || [], bookIdArg);
+      return createTitleSuggestionMessage(msg.id, msg.data.refinedSummary, msg.data.titles || []);
     }
     if (msg.customType === 'outline' && msg.data) {
       setOutline(msg.data.outline || []);
@@ -147,7 +147,7 @@ export default function ChatScreen({ initialBookId = null }) {
           if (Array.isArray(stored.titleOptions)) setTitleOptions(stored.titleOptions);
 
           let restoredMessages = Array.isArray(stored.messages)
-            ? stored.messages.map((m) => restoreMessage(m, initialBookId, stored.chapterCount))
+            ? stored.messages.map((m) => restoreMessage(m))
             : [];
 
           setMessages(restoredMessages);
@@ -264,7 +264,7 @@ export default function ChatScreen({ initialBookId = null }) {
           if (Array.isArray(stored.titleOptions)) setTitleOptions(stored.titleOptions);
 
           const restoredMessages = Array.isArray(stored.messages)
-            ? stored.messages.map((m) => restoreMessage(m, id , stored.chapterCount))
+            ? stored.messages.map((m) => restoreMessage(m))
             : [];
 
           setMessages(restoredMessages);
@@ -339,7 +339,7 @@ export default function ChatScreen({ initialBookId = null }) {
         setMessages((prev) =>
           prev.map((m) =>
             m.id === loadingId
-              ? createTitleSuggestionMessage(loadingId, refined, titles, newBookId)
+              ? createTitleSuggestionMessage(loadingId, refined, titles)
               : m
           )
         );
@@ -352,15 +352,28 @@ export default function ChatScreen({ initialBookId = null }) {
       }
       setStep('title');
     } else if (currentStep === 'title') {
-          setMessages((prev) => [
-            ...prev,
-            {
-              id: generateId(),
-              sender: 'bot',
-              text: `How many chapters do you want in your ${selectedBookType}? Usually this type has ${getChapterRange()} chapters.`,
-            },
-          ]);
-          setStep('chapters');
+      const cleanTitle = currentInput.replace(/\*\*/g, '').trim();
+      setSelectedTitle(cleanTitle);
+      if (!bookId) {
+        console.error("Cannot save title: bookId is null");
+      } else {
+        try {
+          await saveTitle(bookId, cleanTitle);
+          ensureTitleInStorage(bookId, cleanTitle);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: generateId(),
+          sender: 'bot',
+          text: `How many chapters do you want in your ${selectedBookType}? Usually this type has ${getChapterRange()} chapters.`,
+        },
+      ]);
+      setStep('chapters');
         } else if (currentStep === 'chapters') {
           const num = parseInt(currentInput);
           if (!isNaN(num) && num > 0 && num <= 50) {
@@ -478,37 +491,9 @@ const getRequiredKeyPoints = () => {
   };
 
 
-  const handleTitleSelect = async (title , bookIdArg) => {
+  const handleTitleSelect = (title) => {
     const cleanTitle = title.replace(/\*\*/g, '').trim();
-    setSelectedTitle(cleanTitle);
-    if (!bookIdArg) {
-      console.error("Cannot save title: bookId is null");
-      return;
-    }
-
-    setMessages((prev) => [
-      ...prev,
-      { id: generateId(), sender: 'user', text: `I like "${title}"` },
-    ]);
-    try {
-   
-      await saveTitle(bookIdArg, title);
-
-      ensureTitleInStorage(bookIdArg, cleanTitle);
-
-    } catch (e) {
-      console.error(e);
-    }
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: generateId(),
-        sender: 'bot',
-        text: `How many chapters do you want in your ${selectedBookType}? Usually this type has ${getChapterRange()} chapters.`,
-      },
-    ]);
-    setStep('chapters');
-    setInput('');
+    setInput(cleanTitle);
     inputRef.current?.focus();
   };
 
