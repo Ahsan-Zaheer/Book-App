@@ -40,6 +40,7 @@ export default function UserDetail() {
       <main className={styles.main}>
         <Image src={logo} alt="Logo" width={180}  />
         <h1 className={styles.title}>Please Fill in the form to continue with the app</h1>
+        <div className={`mb-2 ${styles.subTitle}`}> Book Writer Pro GPT is a powerful AI-driven system that helps you turn your ideas into a professionally written book in less than 7 days — no writing experience needed. From titles and outlines to full chapters, it does the heavy lifting so you can finally publish your story with confidence</div>
         <input
           className={styles.oldBookInput}
           type="text"

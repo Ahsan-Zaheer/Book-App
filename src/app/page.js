@@ -78,7 +78,7 @@ export default function Home() {
               className={styles.secondary}
               onClick={() => setShowInput(!showInput)}
             >
-              Start with old one
+            Continue with a Previous Book
           </button>)}
         </div>
 
