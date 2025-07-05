@@ -515,19 +515,16 @@ const getRequiredKeyPoints = () => {
 
   const getOutlineSuggestions = async (count, oldOutline = null) => {
 
-    if(oldOutline !== null){
-      const answer = await askQuestion(
-      `This is the old outline that you gave the user ${oldOutline}, user ask for a different one, So, Please Provide an outline of ${count} chapters for the ${bookType} "${selectedTitle}" based on this summary:\n${summary}. Each chapter should have a title followed by a brief concept of the chapter in no more than two lines.`
-    );
-      
-    } else{
-
-    const answer = await askQuestion(
+    let answer = await askQuestion(
       `Provide an outline of ${count} chapters for the ${bookType} "${selectedTitle}" based on this summary:\n${summary}. Each chapter should have a title followed by a brief concept of the chapter in no more than two lines.`
     );
-  
-  }
 
+    if(oldOutline !== null){
+      answer = await askQuestion(
+      `The user has requested a different version. Please create a new outline with ${count} chapters for the ${bookType} titled "${selectedTitle}", based on the following summary: ${summary} Each chapter should include a title followed by a brief description, no longer than two lines, summarizing the main concept of the chapter.`
+    );}
+      
+   
 
     const lines = answer
       .split(/\n|\r/)
