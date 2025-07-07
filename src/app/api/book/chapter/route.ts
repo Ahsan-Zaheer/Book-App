@@ -48,6 +48,7 @@ export const POST = async (req: Request) => {
   "   - Start with a heading in this exact format (including colon at the end):\n" +
   "     Part X: Title:\n" +
   "   (where X is 1, 2, 3, or 4)\n" +
+  "   - Add 2 spaces after each Period.\n" +
   "3. The COMPLETE chapter MUST have more than " + (wordsPerPart * 4) + " WORDS.\n" +
   "4. Key-point usage:\n" +
   "   - BEFORE writing, divide the provided key points into exactly 4 sequential groups (in the given order).\n" +
