@@ -30,9 +30,8 @@ export function formatChapterText(text: string, doubleSpaceAfterPeriod = false):
   if (doubleSpaceAfterPeriod) {
     // Add 2 spaces after each period, unless already followed by 2+ spaces or at line end.
     // This preserves numbered lists and abbreviations.
-    sanitized = sanitized.replace(/\.([ \n]|$)/g, (m, p1) => `.  ${p1 === '\n' ? '' : ''}`);
-    // Remove triple spaces (if repeated), leave only two
-    sanitized = sanitized.replace(/ {3,}/g, '  ');
+    sanitized = sanitized.replace(/\.([ \n]|$)/g, (m, p1) => `.   ${p1 === '\n' ? '' : ''}`);
+   
   }
 
   return sanitized.trim();

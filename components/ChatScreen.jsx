@@ -602,7 +602,7 @@ const getRequiredKeyPoints = () => {
 
       setMessages((prev) =>
         prev.map((m) =>
-          m.id === loadingId ? { ...m, text: fullText, custom: formatMessageText(fullText) } : m
+          m.id === loadingId ? { ...m, text: fullText, custom: formatMessageText(fullText, true) } : m
         )
       );
 
