@@ -27,12 +27,8 @@ export function formatChapterText(text: string, doubleSpaceAfterPeriod = false):
   // ✅ Add triple space after the last colon in Part titles
   sanitized = sanitized.replace(/(Part\s+\d+:[^:]*:)(\s*)/g, "$1   ");
 
-  if (doubleSpaceAfterPeriod) {
-    // Add 2 spaces after each period, unless already followed by 2+ spaces or at line end.
-    // This preserves numbered lists and abbreviations.
-    sanitized = sanitized.replace(/\.([ \n]|$)/g, (m, p1) => `.   ${p1 === '\n' ? '' : ''}`);
+  sanitized = sanitized.replace(/\.([ \n]|$)/g, (m, p1) => `.   ${p1 === '\n' ? '' : ''}`);
    
-  }
 
   return sanitized.trim();
 }

@@ -53,8 +53,8 @@ export default function ChatScreen({ initialBookId = null }) {
           {titles.map((t, idx) => (
             <li key={idx} className="title-suggestion">
               <button className="selection" onClick={() => handleTitleSelect(t.title)}>
-                <span className="main-title">{t.title}</span>
-                {t.subtitle && <div className="subtitle">{t.subtitle}</div>}
+                <span className="main-title">Title: {t.title}</span>
+                {t.subtitle && <div className="subtitle">Subtitle: {t.subtitle}</div>}
               </button>
             </li>
           ))}
@@ -297,21 +297,37 @@ export default function ChatScreen({ initialBookId = null }) {
         const answer = await askQuestion(
           `Provide 10 book title suggestions with subtitles based on the following summary:\n${currentInput}`
         );
+
+      
         const titles = answer
           .split(/\n|\r/)
           .map((t) => t.trim())
           .filter((t) => /^\d+\./.test(t))
           .map((t) => {
-            // This regex expects: "1. Book Title: Subtitle"
-            const match = t.match(/^\d+\.\s*(.*?)\s*[:\-–]\s*(.*)$/);
+            // Match titles inside **bold** markdown with : or - as separator
+            const match = t.match(/^\d+\.\s*\*\*(.+?)\s*[:\-–]\s*(.+?)\*\*$/);
             if (match) {
               return { title: match[1].trim(), subtitle: match[2].trim() };
             } else {
-              return { title: t.replace(/^\d+\.\s*/, '').trim(), subtitle: '' };
+              // Fallback: try to extract title and subtitle without markdown
+              const fallback = t.match(/^\d+\.\s*(.*?)\s*[:\-–]\s*(.*)$/);
+              if (fallback) {
+                return { title: fallback[1].trim(), subtitle: fallback[2].trim() };
+              } else {
+                return { title: t.replace(/^\d+\.\s*/, '').trim(), subtitle: '' };
+              }
             }
           });
 
-        );
+           setTitleOptions(titles);
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === loadingId
+              ? createTitleSuggestionMessage(loadingId, refined, titles)
+              : m
+          ));
+
+
       } catch (e) {
         setMessages((prev) =>
           prev.map((m) =>
@@ -736,6 +752,9 @@ const getRequiredKeyPoints = () => {
     const numberedListRegex = /^(\d+\.\s.*)$/gm;
     const parts = sanitized.split(numberedListRegex);
     const isNumberedItem = /^\d+\.\s.*$/;
+
+
+    
 
     return (
       <>
