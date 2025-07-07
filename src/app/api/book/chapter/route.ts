@@ -13,8 +13,6 @@ export const POST = async (req: Request) => {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
-  console.log("Received Data", { bookId, bookType, summary, title, chapterIndex, chapterTitle, keyPoints });
-
   await connectToDatabase();
   const book = await Book.findById(bookId);
   if (!book) {
@@ -26,8 +24,6 @@ export const POST = async (req: Request) => {
 
   const wordsPerPart =
     bookType === "Ebook" ? 700 : bookType === "Short Book" ? 1000 : 1500;
-
-    console.log("Words per part:", wordsPerPart);
     
   
   const prompt =

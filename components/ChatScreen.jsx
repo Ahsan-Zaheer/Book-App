@@ -483,7 +483,7 @@ const getRequiredKeyPoints = () => {
       {
         id: generateId(),
         sender: 'bot',
-        text: `Great! Let's start with Chapter 1: ${first.title}. Please enter ${getRequiredKeyPoints()} key points you'd like to include in this Chapter.`,
+        text: `Great! Let's start with \n Chapter 1: ${first.title} \n Concept: ${first.concept} \n Please enter ${getRequiredKeyPoints()} key points you'd like to include in this Chapter.`,
       },
     ]);
     setKeyPoints(getInitialKeyPoints());
@@ -609,12 +609,13 @@ const getRequiredKeyPoints = () => {
       const next = currentChapter + 1;
       if (next <= chapterCount) {
         const nextTitle = outline[next - 1]?.title || `Chapter ${next}`;
+        const nextConcept = outline[next - 1]?.concept || '';
         setMessages((prev) => [
           ...prev,
           {
             id: generateId(),
             sender: 'bot',
-            text: `Great! Let's work on Chapter ${next}: ${nextTitle}. Please enter ${getRequiredKeyPoints()} Key points you'd like to include in this Chapter:`,
+            text: `Great! Let's work on Chapter ${next}: ${nextTitle} \n Concept: ${nextConcept} \n Please enter ${getRequiredKeyPoints()} Key points you'd like to include in this Chapter:`,
           },
         ]);
         setCurrentChapter(next);
