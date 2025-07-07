@@ -38,6 +38,9 @@ export const POST = async (req: Request) => {
   "Stay 100% faithful to the key points provided.\n\n" +
   "Write in a professional, clear, and sincere tone. This is non-fiction.\n\n" +
 
+  // ── NEW FORMATTING REQUIREMENT ──────────────────────────────────────────────
+  "Formatting requirement: In the chapter you produce, insert exactly two spaces after every period/full stop.\n\n" +
+
   // ── EXISTING STRUCTURE RULES + KEY-POINT-DIVISION RULE ───────────────────────
   "Strictly follow this structure:\n" +
   "1. Start the chapter with this exact line (no extra characters, no quotes):\n" +
@@ -48,7 +51,6 @@ export const POST = async (req: Request) => {
   "   - Start with a heading in this exact format (including colon at the end):\n" +
   "     Part X: Title:\n" +
   "   (where X is 1, 2, 3, or 4)\n" +
-  "   - Add 2 spaces after each Period.\n" +
   "3. The COMPLETE chapter MUST have more than " + (wordsPerPart * 4) + " WORDS.\n" +
   "4. Key-point usage:\n" +
   "   - BEFORE writing, divide the provided key points into exactly 4 sequential groups (in the given order).\n" +
