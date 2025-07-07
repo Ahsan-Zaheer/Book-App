@@ -721,10 +721,10 @@ const getRequiredKeyPoints = () => {
     }
 
   };
-  const formatMessageText = (text) => {
+  const formatMessageText = (text, doubleSpace = false) => {
     if (!text || typeof text !== 'string') return text;
 
-    const sanitized = formatChapterText(text);
+    const sanitized = formatChapterText(text, doubleSpace);
 
     // Match lines that start with "1. ", "2. ", etc.
     const numberedListRegex = /^(\d+\.\s.*)$/gm;

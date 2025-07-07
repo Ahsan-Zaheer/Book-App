@@ -80,7 +80,7 @@ export const POST = async (req: Request) => {
               controller.enqueue(encoder.encode("event: done\n\n"));
               controller.close();
 
-              const formatted = formatChapterText(content);
+              const formatted = formatChapterText(content, true);
 
               book.chapters.push({
                 idx: chapterIndex,
