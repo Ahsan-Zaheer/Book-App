@@ -51,11 +51,15 @@ export default function ChatScreen({ initialBookId = null }) {
         </p>
         <ul className="list-unstyled d-flex flex-wrap gap-2">
           {titles.map((t, idx) => (
-            <li key={idx}>
-              <button className="selection" onClick={() => handleTitleSelect(t)}>{t}</button>
+            <li key={idx} className="title-suggestion">
+              <button className="selection" onClick={() => handleTitleSelect(t.title)}>
+                <span className="main-title">{t.title}</span>
+                {t.subtitle && <div className="subtitle">{t.subtitle}</div>}
+              </button>
             </li>
           ))}
         </ul>
+
       </div>
     ),
   });
