@@ -771,7 +771,7 @@ const getRequiredKeyPoints = () => {
               if (/^Chapter\s*\d+/i.test(cleaned)) {
                 return (
                   <React.Fragment key={`${idx}-${jdx}`}>
-                    <strong>{cleaned}</strong>
+                    <strong >{cleaned}</strong>
                     <br />
                   </React.Fragment>
                 );
@@ -779,14 +779,14 @@ const getRequiredKeyPoints = () => {
               if (/^Part\s*\d+/i.test(cleaned)) {
                 return (
                   <React.Fragment key={`${idx}-${jdx}`}>
-                    {cleaned}
+                    <span style={{ whiteSpace: 'pre-wrap' }}>{cleaned}</span>
                     <br />
                   </React.Fragment>
                 );
               }
               return (
                 <React.Fragment key={`${idx}-${jdx}`}>
-                  {cleaned}
+                  <span style={{ whiteSpace: 'pre-wrap' }}>{cleaned}</span>
                   <br />
                 </React.Fragment>
               );

@@ -24,11 +24,12 @@ export function formatChapterText(text: string, doubleSpaceAfterPeriod = false):
     "\n**$1**\n"
   );
 
+  if(doubleSpaceAfterPeriod) {
   // ✅ Add triple space after the last colon in Part titles
-  sanitized = sanitized.replace(/(Part\s+\d+:[^:]*:)(\s*)/g, "$1   ");
+  sanitized = sanitized.replace(/(Part\s+\d+:[^:]*:)(\s*)/g, "$1  ");
 
-  sanitized = sanitized.replace(/\.([ \n]|$)/g, (m, p1) => `.   ${p1 === '\n' ? '' : ''}`);
-   
+  sanitized = sanitized.replace(/\.([ \n]|$)/g, (m, p1) => `.  ${p1 === '\n' ? '' : ''}`);
+  }
 
   return sanitized.trim();
 }
