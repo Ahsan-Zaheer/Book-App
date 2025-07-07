@@ -1,4 +1,4 @@
-export function formatChapterText(text: string): string {
+export function formatChapterText(text: string, doubleSpaceAfterPeriod = false): string {
   if (!text || typeof text !== "string") return text;
 
   let sanitized = text.replace(/\*\*/g, "").replace(/#/g, "");
@@ -12,7 +12,7 @@ export function formatChapterText(text: string): string {
   sanitized = sanitized.replace(/([^\n])(\s*)(Chapter\s+\d+)/gi, "$1\n\n$3");
   sanitized = sanitized.replace(/([^\n])(\s*)(Part\s+\d+)/gi, "$1\n\n$3");
 
-    // ✅ Bold full Chapter headings
+  // ✅ Bold full Chapter headings
   sanitized = sanitized.replace(
     /\n?(Chapter\s*\d+\s*[:\-]?\s*[^\n]*)/gi,
     "\n**$1**\n"
@@ -24,10 +24,16 @@ export function formatChapterText(text: string): string {
     "\n**$1**\n"
   );
 
-
   // ✅ Add triple space after the last colon in Part titles
   sanitized = sanitized.replace(/(Part\s+\d+:[^:]*:)(\s*)/g, "$1   ");
 
+  if (doubleSpaceAfterPeriod) {
+    // Add 2 spaces after each period, unless already followed by 2+ spaces or at line end.
+    // This preserves numbered lists and abbreviations.
+    sanitized = sanitized.replace(/\.([ \n]|$)/g, (m, p1) => `.  ${p1 === '\n' ? '' : ''}`);
+    // Remove triple spaces (if repeated), leave only two
+    sanitized = sanitized.replace(/ {3,}/g, '  ');
+  }
 
   return sanitized.trim();
 }
