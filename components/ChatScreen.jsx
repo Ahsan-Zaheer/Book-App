@@ -297,14 +297,16 @@ export default function ChatScreen({ initialBookId = null }) {
           .split(/\n|\r/)
           .map((t) => t.trim())
           .filter((t) => /^\d+\./.test(t))
-          .map((t) => t.replace(/^\d+\.\s*/, '').replace(/\*\*/g, '').trim());
-        setTitleOptions(titles);
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === loadingId
-              ? createTitleSuggestionMessage(loadingId, refined, titles)
-              : m
-          )
+          .map((t) => {
+            // This regex expects: "1. Book Title: Subtitle"
+            const match = t.match(/^\d+\.\s*(.*?)\s*[:\-–]\s*(.*)$/);
+            if (match) {
+              return { title: match[1].trim(), subtitle: match[2].trim() };
+            } else {
+              return { title: t.replace(/^\d+\.\s*/, '').trim(), subtitle: '' };
+            }
+          });
+
         );
       } catch (e) {
         setMessages((prev) =>
