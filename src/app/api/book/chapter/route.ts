@@ -39,7 +39,7 @@ export const POST = async (req: Request) => {
   "Write in a professional, clear, and sincere tone. This is non-fiction.\n\n" +
 
   // ── NEW FORMATTING REQUIREMENT ──────────────────────────────────────────────
-  "Formatting requirement: In the chapter you produce, insert exactly two spaces after every period/full stop.\n\n" +
+  "FORMATTING REQUIREMENT: In the chapter you produce, insert exactly two spaces after every period/full stop.\n\n" +
 
   // ── EXISTING STRUCTURE RULES + KEY-POINT-DIVISION RULE ───────────────────────
   "Strictly follow this structure:\n" +
