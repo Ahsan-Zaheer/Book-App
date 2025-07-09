@@ -70,7 +70,7 @@ export default function Sidebar() {
       {!isCollapsed && (
         <>
           <div className="d-flex gap-2 mb-4">
-           <Link href="/home"><button className="btn-1" >+ New Book</button></Link>
+           <a href="/home"><button className="btn-1" >+ New Book</button></a>
           </div>
 
           <hr />
