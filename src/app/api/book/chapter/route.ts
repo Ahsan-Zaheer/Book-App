@@ -84,7 +84,6 @@ export const POST = async (req: Request) => {
               controller.close();
 
 
-              console.log(content);
               
 
               const formatted = formatChapterText(content, true);

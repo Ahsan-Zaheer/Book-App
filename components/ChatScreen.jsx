@@ -898,7 +898,7 @@ const getRequiredKeyPoints = () => {
               </div>
             ) : (
               <div className="p-3 keypointBg">
-                <p className="text-dark mb-2">Please enter {getRequiredKeyPoints()} key points you'd like to include in your book:</p>
+                <p className="text-dark mb-2">Please enter {getRequiredKeyPoints()} key points you'd like to include in this chapter:</p>
                 <div className="scrollable-keypoints mb-2">
                   {keyPoints.map((point, idx) => (
                     <input

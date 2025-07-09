@@ -70,10 +70,7 @@ export default function Sidebar() {
       {!isCollapsed && (
         <>
           <div className="d-flex gap-2 mb-4">
-            <button className="btn-1" onClick={() => window.location.reload()}>+ New Book</button>
-            {/* <button className="btn-2">
-              <Icon icon="icon-park-twotone:search" className="text-dark" />
-            </button> */}
+           <Link href="/home"><button className="btn-1" >+ New Book</button></Link>
           </div>
 
           <hr />
