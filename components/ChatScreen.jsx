@@ -911,9 +911,11 @@ const getRequiredKeyPoints = () => {
                   </button>
                 </div>
                 <div className="mt-2 text-end">
+                  {bookType === "Ebook" && (
                   <button className="btn-toggle-input" onClick={handleSkipKeyPoints}>
                     Skip this step
                   </button>
+                  )}
                 </div>
               </div>
             ) : (
@@ -942,9 +944,11 @@ const getRequiredKeyPoints = () => {
                     <button className="btn-toggle-input" onClick={() => setUseSimpleInput(true)}>
                       Use simple input
                     </button>
-                    <button className="btn-toggle-input" onClick={handleSkipKeyPoints}>
-                      Skip this step
-                    </button>
+                    {bookType === "Ebook" && (
+                      <button className="btn-toggle-input" onClick={handleSkipKeyPoints}>
+                        Skip this step
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
