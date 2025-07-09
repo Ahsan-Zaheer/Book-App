@@ -715,6 +715,21 @@ const getRequiredKeyPoints = () => {
       setIsGenerating(false);
     };
 
+  const handleSkipKeyPoints = async () => {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: generateId(),
+          sender: 'user',
+          text: 'Skip key points for this chapter',
+        },
+      ]);
+      setHasKeyPoints(false);
+      setIsGenerating(true);
+      await generateChapterContent(selectedChapter || input, []);
+      setIsGenerating(false);
+    };
+
 
   const handleClearChat = () => {
     setMessages([
@@ -895,6 +910,11 @@ const getRequiredKeyPoints = () => {
                     <Icon icon="fa:send-o" />
                   </button>
                 </div>
+                <div className="mt-2 text-end">
+                  <button className="btn-toggle-input" onClick={handleSkipKeyPoints}>
+                    Skip this step
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="p-3 keypointBg">
@@ -918,9 +938,14 @@ const getRequiredKeyPoints = () => {
                   <button className="btn-chat" onClick={handleSubmitKeyPoints}>
                     Submit Key Points
                   </button>
-                  <button className="btn-toggle-input" onClick={() => setUseSimpleInput(true)}>
-                    Use simple input
-                  </button>
+                  <div className="d-flex gap-2">
+                    <button className="btn-toggle-input" onClick={() => setUseSimpleInput(true)}>
+                      Use simple input
+                    </button>
+                    <button className="btn-toggle-input" onClick={handleSkipKeyPoints}>
+                      Skip this step
+                    </button>
+                  </div>
                 </div>
               </div>
             )
