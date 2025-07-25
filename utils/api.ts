@@ -1,4 +1,4 @@
-const createUrl = (path) =>{
+const createUrl = ( path ) =>{
     return window.location.origin + path;
 }
 
