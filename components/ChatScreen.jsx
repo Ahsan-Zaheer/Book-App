@@ -608,16 +608,23 @@ const getRequiredKeyPoints = () => {
 
   const getOutlineSuggestions = async (count, oldOutline = null) => {
 
-    let answer = await askQuestion(
-      `Provide an outline of ${count} chapters for the ${bookType} "${selectedTitle}" based on this summary:\n${summary}. Each chapter should have a title followed by a brief concept of the chapter in no more than two lines.`
-    );
+    let answer;
     
     console.log("old outline",oldOutline);
     
     if(Array.isArray(oldOutline) && oldOutline.length > 0){
+      // Generate completely different outline when regenerating
+      const existingChapters = oldOutline.map(ch => `${ch.title}: ${ch.concept}`).join('\n');
+      
       answer = await askQuestion(
-      `The following outline was already provided: ${oldOutline}.\n\nPlease generate a **completely different** outline with ${count} chapters for the ${bookType} titled "${selectedTitle}", based on this summary:\n${summary}.\n\nAvoid rephrasing or repeating ideas from the previous version. Instead, introduce **new perspectives, alternative structures, or fresh thematic interpretations**. Each chapter should include a distinctive title and a brief concept (max two lines) that stands apart from the prior version.`
-    );}
+        `Generate a **completely NEW and UNIQUE** outline with ${count} chapters for the ${bookType} titled "${selectedTitle}", based on this summary:\n${summary}.\n\nPREVIOUS OUTLINE TO AVOID (do not repeat, rephrase, or use similar concepts):\n${existingChapters}\n\nRequirements for the new outline:\n- Use entirely different chapter themes and approaches\n- Explore alternative angles, perspectives, or methodologies\n- Introduce fresh concepts and unique chapter structures\n- Avoid any similarity to the previous version\n- Each chapter should have a distinctive title and brief concept (max two lines)\n- Be creative and think outside the box\n\nFormat: Chapter X: [Title] - [Concept]`
+      );
+    } else {
+      // First time generating outline
+      answer = await askQuestion(
+        `Provide an outline of ${count} chapters for the ${bookType} "${selectedTitle}" based on this summary:\n${summary}. Each chapter should have a title followed by a brief concept of the chapter in no more than two lines.`
+      );
+    }
       
    
 
