@@ -47,9 +47,9 @@ export default function ChatScreen({ initialBookId = null }) {
     custom: (
       <div>
         <p>
-          Great! Here is the refined version of your summary: <br /> <br /> <span style={{fontStyle: 'italic'}}>"{refined}"</span><br /> <br />  <h3>
+          Great! Here is the refined version of your summary: <br /> <br /> <span style={{fontStyle: 'italic'}}>"{refined}"</span><br /> <br />  <p style={{fontSize: '20px', fontWeight: 'bold'}}>
             Based on your summary, here are some title ideas choose one or enter your own book title
-          </h3>
+          </p>
         </p>
         <ul className="list-unstyled d-flex flex-wrap gap-2">
           {titles.map((t, idx) => (
@@ -468,7 +468,7 @@ export default function ChatScreen({ initialBookId = null }) {
                 {
                   id: generateId(),
                   sender: 'bot',
-                  text: `Awesome! Now, <strong>please enter ${getRequiredKeyPoints()} Key points you'd like to include in this Chapter:</strong>`,
+                  text: `Awesome! Now, please enter ${getRequiredKeyPoints()} Key points you'd like to include in this Chapter:`,
                 },
               ]);
               setKeyPoints(getInitialKeyPoints());
@@ -568,7 +568,7 @@ const getRequiredKeyPoints = () => {
       {
         id: generateId(),
         sender: 'bot',
-        text: `Great! Let's start with \n Chapter 1: ${first.title} \n Concept: ${first.concept} \n <strong>Please enter ${getRequiredKeyPoints()} key points you'd like to include in this Chapter.</strong>`,
+        text: `Great! Let's start with \n Chapter 1: ${first.title} \n Concept: ${first.concept} \n Please enter ${getRequiredKeyPoints()} key points you'd like to include in this Chapter.`,
       },
     ]);
     setKeyPoints(getInitialKeyPoints());
@@ -835,7 +835,7 @@ const getRequiredKeyPoints = () => {
           {
             id: generateId(),
             sender: 'bot',
-            text: `Great! Let's work on Chapter ${next}: ${nextTitle} \n Concept: ${nextConcept} \n <strong>Please enter ${getRequiredKeyPoints()} Key points you'd like to include in this Chapter:</strong>`,
+            text: `Great! Let's work on Chapter ${next}: ${nextTitle} \n Concept: ${nextConcept} \n Please enter ${getRequiredKeyPoints()} Key points you'd like to include in this Chapter:`,
           },
         ]);
         setCurrentChapter(next);
