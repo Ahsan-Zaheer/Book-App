@@ -69,11 +69,11 @@ export const POST = async (req: Request) => {
     
     "MANDATORY STRUCTURE (DO NOT ADD EXTRA PARTS):\n" +
     "Chapter " + chapterIndex + ": " + chapterTitle + "\n\n" +
-    "Part 1: [Creative Title]\n[Write extensive, detailed content with comprehensive explanations, multiple examples, and thorough analysis - target " + wordsPerPart + " words]\n\n" +
-    "Part 2: [Creative Title]\n[Write extensive, detailed content with comprehensive explanations, multiple examples, and thorough analysis - target " + wordsPerPart + " words]\n\n" +
-    "Part 3: [Creative Title]\n[Write extensive, detailed content with comprehensive explanations, multiple examples, and thorough analysis - target " + wordsPerPart + " words]\n\n" +
-    "Part 4: [Creative Title]\n[Write extensive, detailed content with comprehensive explanations, multiple examples, and thorough analysis - target " + wordsPerPart + " words]\n\n" +
-    
+    "Part 1: [Creative Title] [Three Explanation mark: !!!]\n[Write extensive, detailed content with comprehensive explanations, multiple examples, and thorough analysis - target " + wordsPerPart + " words]\n\n" +
+    "Part 2: [Creative Title] [Three Explanation mark: !!!]\n[Write extensive, detailed content with comprehensive explanations, multiple examples, and thorough analysis - target " + wordsPerPart + " words]\n\n" +
+    "Part 3: [Creative Title] [Three Explanation mark: !!!]\n[Write extensive, detailed content with comprehensive explanations, multiple examples, and thorough analysis - target " + wordsPerPart + " words]\n\n" +
+    "Part 4: [Creative Title] [Three Explanation mark: !!!]\n[Write extensive, detailed content with comprehensive explanations, multiple examples, and thorough analysis - target " + wordsPerPart + " words]\n\n" +
+
     "CRITICAL REQUIREMENTS:\n" +
     "- Write ONLY 4 parts (no more, no less)\n" +
     "- Each part should be approximately " + wordsPerPart + " words\n" +
@@ -99,11 +99,11 @@ export const POST = async (req: Request) => {
       
       "MANDATORY STRUCTURE (DO NOT ADD EXTRA PARTS):\n" +
       "Chapter " + chapterIndex + ": " + chapterTitle + "\n\n" +
-      "Part 1: [Creative Title]\n[Write extensive, detailed content - target " + wordsPerPart + " words]\n\n" +
-      "Part 2: [Creative Title]\n[Write extensive, detailed content - target " + wordsPerPart + " words]\n\n" +
-      "Part 3: [Creative Title]\n[Write extensive, detailed content - target " + wordsPerPart + " words]\n\n" +
-      "Part 4: [Creative Title]\n[Write extensive, detailed content - target " + wordsPerPart + " words]\n\n" +
-      
+      "Part 1: [Creative Title] [Three Explanation mark: !!!]\n[Write extensive, detailed content - target " + wordsPerPart + " words]\n\n" +
+      "Part 2: [Creative Title] [Three Explanation mark: !!!]\n[Write extensive, detailed content - target " + wordsPerPart + " words]\n\n" +
+      "Part 3: [Creative Title] [Three Explanation mark: !!!]\n[Write extensive, detailed content - target " + wordsPerPart + " words]\n\n" +
+      "Part 4: [Creative Title] [Three Explanation mark: !!!]\n[Write extensive, detailed content - target " + wordsPerPart + " words]\n\n" +
+
       "CRITICAL REQUIREMENTS:\n" +
       "- Write ONLY 4 parts (no additional parts)\n" +
       "- Each part should be approximately " + wordsPerPart + " words\n" +
