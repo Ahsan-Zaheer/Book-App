@@ -319,7 +319,7 @@ export default function ChatScreen({ initialBookId = null }) {
             }
           });
 
-           setTitleOptions(titles);
+        setTitleOptions(titles);
         setMessages((prev) =>
           prev.map((m) =>
             m.id === loadingId
