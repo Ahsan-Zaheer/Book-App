@@ -999,6 +999,20 @@ const getRequiredKeyPoints = () => {
                 // More flexible approach to separate Part title from content
                 // First, try to find content that starts with common sentence starters
                 const contentStartPatterns = [
+                  // Handle cases where content starts immediately after title (no space) - most specific first
+                  /^(Part\s*\d+\s*:\s*.*?)(?=In[A-Z][a-z]*)/,
+                  /^(Part\s*\d+\s*:\s*.*?)(?=As[A-Z][a-z]*)/,
+                  /^(Part\s*\d+\s*:\s*.*?)(?=The[A-Z][a-z]*)/,
+                  /^(Part\s*\d+\s*:\s*.*?)(?=When[A-Z][a-z]*)/,
+                  /^(Part\s*\d+\s*:\s*.*?)(?=After[A-Z][a-z]*)/,
+                  /^(Part\s*\d+\s*:\s*.*?)(?=During[A-Z][a-z]*)/,
+                  /^(Part\s*\d+\s*:\s*.*?)(?=Through[A-Z][a-z]*)/,
+                  /^(Part\s*\d+\s*:\s*.*?)(?=With[A-Z][a-z]*)/,
+                  /^(Part\s*\d+\s*:\s*.*?)(?=From[A-Z][a-z]*)/,
+                  /^(Part\s*\d+\s*:\s*.*?)(?=By[A-Z][a-z]*)/,
+                  /^(Part\s*\d+\s*:\s*.*?)(?=On[A-Z][a-z]*)/,
+                  /^(Part\s*\d+\s*:\s*.*?)(?=At[A-Z][a-z]*)/,
+                  // Handle normal spaced content
                   /^(Part\s*\d+\s*:\s*.*?)(?=As\s+[a-z])/i,
                   /^(Part\s*\d+\s*:\s*.*?)(?=The\s+[a-z])/i,
                   /^(Part\s*\d+\s*:\s*.*?)(?=In\s+[a-z])/i,
@@ -1011,10 +1025,6 @@ const getRequiredKeyPoints = () => {
                   /^(Part\s*\d+\s*:\s*.*?)(?=By\s+[a-z])/i,
                   /^(Part\s*\d+\s*:\s*.*?)(?=On\s+[a-z])/i,
                   /^(Part\s*\d+\s*:\s*.*?)(?=At\s+[a-z])/i,
-                  // Handle cases where content starts immediately after title (no space)
-                  /^(Part\s*\d+\s*:\s*.*?)(?=As[A-Z])/,
-                  /^(Part\s*\d+\s*:\s*.*?)(?=The[A-Z])/,
-                  /^(Part\s*\d+\s*:\s*.*?)(?=In[A-Z])/,
                   // General pattern for any word followed by lowercase (likely start of sentence)
                   /^(Part\s*\d+\s*:\s*.*?)(?=[A-Z][a-z]*\s+[a-z])/
                 ];
