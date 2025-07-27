@@ -1132,10 +1132,12 @@ const getRequiredKeyPoints = () => {
               >
                 <div
                   className={`p-3 rounded message ${msg.sender === 'user' ? 'userMsg' : 'botMsg'}`}
-                  dangerouslySetInnerHTML={msg.isHtml && msg.htmlContent ? { __html: msg.htmlContent.replace(/\n/g, '<br />') } : undefined}
                 >
-                 {!(msg.isHtml && msg.htmlContent) && (msg.custom ? msg.custom : formatMessageText(msg.text))}
-
+                  {msg.isHtml && msg.htmlContent ? (
+                    <div dangerouslySetInnerHTML={{ __html: msg.htmlContent.replace(/\n/g, '<br />') }} />
+                  ) : (
+                    msg.custom ? msg.custom : formatMessageText(msg.text)
+                  )}
                 </div>
               </div>
             ))}
