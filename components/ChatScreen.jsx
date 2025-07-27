@@ -670,6 +670,8 @@ const getRequiredKeyPoints = () => {
     } else {
       // Array of different prompt variations for outline generation
       const summaryToUse = refinedSummary || summary;
+      console.log("Summary to use: ", summaryToUse);
+      
       const outlineGenerationPrompts = [
         `Provide an outline of ${count} chapters for the ${bookType} "${selectedTitle}" based on this summary:\n${summaryToUse}. Each chapter should have a title followed by a brief concept of the chapter in no more than two lines.`,
         `Create a comprehensive ${count}-chapter outline for the ${bookType} titled "${selectedTitle}" using this summary:\n${summaryToUse}. Structure each chapter with a compelling title and a concise concept description (maximum two lines).`,
