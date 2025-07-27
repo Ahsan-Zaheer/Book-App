@@ -895,11 +895,21 @@ const getRequiredKeyPoints = () => {
                 );
               }
               if (/^Part\s*\d+/i.test(cleaned)) {
-                // Match part title - capture everything from "Part X:" up to where content starts
-                const partMatch = cleaned.match(/^(Part\s*\d+\s*:\s*[^A-Z]*[A-Z][^A-Z]*[A-Za-z\s]*?)([A-Z][a-z].*)?$/);
-                if (partMatch) {
-                  const partTitle = partMatch[1].trim();
-                  const partContent = partMatch[2] ? partMatch[2].trim() : '';
+                // Look for pattern: "Part X: Title" followed by content that starts with uppercase
+                // Split at the point where we see an uppercase letter followed by lowercase (start of sentence)
+                const match = cleaned.match(/^(Part\s*\d+\s*:\s*.*?)([A-Z][a-z][^.]*\..*|[A-Z][a-z].*?)$/);
+                
+                if (match) {
+                  let partTitle = match[1].trim();
+                  let partContent = match[2] ? match[2].trim() : '';
+                  
+                  // More precise splitting: look for where title ends and content begins
+                  // Title typically ends before a word that starts a sentence
+                  const titleContentSplit = partTitle.match(/^(Part\s*\d+\s*:\s*(?:[A-Z][a-z]*\s*)*[A-Z][a-z]*)\s*([A-Z][a-z].*)?$/);
+                  if (titleContentSplit && titleContentSplit[2]) {
+                    partTitle = titleContentSplit[1].trim();
+                    partContent = (titleContentSplit[2] + ' ' + partContent).trim();
+                  }
                   
                   return (
                     <React.Fragment key={`${idx}-${jdx}`}>
@@ -915,14 +925,11 @@ const getRequiredKeyPoints = () => {
                     </React.Fragment>
                   );
                 } else {
-                  // Fallback: look for content that starts with uppercase after the title
-                  const fallbackMatch = cleaned.match(/^(Part\s*\d+\s*:\s*.*?)([A-Z][a-z]+.*)?$/);
-                  if (fallbackMatch) {
-                    let partTitle = fallbackMatch[1].trim();
-                    const partContent = fallbackMatch[2] ? fallbackMatch[2].trim() : '';
-                    
-                    // Clean up the title by removing any trailing content that looks like it belongs to content
-                    partTitle = partTitle.replace(/([a-z])\s*([A-Z][a-z])/, '$1');
+                  // Simple fallback - just look for "Part X: " and take everything up to first sentence
+                  const simpleMatch = cleaned.match(/^(Part\s*\d+\s*:\s*[^.!?]*?)([.!?].*|$)/);
+                  if (simpleMatch) {
+                    const partTitle = simpleMatch[1].trim();
+                    const partContent = simpleMatch[2] ? simpleMatch[2].trim() : '';
                     
                     return (
                       <React.Fragment key={`${idx}-${jdx}`}>
@@ -938,6 +945,7 @@ const getRequiredKeyPoints = () => {
                       </React.Fragment>
                     );
                   } else {
+                    // Last resort - make the whole line bold
                     return (
                       <React.Fragment key={`${idx}-${jdx}`}>
                         <br />
