@@ -895,8 +895,8 @@ const getRequiredKeyPoints = () => {
                 );
               }
               if (/^Part\s*\d+/i.test(cleaned)) {
-                // Match part title more precisely - only up to the colon and title
-                const partMatch = cleaned.match(/^(Part\s*\d+\s*:\s*[^A-Z]*[A-Z][^.!?]*?)([.!?].*|[A-Z][a-z].*)?$/i);
+                // Match part title - capture everything from "Part X:" up to where content starts
+                const partMatch = cleaned.match(/^(Part\s*\d+\s*:\s*[^A-Z]*[A-Z][^A-Z]*[A-Za-z\s]*?)([A-Z][a-z].*)?$/);
                 if (partMatch) {
                   const partTitle = partMatch[1].trim();
                   const partContent = partMatch[2] ? partMatch[2].trim() : '';
@@ -915,11 +915,14 @@ const getRequiredKeyPoints = () => {
                     </React.Fragment>
                   );
                 } else {
-                  // Fallback: try to find just "Part X: Title" pattern
-                  const simpleMatch = cleaned.match(/^(Part\s*\d+\s*:\s*[^A-Z]*[A-Z][^A-Z]*?)(.*)$/i);
-                  if (simpleMatch) {
-                    const partTitle = simpleMatch[1].trim();
-                    const partContent = simpleMatch[2] ? simpleMatch[2].trim() : '';
+                  // Fallback: look for content that starts with uppercase after the title
+                  const fallbackMatch = cleaned.match(/^(Part\s*\d+\s*:\s*.*?)([A-Z][a-z]+.*)?$/);
+                  if (fallbackMatch) {
+                    let partTitle = fallbackMatch[1].trim();
+                    const partContent = fallbackMatch[2] ? fallbackMatch[2].trim() : '';
+                    
+                    // Clean up the title by removing any trailing content that looks like it belongs to content
+                    partTitle = partTitle.replace(/([a-z])\s*([A-Z][a-z])/, '$1');
                     
                     return (
                       <React.Fragment key={`${idx}-${jdx}`}>
