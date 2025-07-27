@@ -541,19 +541,22 @@ const getRequiredKeyPoints = () => {
       { id: loadingId, sender: 'bot', text: 'Generating new title suggestions...' },
     ]);
 
-
-    console.log('Redefine Summary:', refinedSummary);
-    console.log('Summary:', summary);
+    // Use the original summary if refinedSummary is empty
+    const summaryToUse = refinedSummary || summary;
+    
+    console.log('Summary to use:', summaryToUse);
+    console.log('Original Summary:', summary);
+    console.log('Refined Summary:', refinedSummary);
     
 
     try {
       const refined = await askQuestion(
-        `Rewrite the following book summary in a single polished paragraph with a different approach or perspective:\n${refinedSummary}`
+        `Rewrite the following book summary in a single polished paragraph with a different approach or perspective:\n${summaryToUse}`
       );
       setRefinedSummary(refined);
 
       const answer = await askQuestion(
-        `Provide 10 completely different book title suggestions with subtitles based on the following summary. Avoid repeating any previous suggestions and explore new creative angles:\n${summary}`
+        `Provide 10 completely different book title suggestions with subtitles based on the following summary. Avoid repeating any previous suggestions and explore new creative angles:\n${summaryToUse}`
       );
 
        const titles = answer
