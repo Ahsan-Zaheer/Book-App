@@ -1001,9 +1001,8 @@ const getRequiredKeyPoints = () => {
                 );
               }
               if (/^Part\s*\d+/i.test(cleaned)) {
-                // Look for "Part X: Title" pattern and split where content starts
-                // Content typically starts with "As", "The", "In", etc. followed by lowercase
-                const match = cleaned.match(/^(Part\s*\d+\s*:\s*[^A-Z]*(?:[A-Z][a-z]*\s*)*[A-Z][a-z]*?)([A-Z][a-z]+\s+[a-z].*|As\s+.*|The\s+.*|In\s+.*|When\s+.*|After\s+.*|During\s+.*|Through\s+.*|With\s+.*|From\s+.*|By\s+.*|On\s+.*|At\s+.*)$/);
+                // Look for part titles ending with !!!
+                const match = cleaned.match(/^(Part\s*\d+[^!]*!!!)(.*)$/);
                 
                 if (match) {
                   const partTitle = match[1].trim();
@@ -1023,35 +1022,14 @@ const getRequiredKeyPoints = () => {
                     </React.Fragment>
                   );
                 } else {
-                  // Fallback: try to find where title ends by looking for common sentence starters
-                  const fallbackMatch = cleaned.match(/^(Part\s*\d+\s*:\s*.*?)(?=(?:As|The|In|When|After|During|Through|With|From|By|On|At|[A-Z][a-z]+\s+[a-z])\s)/);
-                  if (fallbackMatch) {
-                    const partTitle = fallbackMatch[1].trim();
-                    const partContent = cleaned.substring(partTitle.length).trim();
-                    
-                    return (
-                      <React.Fragment key={`${idx}-${jdx}`}>
-                        <br />
-                        <strong>{partTitle}  </strong>
-                        {partContent && (
-                          <>
-                            <br />
-                            <span style={{ whiteSpace: 'pre-wrap' }}>{partContent}</span>
-                          </>
-                        )}
-                        <br />
-                      </React.Fragment>
-                    );
-                  } else {
-                    // Last resort - make the whole line bold
-                    return (
-                      <React.Fragment key={`${idx}-${jdx}`}>
-                        <br />
-                        <strong>{cleaned}  </strong>
-                        <br />
-                      </React.Fragment>
-                    );
-                  }
+                  // Fallback: make the whole line bold if it starts with Part
+                  return (
+                    <React.Fragment key={`${idx}-${jdx}`}>
+                      <br />
+                      <strong>{cleaned}  </strong>
+                      <br />
+                    </React.Fragment>
+                  );
                 }
               }
               return (
