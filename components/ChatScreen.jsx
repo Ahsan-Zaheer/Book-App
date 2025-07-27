@@ -47,9 +47,9 @@ export default function ChatScreen({ initialBookId = null }) {
     custom: (
       <div>
         <p>
-          Great! Here is the refined version of your summary: <br /> <br /> <span style={{fontStyle: 'italic'}}>"{refined}"</span><br /> <br />  <p style={{fontSize: '20px', fontWeight: 'bold'}}>
-            Based on your summary, here are some title ideas choose one or enter your own book title
-          </p>
+          Great! Here is the refined version of your summary: <br /> <br /> <span style={{fontStyle: 'italic'}}>"{refined}"</span><br /> <br />  <strong >
+            Based on your summary, here are some title ideas choose one or enter your own book title:
+          </strong>
         </p>
         <ul className="list-unstyled d-flex flex-wrap gap-2">
           {titles.map((t, idx) => (
