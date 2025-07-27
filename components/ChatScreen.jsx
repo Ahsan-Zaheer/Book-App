@@ -996,73 +996,58 @@ const getRequiredKeyPoints = () => {
                 );
               }
               if (/^Part\s*\d+/i.test(cleaned)) {
-                // More flexible approach to separate Part title from content
-                // First, try to find content that starts with common sentence starters
-                const contentStartPatterns = [
-                  // Handle cases where content starts immediately after title (no space) - most specific first
-                  /^(Part\s*\d+\s*:\s*.*?)(?=In[A-Z][a-z]*)/,
-                  /^(Part\s*\d+\s*:\s*.*?)(?=As[A-Z][a-z]*)/,
-                  /^(Part\s*\d+\s*:\s*.*?)(?=The[A-Z][a-z]*)/,
-                  /^(Part\s*\d+\s*:\s*.*?)(?=When[A-Z][a-z]*)/,
-                  /^(Part\s*\d+\s*:\s*.*?)(?=After[A-Z][a-z]*)/,
-                  /^(Part\s*\d+\s*:\s*.*?)(?=During[A-Z][a-z]*)/,
-                  /^(Part\s*\d+\s*:\s*.*?)(?=Through[A-Z][a-z]*)/,
-                  /^(Part\s*\d+\s*:\s*.*?)(?=With[A-Z][a-z]*)/,
-                  /^(Part\s*\d+\s*:\s*.*?)(?=From[A-Z][a-z]*)/,
-                  /^(Part\s*\d+\s*:\s*.*?)(?=By[A-Z][a-z]*)/,
-                  /^(Part\s*\d+\s*:\s*.*?)(?=On[A-Z][a-z]*)/,
-                  /^(Part\s*\d+\s*:\s*.*?)(?=At[A-Z][a-z]*)/,
-                  // Handle normal spaced content
-                  /^(Part\s*\d+\s*:\s*.*?)(?=As\s+[a-z])/i,
-                  /^(Part\s*\d+\s*:\s*.*?)(?=The\s+[a-z])/i,
-                  /^(Part\s*\d+\s*:\s*.*?)(?=In\s+[a-z])/i,
-                  /^(Part\s*\d+\s*:\s*.*?)(?=When\s+[a-z])/i,
-                  /^(Part\s*\d+\s*:\s*.*?)(?=After\s+[a-z])/i,
-                  /^(Part\s*\d+\s*:\s*.*?)(?=During\s+[a-z])/i,
-                  /^(Part\s*\d+\s*:\s*.*?)(?=Through\s+[a-z])/i,
-                  /^(Part\s*\d+\s*:\s*.*?)(?=With\s+[a-z])/i,
-                  /^(Part\s*\d+\s*:\s*.*?)(?=From\s+[a-z])/i,
-                  /^(Part\s*\d+\s*:\s*.*?)(?=By\s+[a-z])/i,
-                  /^(Part\s*\d+\s*:\s*.*?)(?=On\s+[a-z])/i,
-                  /^(Part\s*\d+\s*:\s*.*?)(?=At\s+[a-z])/i,
-                  // General pattern for any word followed by lowercase (likely start of sentence)
-                  /^(Part\s*\d+\s*:\s*.*?)(?=[A-Z][a-z]*\s+[a-z])/
-                ];
-
-                let partTitle = '';
-                let partContent = '';
-                let matched = false;
-
-                // Try each pattern to find the split point
-                for (const pattern of contentStartPatterns) {
-                  const match = cleaned.match(pattern);
-                  if (match) {
-                    partTitle = match[1].trim();
-                    partContent = cleaned.substring(match[1].length).trim();
-                    matched = true;
-                    break;
+                // Look for "Part X: Title" pattern and split where content starts
+                // Content typically starts with "As", "The", "In", etc. followed by lowercase
+                const match = cleaned.match(/^(Part\s*\d+\s*:\s*[^A-Z]*(?:[A-Z][a-z]*\s*)*[A-Z][a-z]*?)([A-Z][a-z]+\s+[a-z].*|As\s+.*|The\s+.*|In\s+.*|When\s+.*|After\s+.*|During\s+.*|Through\s+.*|With\s+.*|From\s+.*|By\s+.*|On\s+.*|At\s+.*)$/);
+                
+                if (match) {
+                  const partTitle = match[1].trim();
+                  const partContent = match[2] ? match[2].trim() : '';
+                  
+                  return (
+                    <React.Fragment key={`${idx}-${jdx}`}>
+                      <br />
+                      <strong>{partTitle}  </strong>
+                      {partContent && (
+                        <>
+                          <br />
+                          <span style={{ whiteSpace: 'pre-wrap' }}>{partContent}</span>
+                        </>
+                      )}
+                      <br />
+                    </React.Fragment>
+                  );
+                } else {
+                  // Fallback: try to find where title ends by looking for common sentence starters
+                  const fallbackMatch = cleaned.match(/^(Part\s*\d+\s*:\s*.*?)(?=(?:As|The|In|When|After|During|Through|With|From|By|On|At|[A-Z][a-z]+\s+[a-z])\s)/);
+                  if (fallbackMatch) {
+                    const partTitle = fallbackMatch[1].trim();
+                    const partContent = cleaned.substring(partTitle.length).trim();
+                    
+                    return (
+                      <React.Fragment key={`${idx}-${jdx}`}>
+                        <br />
+                        <strong>{partTitle}  </strong>
+                        {partContent && (
+                          <>
+                            <br />
+                            <span style={{ whiteSpace: 'pre-wrap' }}>{partContent}</span>
+                          </>
+                        )}
+                        <br />
+                      </React.Fragment>
+                    );
+                  } else {
+                    // Last resort - make the whole line bold
+                    return (
+                      <React.Fragment key={`${idx}-${jdx}`}>
+                        <br />
+                        <strong>{cleaned}  </strong>
+                        <br />
+                      </React.Fragment>
+                    );
                   }
                 }
-
-                // If no pattern matched, treat the whole line as title
-                if (!matched) {
-                  partTitle = cleaned;
-                  partContent = '';
-                }
-
-                return (
-                  <React.Fragment key={`${idx}-${jdx}`}>
-                    <br />
-                    <strong>{partTitle}</strong>
-                    {partContent && (
-                      <>
-                        <br />
-                        <span style={{ whiteSpace: 'pre-wrap' }}>{partContent}</span>
-                      </>
-                    )}
-                    <br />
-                  </React.Fragment>
-                );
               }
               return (
                 <React.Fragment key={`${idx}-${jdx}`}>
