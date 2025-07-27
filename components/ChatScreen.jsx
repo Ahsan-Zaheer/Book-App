@@ -60,7 +60,7 @@ export default function ChatScreen({ initialBookId = null }) {
           ))}
         </ul>
         <div className="d-flex gap-2 mt-2">
-          <button className="selection" onClick={() => handleSummaryRegeneration(originalSummary, refined)}>Generate another suggestion</button>
+          <button className="selection regeneration" onClick={() => handleSummaryRegeneration(originalSummary, refined)}>Generate another suggestion</button>
         </div>
       </div>
     ),
@@ -85,7 +85,7 @@ export default function ChatScreen({ initialBookId = null }) {
         </ol>
         <div className="d-flex gap-2 mt-2">
           <button className="selection" onClick={() => handleOutlineDecision(true, outlineData)}>Go ahead with this</button>
-          <button className="selection" onClick={() => handleOutlineDecision(false, null)}>Generate another suggestion</button>
+          <button className="selection regeneration" onClick={() => handleOutlineDecision(false, null)}>Generate another suggestion</button>
         </div>
       </div>
     ),
