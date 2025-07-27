@@ -688,14 +688,19 @@ const getRequiredKeyPoints = () => {
     if(Array.isArray(oldOutline) && oldOutline.length > 0){
       // Generate completely different outline when regenerating
       const existingChapters = oldOutline.map(ch => `${ch.title}: ${ch.concept}`).join('\n');
+      const summaryToUse = refinedSummary || summary;
+      console.log("Summary to use: ", summaryToUse);
+
+
       
       answer = await askQuestion(
-        `Generate a **completely NEW and UNIQUE** outline with ${count} chapters for the ${bookType} titled "${selectedTitle}", based on this summary:\n${refinedSummary || summary}.\n\nPREVIOUS OUTLINE TO AVOID (do not repeat, rephrase, or use similar concepts):\n${existingChapters}\n\nRequirements for the new outline:\n- Use entirely different chapter themes and approaches\n- Explore alternative angles, perspectives, or methodologies\n- Introduce fresh concepts and unique chapter structures\n- Avoid any similarity to the previous version\n- Each chapter should have a distinctive title and brief concept (max two lines)\n- Be creative and think outside the box\n\nFormat: Chapter X: [Title] - [Concept]`
+        `Generate a **completely NEW and UNIQUE** outline with ${count} chapters for the ${bookType} titled "${selectedTitle}", based on this summary:\n${summaryToUse}.\n\nPREVIOUS OUTLINE TO AVOID (do not repeat, rephrase, or use similar concepts):\n${existingChapters}\n\nRequirements for the new outline:\n- Use entirely different chapter themes and approaches\n- Explore alternative angles, perspectives, or methodologies\n- Introduce fresh concepts and unique chapter structures\n- Avoid any similarity to the previous version\n- Each chapter should have a distinctive title and brief concept (max two lines)\n- Be creative and think outside the box\n\nFormat: Chapter X: [Title] - [Concept]. Please don't make anything bold`
       );
+      console.log(answer);
+      
     } else {
       // Array of different prompt variations for outline generation
       const summaryToUse = refinedSummary || summary;
-      console.log("Summary to use: ", summaryToUse);
       
       const outlineGenerationPrompts = [
         `Provide an outline of ${count} chapters for the ${bookType} "${selectedTitle}" based on this summary:\n${summaryToUse}. Each chapter should have a title followed by a brief concept of the chapter in no more than two lines.`,
@@ -717,7 +722,7 @@ const getRequiredKeyPoints = () => {
         `Generate a strategic outline of ${count} chapters for "${selectedTitle}" as a ${bookType}, using:\n${summaryToUse}. Each chapter should have a clear title and brief conceptual description (maximum two lines).`,
         `Craft a logical ${count}-chapter framework for the ${bookType} "${selectedTitle}" inspired by this content:\n${summaryToUse}. Structure with chapter titles and compact concept summaries (no more than two lines).`,
         `Establish a coherent outline with ${count} chapters for "${selectedTitle}" (${bookType}) based on:\n${summaryToUse}. Include chapter titles with short conceptual explanations (two lines or less).`,
-        `Create a well-structured ${count}-chapter blueprint for the ${bookType} titled "${selectedTitle}" from this summary:\n${summaryToUse}. Present each chapter with a title and brief concept overview (limit two lines).`
+        `Create a well-structured ${count}-chapter blueprint for the ${bookType} titled "${selectedTitle}" from this summary:\n${summaryToUse}. Present each chapter with a title and brief concept overview (limit two lines). `
       ];
 
       // Randomly select a prompt variation
