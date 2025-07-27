@@ -65,53 +65,55 @@ export const POST = async (req: Request) => {
 
   if (keyPoints.length > 0) {
     prompt = basePrompt +
-    "IMPORTANT: You are writing a professional-grade chapter with strict format and word count requirements.\n\n" +
+    "CRITICAL: You MUST write EXACTLY " + totalWords + " words total. This is NON-NEGOTIABLE.\n\n" +
     
-    "CHAPTER STRUCTURE:\n" +
+    "MANDATORY STRUCTURE:\n" +
     "Chapter " + chapterIndex + ": " + chapterTitle + "\n\n" +
-    "Part 1: [Insert Title]\n[Write EXACTLY " + wordsPerPart + " words]\n\n" +
-    "Part 2: [Insert Title]\n[Write EXACTLY " + wordsPerPart + " words]\n\n" +
-    "Part 3: [Insert Title]\n[Write EXACTLY " + wordsPerPart + " words]\n\n" +
-    "Part 4: [Insert Title]\n[Write EXACTLY " + wordsPerPart + " words]\n\n" +
+    "Part 1: [Insert Title]\n[Write EXACTLY " + wordsPerPart + " words - count every single word]\n\n" +
+    "Part 2: [Insert Title]\n[Write EXACTLY " + wordsPerPart + " words - count every single word]\n\n" +
+    "Part 3: [Insert Title]\n[Write EXACTLY " + wordsPerPart + " words - count every single word]\n\n" +
+    "Part 4: [Insert Title]\n[Write EXACTLY " + wordsPerPart + " words - count every single word]\n\n" +
     
-    "TOTAL WORDS: EXACTLY " + totalWords + ". EACH PART MUST HAVE EXACT WORD COUNT — NO MORE, NO LESS.\n\n" +
+    "WORD COUNT ENFORCEMENT:\n" +
+    "- TOTAL: " + totalWords + " words (no exceptions)\n" +
+    "- Each part: " + wordsPerPart + " words (no exceptions)\n" +
+    "- Count words continuously as you write\n" +
+    "- Stop immediately when you reach the target\n\n" +
     
-    "RULES:\n" +
-    "- Do NOT summarize, do NOT compress.\n" +
-    "- Do NOT exceed or fall short in word count. Each part must be standalone and precisely written.\n" +
-    "- Use the following key points across the 4 parts. Spread them logically: " + keyPoints.join("; ") + "\n" +
-    "- Add TWO SPACES after every period.\n" +
-    "- Use clear, professional tone.\n" +
-    "- Count the words as you write.\n\n" +
-    
-    "ADDITIONAL:\n" +
-    "- If helpful, write a few short paragraphs per part to hit the exact word count.\n" +
-    "- Avoid bullet points, markdown, or dialogue unless contextually relevant.\n\n" +
+    "CONTENT REQUIREMENTS:\n" +
+    "- Use these key points across all 4 parts: " + keyPoints.join("; ") + "\n" +
+    "- Write detailed, comprehensive content to reach word targets\n" +
+    "- Add TWO SPACES after every period\n" +
+    "- Professional, educational tone\n" +
+    "- No bullet points or lists - use full paragraphs\n" +
+    "- Expand on concepts with examples and explanations\n\n" +
     
     "BOOK SUMMARY TO FOLLOW: " + summary;
   } else {
     prompt = basePrompt +
-      "READ CAREFULLY:\n\n" +
+      "CRITICAL WORD COUNT REQUIREMENT: You MUST write EXACTLY " + totalWords + " words total.\n\n" +
       
-      "WORD COUNT LIMITS:\n" +
-      "- Part 1: Write EXACTLY " + wordsPerPart + " words, then STOP\n" +
-      "- Part 2: Write EXACTLY " + wordsPerPart + " words, then STOP\n" +
-      "- Part 3: Write EXACTLY " + wordsPerPart + " words, then STOP\n" +
-      "- Part 4: Write EXACTLY " + wordsPerPart + " words, then STOP\n" +
-      "- TOTAL CHAPTER: " + totalWords + " words maximum\n" +
-      "- DO NOT exceed these limits under any circumstances\n\n" +
+      "MANDATORY WORD TARGETS:\n" +
+      "- Part 1: EXACTLY " + wordsPerPart + " words (count each word)\n" +
+      "- Part 2: EXACTLY " + wordsPerPart + " words (count each word)\n" +
+      "- Part 3: EXACTLY " + wordsPerPart + " words (count each word)\n" +
+      "- Part 4: EXACTLY " + wordsPerPart + " words (count each word)\n" +
+      "- TOTAL: " + totalWords + " words (this is mandatory)\n\n" +
       
-      "STRUCTURE (Follow this exact format):\n" +
+      "STRUCTURE (Follow exactly):\n" +
       "Chapter " + chapterIndex + ": " + chapterTitle + "\n\n" +
-      "Part 1: [Title]:\n[Content - exactly " + wordsPerPart + " words]\n\n" +
-      "Part 2: [Title]:\n[Content - exactly " + wordsPerPart + " words]\n\n" +
-      "Part 3: [Title]:\n[Content - exactly " + wordsPerPart + " words]\n\n" +
-      "Part 4: [Title]:\n[Content - exactly " + wordsPerPart + " words]\n\n" +
+      "Part 1: [Title]\n[Write comprehensive content with detailed explanations - exactly " + wordsPerPart + " words]\n\n" +
+      "Part 2: [Title]\n[Write comprehensive content with detailed explanations - exactly " + wordsPerPart + " words]\n\n" +
+      "Part 3: [Title]\n[Write comprehensive content with detailed explanations - exactly " + wordsPerPart + " words]\n\n" +
+      "Part 4: [Title]\n[Write comprehensive content with detailed explanations - exactly " + wordsPerPart + " words]\n\n" +
       
-      "CONTENT RULES:\n" +
-      "- Write educational content related to the book topic\n" +
+      "WRITING REQUIREMENTS:\n" +
+      "- Write detailed, educational content about the book topic\n" +
+      "- Use full paragraphs with comprehensive explanations\n" +
+      "- Include examples, details, and thorough coverage\n" +
       "- Add two spaces after every period\n" +
-      "- Professional, clear tone\n\n" +
+      "- Professional, clear tone\n" +
+      "- Expand concepts fully to meet word count requirements\n\n" +
       
       "Book Summary: " + summary;
   }
@@ -137,7 +139,7 @@ export const POST = async (req: Request) => {
               const currentWordCount = countWords(content);
               
               // Stop if we exceed the target (with small buffer)
-              if (currentWordCount > totalWords + 100) {
+              if (currentWordCount > totalWords + 50) {
                 console.log("Stopping generation - word count exceeded:", currentWordCount);
                 controller.enqueue(encoder.encode("event: done\n\n"));
                 controller.close();
