@@ -59,7 +59,9 @@ export default function ChatScreen({ initialBookId = null }) {
             </li>
           ))}
         </ul>
-
+        <div className="d-flex gap-2 mt-2">
+          <button className="selection" onClick={() => handleSummaryRegeneration()}>Generate another suggestion</button>
+        </div>
       </div>
     ),
   });
@@ -525,6 +527,60 @@ const getRequiredKeyPoints = () => {
     setInput(''); // clear input so user can type a new number
   }
 };
+
+  const handleSummaryRegeneration = async () => {
+    const loadingId = generateId();
+    setMessages((prev) => [
+      ...prev,
+      { id: loadingId, sender: 'bot', text: 'Generating new title suggestions...' },
+    ]);
+
+    try {
+      const refined = await askQuestion(
+        `Rewrite the following book summary in a single polished paragraph with a different approach or perspective:\n${summary}`
+      );
+      setRefinedSummary(refined);
+
+      const answer = await askQuestion(
+        `Provide 10 completely different book title suggestions with subtitles based on the following summary. Avoid repeating any previous suggestions and explore new creative angles:\n${summary}`
+      );
+
+      const titles = answer
+        .split(/\n|\r/)
+        .map((t) => t.trim())
+        .filter((t) => /^\d+\./.test(t))
+        .map((t) => {
+          // Match titles inside **bold** markdown with : or - as separator
+          const match = t.match(/^\d+\.\s*\*\*(.+?)\s*[:\-–]\s*(.+?)\*\*$/);
+          if (match) {
+            return { title: match[1].trim(), subtitle: match[2].trim() };
+          } else {
+            // Fallback: try to extract title and subtitle without markdown
+            const fallback = t.match(/^\d+\.\s*(.*?)\s*[:\-–]\s*(.*)$/);
+            if (fallback) {
+              return { title: fallback[1].trim(), subtitle: fallback[2].trim() };
+            } else {
+              return { title: t.replace(/^\d+\.\s*/, '').trim(), subtitle: '' };
+            }
+          }
+        });
+
+      setTitleOptions(titles);
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === loadingId
+            ? createTitleSuggestionMessage(loadingId, refined, titles)
+            : m
+        ));
+
+    } catch (e) {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === loadingId ? { id: loadingId, sender: 'bot', text: 'Failed to generate new suggestions.' } : m
+        )
+      );
+    }
+  };
 
 
   const getOutlineSuggestions = async (count, oldOutline = null) => {
