@@ -65,66 +65,59 @@ export const POST = async (req: Request) => {
 
   if (keyPoints.length > 0) {
     prompt = basePrompt +
-    "🚨 CRITICAL WORD COUNT REQUIREMENT: You MUST write EXACTLY " + totalWords + " words total. DO NOT STOP WRITING UNTIL YOU REACH THIS EXACT NUMBER! 🚨\n\n" +
+    "Please write a comprehensive chapter with the following structure and word count target of " + totalWords + " words total.\n\n" +
     
-    "MANDATORY STRUCTURE (MUST FOLLOW EXACTLY):\n" +
+    "CHAPTER STRUCTURE:\n" +
     "Chapter " + chapterIndex + ": " + chapterTitle + "\n\n" +
-    "Part 1: [Insert Creative Title]\n[Write extensive, comprehensive content with detailed explanations, multiple examples, case studies, and thorough coverage - EXACTLY " + wordsPerPart + " words]\n\n" +
-    "Part 2: [Insert Creative Title]\n[Write extensive, comprehensive content with detailed explanations, multiple examples, case studies, and thorough coverage - EXACTLY " + wordsPerPart + " words]\n\n" +
-    "Part 3: [Insert Creative Title]\n[Write extensive, comprehensive content with detailed explanations, multiple examples, case studies, and thorough coverage - EXACTLY " + wordsPerPart + " words]\n\n" +
-    "Part 4: [Insert Creative Title]\n[Write extensive, comprehensive content with detailed explanations, multiple examples, case studies, and thorough coverage - EXACTLY " + wordsPerPart + " words]\n\n" +
+    "Part 1: [Creative Title]\n[Comprehensive content - approximately " + wordsPerPart + " words]\n\n" +
+    "Part 2: [Creative Title]\n[Comprehensive content - approximately " + wordsPerPart + " words]\n\n" +
+    "Part 3: [Creative Title]\n[Comprehensive content - approximately " + wordsPerPart + " words]\n\n" +
+    "Part 4: [Creative Title]\n[Comprehensive content - approximately " + wordsPerPart + " words]\n\n" +
     
-    "ABSOLUTE WORD COUNT REQUIREMENTS:\n" +
-    "- TOTAL TARGET: " + totalWords + " words (THIS IS NON-NEGOTIABLE - YOU MUST REACH THIS EXACT NUMBER)\n" +
-    "- Each part target: " + wordsPerPart + " words (WRITE EXTENSIVELY TO MEET THIS)\n" +
-    "- Count words as you write and continue until you reach the target\n" +
-    "- Write multiple detailed paragraphs with comprehensive explanations\n" +
-    "- Include multiple examples, case studies, detailed analysis, and practical applications\n" +
-    "- Expand on every concept thoroughly with extensive detail\n" +
-    "- DO NOT summarize, compress, or conclude early - KEEP EXPANDING AND ELABORATING\n" +
-    "- If you reach what feels like a natural conclusion, continue with additional insights, examples, or analysis\n\n" +
+    "CONTENT REQUIREMENTS:\n" +
+    "- Target word count: " + totalWords + " words total (" + wordsPerPart + " words per part)\n" +
+    "- Write detailed, educational content with thorough explanations\n" +
+    "- Include practical examples, case studies, and real-world applications\n" +
+    "- Use comprehensive analysis and multiple perspectives\n" +
+    "- Write in full paragraphs with rich, descriptive language\n" +
+    "- Expand on concepts with detailed exploration and insights\n" +
+    "- Add two spaces after every period\n" +
+    "- Maintain a professional, educational tone throughout\n\n" +
     
-    "CONTENT EXPANSION REQUIREMENTS:\n" +
-    "- Use these key points across all 4 parts: " + keyPoints.join("; ") + "\n" +
-    "- Write in-depth, educational content with extensive detail and multiple perspectives\n" +
-    "- Include practical examples, real-world applications, case studies, and scenarios\n" +
-    "- Add comprehensive explanations for every concept with multiple angles\n" +
-    "- Use descriptive language, thorough analysis, and rich vocabulary\n" +
-    "- Write extensive paragraphs with detailed exploration of each topic\n" +
-    "- Add TWO SPACES after every period\n" +
-    "- Professional, educational tone with extensive elaboration\n" +
-    "- NO bullet points or short sentences - use full, detailed paragraphs\n" +
-    "- Continue writing until you reach exactly " + totalWords + " words\n\n" +
+    "KEY POINTS TO INCORPORATE:\n" +
+    "- Distribute these key points across all 4 parts: " + keyPoints.join("; ") + "\n" +
+    "- Expand each key point with detailed explanations and examples\n" +
+    "- Connect concepts logically throughout the chapter\n" +
+    "- Provide thorough coverage of each topic area\n\n" +
     
     "BOOK SUMMARY TO FOLLOW: " + summary;
   } else {
     prompt = basePrompt +
-      "🚨 ABSOLUTE WORD COUNT REQUIREMENT: You MUST write EXACTLY " + totalWords + " words total. DO NOT STOP WRITING UNTIL YOU REACH THIS EXACT TARGET! 🚨\n\n" +
+      "Please write a comprehensive chapter with a target word count of " + totalWords + " words total.\n\n" +
       
-      "MANDATORY WORD TARGETS (NON-NEGOTIABLE):\n" +
-      "- Part 1: EXACTLY " + wordsPerPart + " words (write extensively with multiple detailed explanations and examples)\n" +
-      "- Part 2: EXACTLY " + wordsPerPart + " words (write extensively with multiple detailed explanations and examples)\n" +
-      "- Part 3: EXACTLY " + wordsPerPart + " words (write extensively with multiple detailed explanations and examples)\n" +
-      "- Part 4: EXACTLY " + wordsPerPart + " words (write extensively with multiple detailed explanations and examples)\n" +
-      "- TOTAL: " + totalWords + " words (THIS IS MANDATORY - COUNT AS YOU WRITE)\n\n" +
+      "WORD COUNT TARGETS:\n" +
+      "- Part 1: Approximately " + wordsPerPart + " words with detailed explanations and examples\n" +
+      "- Part 2: Approximately " + wordsPerPart + " words with detailed explanations and examples\n" +
+      "- Part 3: Approximately " + wordsPerPart + " words with detailed explanations and examples\n" +
+      "- Part 4: Approximately " + wordsPerPart + " words with detailed explanations and examples\n" +
+      "- Total target: " + totalWords + " words\n\n" +
       
-      "STRUCTURE (Follow exactly):\n" +
+      "CHAPTER STRUCTURE:\n" +
       "Chapter " + chapterIndex + ": " + chapterTitle + "\n\n" +
-      "Part 1: [Creative Title]\n[Write extensive, comprehensive content with multiple detailed explanations, examples, case studies, and thorough analysis - EXACTLY " + wordsPerPart + " words]\n\n" +
-      "Part 2: [Creative Title]\n[Write extensive, comprehensive content with multiple detailed explanations, examples, case studies, and thorough analysis - EXACTLY " + wordsPerPart + " words]\n\n" +
-      "Part 3: [Creative Title]\n[Write extensive, comprehensive content with multiple detailed explanations, examples, case studies, and thorough analysis - EXACTLY " + wordsPerPart + " words]\n\n" +
-      "Part 4: [Creative Title]\n[Write extensive, comprehensive content with multiple detailed explanations, examples, case studies, and thorough analysis - EXACTLY " + wordsPerPart + " words]\n\n" +
+      "Part 1: [Creative Title]\n[Write comprehensive content with detailed explanations, examples, and analysis - approximately " + wordsPerPart + " words]\n\n" +
+      "Part 2: [Creative Title]\n[Write comprehensive content with detailed explanations, examples, and analysis - approximately " + wordsPerPart + " words]\n\n" +
+      "Part 3: [Creative Title]\n[Write comprehensive content with detailed explanations, examples, and analysis - approximately " + wordsPerPart + " words]\n\n" +
+      "Part 4: [Creative Title]\n[Write comprehensive content with detailed explanations, examples, and analysis - approximately " + wordsPerPart + " words]\n\n" +
       
-      "CONTENT EXPANSION REQUIREMENTS:\n" +
-      "- Write in-depth, educational content about the book topic with extensive detail\n" +
-      "- Use multiple extensive paragraphs with comprehensive explanations\n" +
-      "- Include multiple detailed examples, case studies, practical applications, and scenarios\n" +
-      "- Provide thorough analysis, deep insights, and multiple perspectives\n" +
+      "CONTENT GUIDELINES:\n" +
+      "- Write thorough, educational content about the book topic\n" +
+      "- Use detailed paragraphs with comprehensive explanations\n" +
+      "- Include practical examples, case studies, and real-world applications\n" +
+      "- Provide in-depth analysis and multiple perspectives\n" +
       "- Add two spaces after every period\n" +
-      "- Professional, educational tone with rich vocabulary and extensive elaboration\n" +
-      "- Expand every concept fully with multiple angles and detailed exploration\n" +
-      "- DO NOT summarize, compress, or conclude early - KEEP WRITING UNTIL YOU REACH " + totalWords + " WORDS\n" +
-      "- If you feel like concluding, continue with additional insights, examples, or detailed analysis\n\n" +
+      "- Maintain a professional, educational tone with rich vocabulary\n" +
+      "- Expand concepts fully with detailed exploration and insights\n" +
+      "- Write substantial content to meet the target word count\n\n" +
       
       "Book Summary: " + summary;
   }
@@ -162,14 +155,7 @@ export const POST = async (req: Request) => {
                 console.log(`Progress: ${currentWordCount}/${totalWords} words`);
               }
           
-              // If we're getting close to the target but haven't reached it, encourage continuation
-              if (currentWordCount >= totalWords * 0.7 && currentWordCount < totalWords) {
-                // Add a continuation prompt to encourage more content
-                const remainingWords = totalWords - currentWordCount;
-                if (remainingWords > 100 && Math.random() < 0.1) { // 10% chance to inject continuation
-                  controller.enqueue(encoder.encode(`data: \n\nContinue writing to reach exactly ${totalWords} words total. You need ${remainingWords} more words. Expand on the concepts with more detailed explanations, examples, and analysis.\n\n`));
-                }
-              }
+              // Remove the continuation injection as it may be causing issues
               
               controller.enqueue(encoder.encode("data: " + token + "\n\n"));
             },
