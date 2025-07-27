@@ -468,7 +468,7 @@ export default function ChatScreen({ initialBookId = null }) {
                 {
                   id: generateId(),
                   sender: 'bot',
-                  text: `Awesome! Now, please enter ${getRequiredKeyPoints()} Key points you'd like to include in this Chapter:`,
+                  text: `Awesome! Now, <strong>please enter ${getRequiredKeyPoints()} Key points you'd like to include in this Chapter:</strong>`,
                 },
               ]);
               setKeyPoints(getInitialKeyPoints());
@@ -835,7 +835,7 @@ const getRequiredKeyPoints = () => {
           {
             id: generateId(),
             sender: 'bot',
-            text: `Great! Let's work on Chapter ${next}: ${nextTitle} \n Concept: ${nextConcept} \n Please enter ${getRequiredKeyPoints()} Key points you'd like to include in this Chapter:`,
+            text: `Great! Let's work on Chapter ${next}: ${nextTitle} \n Concept: ${nextConcept} \n <strong>Please enter ${getRequiredKeyPoints()} Key points you'd like to include in this Chapter:</strong>`,
           },
         ]);
         setCurrentChapter(next);
