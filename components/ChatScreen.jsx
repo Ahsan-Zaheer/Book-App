@@ -47,7 +47,9 @@ export default function ChatScreen({ initialBookId = null }) {
     custom: (
       <div>
         <p>
-          Great! Here is the refined version of your summary: <br /> <br /> <span style={{fontStyle: 'italic'}}>"{refined}"</span><br /> <br /> Based on your summary, here are some title ideas choose one or enter your own book title
+          Great! Here is the refined version of your summary: <br /> <br /> <span style={{fontStyle: 'italic'}}>"{refined}"</span><br /> <br />  <h3>
+            Based on your summary, here are some title ideas choose one or enter your own book title
+          </h3>
         </p>
         <ul className="list-unstyled d-flex flex-wrap gap-2">
           {titles.map((t, idx) => (
@@ -106,7 +108,7 @@ export default function ChatScreen({ initialBookId = null }) {
           <li>Give you 10 title and subtitle suggestions to consider.</li>
           <li>Help you develop chapter ideas and an outline if you’d like.</li>
         </ul>
-        <p>👉 Please go ahead and type or paste your book summary when you're ready.</p>
+        <strong>👉 Please go ahead and type or paste your book summary when you're ready.</strong>
       </div>
     ),
   });
@@ -566,7 +568,7 @@ const getRequiredKeyPoints = () => {
       {
         id: generateId(),
         sender: 'bot',
-        text: `Great! Let's start with \n Chapter 1: ${first.title} \n Concept: ${first.concept} \n Please enter ${getRequiredKeyPoints()} key points you'd like to include in this Chapter.`,
+        text: `Great! Let's start with \n Chapter 1: ${first.title} \n Concept: ${first.concept} \n <strong>Please enter ${getRequiredKeyPoints()} key points you'd like to include in this Chapter.</strong>`,
       },
     ]);
     setKeyPoints(getInitialKeyPoints());
