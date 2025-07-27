@@ -6,6 +6,36 @@ import { CallbackManager } from "@langchain/core/callbacks/manager";
 import { HumanMessage } from "@langchain/core/messages";
 import { formatChapterText } from "../../../../../utils/format";
 
+
+
+
+function getWordsPerPart(bookType: string): number {
+  switch (bookType) {
+    case 'Ebook':
+      return 700; 
+    case 'Short Book':
+      return 1000; 
+    case 'Full Length Book':
+      return 1500; 
+      return 700;
+  }
+}
+
+// Helper function to count words (for debugging)
+function countWords(text: string): number {
+  if (!text || typeof text !== 'string') return 0;
+  
+  // Remove markdown formatting and extra whitespace
+  const cleanText = text
+    .replace(/\*\*/g, '') 
+    .replace(/#+/g, '') 
+    .replace(/\s+/g, ' ') 
+    .trim();
+  
+  // Split by whitespace and filter out empty strings
+  return cleanText.split(/\s+/).filter(word => word.length > 0).length;
+}
+
 export const POST = async (req: Request) => {
   const { bookId, bookType, summary, title, chapterIndex, chapterTitle, keyPoints } = await req.json();
 
@@ -22,85 +52,113 @@ export const POST = async (req: Request) => {
   book.status = "generating";
   await book.save();
 
-  const wordsPerPart =
-    bookType === "Ebook" ? 700 : bookType === "Short Book" ? 1000 : 1500;
+  // Fixed word count calculations
+  const wordsPerPart = getWordsPerPart(bookType);
+  const totalWords = wordsPerPart * 4;
 
-  const basePrompt =
-    `You are a professional book writer. Write Chapter ${chapterIndex} titled "${chapterTitle}" for the ${bookType} "${title}".\n\n`;
+  console.log(`Total words for chapter: ${totalWords} (Parts: ${wordsPerPart} each)`);
 
-  const prompt = keyPoints.length > 0
-    ? basePrompt +
-      "STRICT WRITING INSTRUCTION PROMPT:\n" +
-      "When writing each chapter (and each part of the chapters), do not fabricate, fictionalize, or embellish anything.\n" +
-      "Do not invent any characters, events, stories, or situations.\n\n" +
-      "All content must be derived strictly and only from the key points provided. Your job is to expand and explain the key points in depth — using insight, reflection, analysis, or real-world application — but without introducing anything that was not directly included in the original key points.\n\n" +
-      "No added names. No imagined dialogue. No hypothetical scenarios. No “filler” stories.\n" +
-      "Stay 100% faithful to the key points provided.\n\n" +
-      "Write in a professional, clear, and sincere tone. This is non-fiction.\n\n" +
-      "FORMATTING REQUIREMENT: In the chapter you produce, insert exactly two spaces after every period/full stop.\n\n" +
-      "Strictly follow this structure:\n" +
-      "1. Start the chapter with this exact line (no extra characters, no quotes):\n" +
-      `   Chapter ${chapterIndex}: ${chapterTitle}\n` +
-      "2. Divide the chapter into exactly 4 parts. Each part must:\n" +
-      `   - Have MORE THAN ${wordsPerPart} WORDS.\n` +
-      "   - Begin on a new line\n" +
-      "   - Start with a heading in this exact format (including colon at the end):\n" +
-      "     Part X: Title:\n" +
-      "   (where X is 1, 2, 3, or 4)\n" +
-      "3. The COMPLETE chapter MUST have more than " + (wordsPerPart * 4) + " WORDS.\n" +
-      "4. Key-point usage:\n" +
-      "   - BEFORE writing, divide the provided key points into exactly 4 sequential groups (in the given order).\n" +
-      "   - Use ONLY the key points from Group 1 to write Part 1, Group 2 for Part 2, Group 3 for Part 3, and Group 4 for Part 4.\n" +
-      "   - Do NOT mix key points between parts.\n" +
-      "   - Do NOT introduce any content that is not explicitly present in the assigned key points.\n\n" +
-      "Use the following content to guide your writing:\n" +
-      `  Summary: ${summary}\n` +
-      `  Key points: ${keyPoints.join("; ")}\n`
-    : basePrompt +
-      "STRICT WRITING INSTRUCTION PROMPT:\n" +
-      "When writing each chapter (and each part of the chapters), do not fabricate, fictionalize, or embellish anything.\n" +
-      "Do not invent any characters, events, stories, or situations.\n\n" +
-      "Write in a professional, clear, and sincere tone. This is non-fiction.\n\n" +
-      "FORMATTING REQUIREMENT: In the chapter you produce, insert exactly two spaces after every period/full stop.\n\n" +
-      "Strictly follow this structure:\n" +
-      "1. Start the chapter with this exact line (no extra characters, no quotes):\n" +
-      `   Chapter ${chapterIndex}: ${chapterTitle}\n` +
-      "2. Divide the chapter into exactly 4 parts. Each part must:\n" +
-      `   - Have MORE THAN ${wordsPerPart} WORDS.\n` +
-      "   - Begin on a new line\n" +
-      "   - Start with a heading in this exact format (including colon at the end):\n" +
-      "     Part X: Title:\n" +
-      "   (where X is 1, 2, 3, or 4)\n" +
-      "3. The COMPLETE chapter MUST have more than " + (wordsPerPart * 4) + " WORDS.\n\n" +
-      "Use the following content to guide your writing:\n" +
-      `  Summary: ${summary}\n`;
+  const basePrompt = "You are a professional book writer. Write Chapter " + chapterIndex + " titled \"" + chapterTitle + "\" for the " + "Book" + " \"" + title + "\".\n\n";
+
+  let prompt: string;
+
+  if (keyPoints.length > 0) {
+    prompt = basePrompt +
+    "IMPORTANT: You are writing a professional-grade chapter with strict format and word count requirements.\n\n" +
+    
+    "CHAPTER STRUCTURE:\n" +
+    "Chapter " + chapterIndex + ": " + chapterTitle + "\n\n" +
+    "Part 1: [Insert Title]\n[Write EXACTLY " + wordsPerPart + " words]\n\n" +
+    "Part 2: [Insert Title]\n[Write EXACTLY " + wordsPerPart + " words]\n\n" +
+    "Part 3: [Insert Title]\n[Write EXACTLY " + wordsPerPart + " words]\n\n" +
+    "Part 4: [Insert Title]\n[Write EXACTLY " + wordsPerPart + " words]\n\n" +
+    
+    "TOTAL WORDS: EXACTLY " + totalWords + ". EACH PART MUST HAVE EXACT WORD COUNT — NO MORE, NO LESS.\n\n" +
+    
+    "RULES:\n" +
+    "- Do NOT summarize, do NOT compress.\n" +
+    "- Do NOT exceed or fall short in word count. Each part must be standalone and precisely written.\n" +
+    "- Use the following key points across the 4 parts. Spread them logically: " + keyPoints.join("; ") + "\n" +
+    "- Add TWO SPACES after every period.\n" +
+    "- Use clear, professional tone.\n" +
+    "- Count the words as you write.\n\n" +
+    
+    "ADDITIONAL:\n" +
+    "- If helpful, write a few short paragraphs per part to hit the exact word count.\n" +
+    "- Avoid bullet points, markdown, or dialogue unless contextually relevant.\n\n" +
+    
+    "BOOK SUMMARY TO FOLLOW: " + summary;
+  } else {
+    prompt = basePrompt +
+      "READ CAREFULLY:\n\n" +
+      
+      "WORD COUNT LIMITS:\n" +
+      "- Part 1: Write EXACTLY " + wordsPerPart + " words, then STOP\n" +
+      "- Part 2: Write EXACTLY " + wordsPerPart + " words, then STOP\n" +
+      "- Part 3: Write EXACTLY " + wordsPerPart + " words, then STOP\n" +
+      "- Part 4: Write EXACTLY " + wordsPerPart + " words, then STOP\n" +
+      "- TOTAL CHAPTER: " + totalWords + " words maximum\n" +
+      "- DO NOT exceed these limits under any circumstances\n\n" +
+      
+      "STRUCTURE (Follow this exact format):\n" +
+      "Chapter " + chapterIndex + ": " + chapterTitle + "\n\n" +
+      "Part 1: [Title]:\n[Content - exactly " + wordsPerPart + " words]\n\n" +
+      "Part 2: [Title]:\n[Content - exactly " + wordsPerPart + " words]\n\n" +
+      "Part 3: [Title]:\n[Content - exactly " + wordsPerPart + " words]\n\n" +
+      "Part 4: [Title]:\n[Content - exactly " + wordsPerPart + " words]\n\n" +
+      
+      "CONTENT RULES:\n" +
+      "- Write educational content related to the book topic\n" +
+      "- Add two spaces after every period\n" +
+      "- Professional, clear tone\n\n" +
+      
+      "Book Summary: " + summary;
+  }
 
   const encoder = new TextEncoder();
   let content = "";
+  let wordCount = 0;
 
   const stream = new ReadableStream({
     async start(controller) {
       try {
         const model = new ChatOpenAI({
-          modelName: "gpt-4.1",
-          temperature: 0.7,
+          modelName: "gpt-4o",
+          temperature: 0.2, // Lower temperature for more controlled output
           streaming: true,
+          maxTokens: Math.ceil(totalWords * 1.3), // Limit tokens to prevent overgeneration
           openAIApiKey: process.env.OPEN_AI_KEY,
           callbackManager: CallbackManager.fromHandlers({
             async handleLLMNewToken(token) {
               content += token;
-              controller.enqueue(encoder.encode(`data: ${token}\n\n`));
+              
+              // Count words in real-time
+              const currentWordCount = countWords(content);
+              
+              // Stop if we exceed the target (with small buffer)
+              if (currentWordCount > totalWords + 100) {
+                console.log("Stopping generation - word count exceeded:", currentWordCount);
+                controller.enqueue(encoder.encode("event: done\n\n"));
+                controller.close();
+                return;
+              }
+              
+              controller.enqueue(encoder.encode("data: " + token + "\n\n"));
             },
             async handleLLMEnd() {
               controller.enqueue(encoder.encode("event: done\n\n"));
               controller.close();
 
               const formatted = formatChapterText(content, true);
+              
+              // Log word count for debugging
+              const finalWordCount = countWords(formatted);
+              console.log("Generated chapter word count: " + finalWordCount + ", Expected: " + totalWords);
 
               book.chapters.push({
                 idx: chapterIndex,
                 title: chapterTitle,
-                keyPoints,
+                keyPoints: keyPoints,
                 aiContent: formatted,
               });
 
