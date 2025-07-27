@@ -897,7 +897,8 @@ const getRequiredKeyPoints = () => {
               if (/^Part\s*\d+/i.test(cleaned)) {
                 return (
                   <React.Fragment key={`${idx}-${jdx}`}>
-                    <span style={{ whiteSpace: 'pre-wrap' }}>{cleaned}</span>
+                    <br />
+                    <strong style={{ whiteSpace: 'pre-wrap' }}>{cleaned}</strong>
                     <br />
                   </React.Fragment>
                 );
