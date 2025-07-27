@@ -895,13 +895,34 @@ const getRequiredKeyPoints = () => {
                 );
               }
               if (/^Part\s*\d+/i.test(cleaned)) {
-                return (
-                  <React.Fragment key={`${idx}-${jdx}`}>
-                    <br />
-                    <strong style={{ whiteSpace: 'pre-wrap' }}>{cleaned}</strong>
-                    <br />
-                  </React.Fragment>
-                );
+                // Split the part title from content if they're on the same line
+                const partMatch = cleaned.match(/^(Part\s*\d+[^:]*:?\s*[^.\n]*?)(\.\s*.*)?$/i);
+                if (partMatch) {
+                  const partTitle = partMatch[1].trim();
+                  const partContent = partMatch[2] ? partMatch[2].trim() : '';
+                  
+                  return (
+                    <React.Fragment key={`${idx}-${jdx}`}>
+                      <br />
+                      <strong>{partTitle}</strong>
+                      <br />
+                      {partContent && (
+                        <>
+                          <span style={{ whiteSpace: 'pre-wrap' }}>{partContent}</span>
+                          <br />
+                        </>
+                      )}
+                    </React.Fragment>
+                  );
+                } else {
+                  return (
+                    <React.Fragment key={`${idx}-${jdx}`}>
+                      <br />
+                      <strong>{cleaned}</strong>
+                      <br />
+                    </React.Fragment>
+                  );
+                }
               }
               return (
                 <React.Fragment key={`${idx}-${jdx}`}>
