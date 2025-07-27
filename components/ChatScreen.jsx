@@ -552,13 +552,17 @@ const getRequiredKeyPoints = () => {
     
 
     try {
+      // Generate a completely different refined summary with explicit instructions for uniqueness
       const refined = await askQuestion(
-        `Rewrite the following book summary in a single polished paragraph with a different approach or perspective:\n${summaryToUse}`
+        `Take the following book summary and rewrite it in a completely different style and perspective. Use different vocabulary, sentence structure, and emphasis. Focus on different aspects of the content than previous versions. Make it sound fresh and unique while maintaining the core message:\n\nOriginal summary: ${summaryToUse}\n\nPrevious refined version to avoid repeating: ${currentRefined || refinedSummary || 'None'}\n\nCreate a single polished paragraph that feels completely new and different.`
       );
       setRefinedSummary(refined);
 
+      // Get existing titles to explicitly avoid them
+      const existingTitles = titleOptions.map(t => `${t.title}: ${t.subtitle}`).join('\n');
+      
       const answer = await askQuestion(
-        `Provide 10 completely different book title suggestions with subtitles based on the following summary. Avoid repeating any previous suggestions and explore new creative angles:\n${summaryToUse}`
+        `Generate 10 completely NEW and UNIQUE book title suggestions with subtitles. These must be entirely different from any previous suggestions.\n\nBook summary: ${summaryToUse}\n\nPREVIOUS TITLES TO AVOID (do not repeat or rephrase these):\n${existingTitles}\n\nRequirements:\n- Use completely different keywords and themes\n- Explore new angles, metaphors, and perspectives\n- Vary the style (some catchy, some academic, some emotional, etc.)\n- Make each title memorable and distinct\n- Format as: "1. **Title: Subtitle**"`
       );
 
        const titles = answer
