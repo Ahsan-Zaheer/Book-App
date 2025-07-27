@@ -39,11 +39,11 @@ export default function ChatScreen({ initialBookId = null }) {
   const [isLoadingChat, setIsLoadingChat] = useState(false);
   const [useSimpleInput, setUseSimpleInput] = useState(false);
 
-  const createTitleSuggestionMessage = (id, refined, titles) => ({
+  const createTitleSuggestionMessage = (id, refined, titles, originalSummary) => ({
     id,
     sender: 'bot',
     customType: 'titleSuggestions',
-    data: { refinedSummary: refined, titles },
+    data: { refinedSummary: refined, titles, originalSummary },
     custom: (
       <div>
         <p>
@@ -60,7 +60,7 @@ export default function ChatScreen({ initialBookId = null }) {
           ))}
         </ul>
         <div className="d-flex gap-2 mt-2">
-          <button className="selection" onClick={() => handleSummaryRegeneration()}>Generate another suggestion</button>
+          <button className="selection" onClick={() => handleSummaryRegeneration(originalSummary, refined)}>Generate another suggestion</button>
         </div>
       </div>
     ),
@@ -113,7 +113,7 @@ export default function ChatScreen({ initialBookId = null }) {
     if (msg.customType === 'titleSuggestions' && msg.data) {
       setRefinedSummary(msg.data.refinedSummary || '');
       setTitleOptions(msg.data.titles || []);
-      return createTitleSuggestionMessage(msg.id, msg.data.refinedSummary, msg.data.titles || []);
+      return createTitleSuggestionMessage(msg.id, msg.data.refinedSummary, msg.data.titles || [], msg.data.originalSummary || '');
     }
     if (msg.customType === 'outline' && msg.data) {
       setOutline(msg.data.outline || []);
@@ -331,7 +331,7 @@ export default function ChatScreen({ initialBookId = null }) {
         setMessages((prev) =>
           prev.map((m) =>
             m.id === loadingId
-              ? createTitleSuggestionMessage(loadingId, refined, titles)
+              ? createTitleSuggestionMessage(loadingId, refined, titles, currentInput)
               : m
           ));
 
@@ -534,19 +534,21 @@ const getRequiredKeyPoints = () => {
   }
 };
 
-  const handleSummaryRegeneration = async () => {
+  const handleSummaryRegeneration = async (originalSummary = null, currentRefined = null) => {
     const loadingId = generateId();
     setMessages((prev) => [
       ...prev,
       { id: loadingId, sender: 'bot', text: 'Generating new title suggestions...' },
     ]);
 
-    // Use the original summary if refinedSummary is empty
-    const summaryToUse = refinedSummary || summary;
+    // Use passed parameters first, then fall back to state variables
+    const summaryToUse = originalSummary || currentRefined || refinedSummary || summary;
     
     console.log('Summary to use:', summaryToUse);
-    console.log('Original Summary:', summary);
-    console.log('Refined Summary:', refinedSummary);
+    console.log('Original Summary passed:', originalSummary);
+    console.log('Current Refined passed:', currentRefined);
+    console.log('State Summary:', summary);
+    console.log('State Refined Summary:', refinedSummary);
     
 
     try {
@@ -586,7 +588,7 @@ const getRequiredKeyPoints = () => {
         setMessages((prev) =>
           prev.map((m) =>
             m.id === loadingId
-              ? createTitleSuggestionMessage(loadingId, refined, titles)
+              ? createTitleSuggestionMessage(loadingId, refined, titles, summaryToUse)
               : m
           ));
 
