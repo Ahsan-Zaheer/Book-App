@@ -37,7 +37,7 @@ function countWords(text: string): number {
 }
 
 export const POST = async (req: Request) => {
-  const { bookId, bookType, summary, title, chapterIndex, chapterTitle, keyPoints } = await req.json();
+  const { bookId, bookType, summary, title, chapterIndex, chapterTitle, keyPoints, targetWordCount } = await req.json();
 
   if (!bookId || !chapterTitle || !summary || !title || !Array.isArray(keyPoints) || !chapterIndex) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -52,11 +52,12 @@ export const POST = async (req: Request) => {
   book.status = "generating";
   await book.save();
 
-  // Fixed word count calculations
-  const wordsPerPart = getWordsPerPart(bookType);
+  // Use targetWordCount from frontend if provided, otherwise fall back to getWordsPerPart
+  const wordsPerPart = targetWordCount || getWordsPerPart(bookType);
   const totalWords = wordsPerPart * 4;
 
   console.log(`Total words for chapter: ${totalWords} (Parts: ${wordsPerPart} each)`);
+  console.log(`Target word count received: ${targetWordCount}`);
 
   const basePrompt = "You are a professional book writer. Write Chapter " + chapterIndex + " titled \"" + chapterTitle + "\" for the " + "Book" + " \"" + title + "\".\n\n";
 
