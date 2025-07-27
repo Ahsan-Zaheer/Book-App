@@ -323,9 +323,33 @@ export default function ChatScreen({ initialBookId = null }) {
         console.log(refinedSummary);
         
 
-        const answer = await askQuestion(
-          `Provide 10 book title suggestions with subtitles based on the following summary:\n${currentInput}`
-        );
+        // Array of different prompt variations for title generation
+        const titleGenerationPrompts = [
+          `Provide 10 book title suggestions with subtitles based on the following summary:\n${currentInput}`,
+          `Create 10 compelling book titles with subtitles that capture the essence of this summary:\n${currentInput}`,
+          `Generate 10 creative book title and subtitle combinations inspired by this content:\n${currentInput}`,
+          `Craft 10 engaging book titles with descriptive subtitles from this summary:\n${currentInput}`,
+          `Develop 10 memorable book titles with compelling subtitles based on:\n${currentInput}`,
+          `Design 10 captivating book titles with informative subtitles for this summary:\n${currentInput}`,
+          `Produce 10 professional book titles with engaging subtitles from this content:\n${currentInput}`,
+          `Formulate 10 attractive book titles with descriptive subtitles inspired by:\n${currentInput}`,
+          `Compose 10 striking book titles with meaningful subtitles based on this summary:\n${currentInput}`,
+          `Build 10 powerful book titles with explanatory subtitles from this content:\n${currentInput}`,
+          `Construct 10 dynamic book titles with compelling subtitles for this summary:\n${currentInput}`,
+          `Fashion 10 impactful book titles with descriptive subtitles based on:\n${currentInput}`,
+          `Shape 10 intriguing book titles with informative subtitles from this summary:\n${currentInput}`,
+          `Form 10 appealing book titles with engaging subtitles inspired by this content:\n${currentInput}`,
+          `Establish 10 distinctive book titles with meaningful subtitles for this summary:\n${currentInput}`,
+          `Create 10 unique book titles with explanatory subtitles based on this content:\n${currentInput}`,
+          `Generate 10 innovative book titles with descriptive subtitles from this summary:\n${currentInput}`,
+          `Develop 10 original book titles with compelling subtitles inspired by:\n${currentInput}`,
+          `Craft 10 fresh book titles with informative subtitles for this summary:\n${currentInput}`,
+          `Design 10 novel book titles with engaging subtitles based on this content:\n${currentInput}`
+        ];
+
+        // Randomly select a prompt variation
+        const randomTitlePrompt = titleGenerationPrompts[Math.floor(Math.random() * titleGenerationPrompts.length)];
+        const answer = await askQuestion(randomTitlePrompt);
 
       
         const titles = answer
