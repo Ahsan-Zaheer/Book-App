@@ -65,62 +65,58 @@ export const POST = async (req: Request) => {
 
   if (keyPoints.length > 0) {
     prompt = basePrompt +
-    "Write a comprehensive chapter with EXACTLY " + totalWords + " words total. This word count is mandatory and must be achieved.\n\n" +
+    "Write a comprehensive chapter with the following structure. Focus on creating detailed, educational content.\n\n" +
     
     "CHAPTER STRUCTURE:\n" +
     "Chapter " + chapterIndex + ": " + chapterTitle + "\n\n" +
-    "Part 1: [Creative Title]\n[Write extensive content with detailed explanations - target " + wordsPerPart + " words]\n\n" +
-    "Part 2: [Creative Title]\n[Write extensive content with detailed explanations - target " + wordsPerPart + " words]\n\n" +
-    "Part 3: [Creative Title]\n[Write extensive content with detailed explanations - target " + wordsPerPart + " words]\n\n" +
-    "Part 4: [Creative Title]\n[Write extensive content with detailed explanations - target " + wordsPerPart + " words]\n\n" +
+    "Part 1: [Creative Title]\n[Write detailed content with explanations and examples - approximately " + wordsPerPart + " words]\n\n" +
+    "Part 2: [Creative Title]\n[Write detailed content with explanations and examples - approximately " + wordsPerPart + " words]\n\n" +
+    "Part 3: [Creative Title]\n[Write detailed content with explanations and examples - approximately " + wordsPerPart + " words]\n\n" +
+    "Part 4: [Creative Title]\n[Write detailed content with explanations and examples - approximately " + wordsPerPart + " words]\n\n" +
     
-    "MANDATORY REQUIREMENTS:\n" +
-    "- TOTAL WORD COUNT: " + totalWords + " words (this is non-negotiable)\n" +
-    "- Each part should be approximately " + wordsPerPart + " words\n" +
-    "- Write extensively with detailed explanations, examples, and analysis\n" +
-    "- Include multiple practical examples and case studies\n" +
-    "- Use comprehensive analysis from multiple perspectives\n" +
-    "- Write in full, detailed paragraphs with rich, descriptive language\n" +
-    "- Expand thoroughly on every concept with deep insights\n" +
+    "CONTENT REQUIREMENTS:\n" +
+    "- Write detailed, educational content with thorough explanations\n" +
+    "- Include practical examples and case studies\n" +
+    "- Use comprehensive analysis and multiple perspectives\n" +
+    "- Write in full, detailed paragraphs with descriptive language\n" +
+    "- Expand on concepts with insights and analysis\n" +
     "- Add two spaces after every period\n" +
     "- Maintain a professional, educational tone throughout\n" +
-    "- Do not conclude early - continue writing until you reach " + totalWords + " words\n\n" +
+    "- Write substantial content for each part\n\n" +
     
     "KEY POINTS TO INCORPORATE:\n" +
     "- Distribute these key points across all 4 parts: " + keyPoints.join("; ") + "\n" +
-    "- Expand each key point extensively with detailed explanations and multiple examples\n" +
-    "- Connect concepts logically throughout the chapter with thorough analysis\n" +
-    "- Provide comprehensive coverage of each topic area with extensive detail\n\n" +
+    "- Expand each key point with detailed explanations and examples\n" +
+    "- Connect concepts logically throughout the chapter\n" +
+    "- Provide thorough coverage of each topic area\n\n" +
     
     "BOOK SUMMARY TO FOLLOW: " + summary;
   } else {
     prompt = basePrompt +
-      "Write a comprehensive chapter with EXACTLY " + totalWords + " words total. This word count is mandatory.\n\n" +
+      "Write a comprehensive chapter with detailed content for each part.\n\n" +
       
-      "WORD COUNT REQUIREMENTS:\n" +
-      "- Part 1: Target " + wordsPerPart + " words with extensive explanations and multiple examples\n" +
-      "- Part 2: Target " + wordsPerPart + " words with extensive explanations and multiple examples\n" +
-      "- Part 3: Target " + wordsPerPart + " words with extensive explanations and multiple examples\n" +
-      "- Part 4: Target " + wordsPerPart + " words with extensive explanations and multiple examples\n" +
-      "- TOTAL MANDATORY TARGET: " + totalWords + " words\n\n" +
+      "CONTENT TARGETS:\n" +
+      "- Part 1: Approximately " + wordsPerPart + " words with detailed explanations and examples\n" +
+      "- Part 2: Approximately " + wordsPerPart + " words with detailed explanations and examples\n" +
+      "- Part 3: Approximately " + wordsPerPart + " words with detailed explanations and examples\n" +
+      "- Part 4: Approximately " + wordsPerPart + " words with detailed explanations and examples\n\n" +
       
       "CHAPTER STRUCTURE:\n" +
       "Chapter " + chapterIndex + ": " + chapterTitle + "\n\n" +
-      "Part 1: [Creative Title]\n[Write extensive content with detailed explanations, multiple examples, and thorough analysis - target " + wordsPerPart + " words]\n\n" +
-      "Part 2: [Creative Title]\n[Write extensive content with detailed explanations, multiple examples, and thorough analysis - target " + wordsPerPart + " words]\n\n" +
-      "Part 3: [Creative Title]\n[Write extensive content with detailed explanations, multiple examples, and thorough analysis - target " + wordsPerPart + " words]\n\n" +
-      "Part 4: [Creative Title]\n[Write extensive content with detailed explanations, multiple examples, and thorough analysis - target " + wordsPerPart + " words]\n\n" +
+      "Part 1: [Creative Title]\n[Write comprehensive content with detailed explanations and examples]\n\n" +
+      "Part 2: [Creative Title]\n[Write comprehensive content with detailed explanations and examples]\n\n" +
+      "Part 3: [Creative Title]\n[Write comprehensive content with detailed explanations and examples]\n\n" +
+      "Part 4: [Creative Title]\n[Write comprehensive content with detailed explanations and examples]\n\n" +
       
       "CONTENT REQUIREMENTS:\n" +
-      "- Write extensive, educational content about the book topic\n" +
-      "- Use multiple detailed paragraphs with comprehensive explanations\n" +
-      "- Include numerous practical examples, case studies, and real-world applications\n" +
+      "- Write thorough, educational content about the book topic\n" +
+      "- Use detailed paragraphs with comprehensive explanations\n" +
+      "- Include practical examples, case studies, and real-world applications\n" +
       "- Provide in-depth analysis from multiple perspectives\n" +
       "- Add two spaces after every period\n" +
       "- Maintain a professional, educational tone with rich vocabulary\n" +
-      "- Expand concepts fully with detailed exploration and extensive insights\n" +
-      "- Continue writing until you reach exactly " + totalWords + " words\n" +
-      "- Do not conclude early - keep expanding on concepts until target is met\n\n" +
+      "- Expand concepts fully with detailed exploration and insights\n" +
+      "- Write substantial content for each part\n\n" +
       
       "Book Summary: " + summary;
   }
@@ -134,9 +130,9 @@ export const POST = async (req: Request) => {
   const generateContent = async (controller, attemptPrompt) => {
     const model = new ChatOpenAI({
       modelName: "gpt-4o",
-      temperature: 0.4, // Slightly higher for more expansive content
+      temperature: 0.3, // Lower temperature for more controlled output
       streaming: true,
-      maxTokens: Math.ceil(totalWords * 2.2), // Even higher token limit
+      maxTokens: Math.ceil(totalWords * 1.5), // More reasonable token limit
       openAIApiKey: process.env.OPEN_AI_KEY,
       callbackManager: CallbackManager.fromHandlers({
         async handleLLMNewToken(token) {
@@ -165,13 +161,13 @@ export const POST = async (req: Request) => {
           console.log(`Attempt ${generationAttempts + 1}: Generated ${finalWordCount}/${totalWords} words`);
           
           // Check if we need to continue generating
-          if (finalWordCount < totalWords * 0.85 && generationAttempts < maxAttempts - 1) {
+          if (finalWordCount < totalWords * 0.75 && generationAttempts < maxAttempts - 1) {
             generationAttempts++;
             const remainingWords = totalWords - finalWordCount;
             console.log(`Attempting continuation. Need ${remainingWords} more words.`);
             
-            // Create continuation prompt
-            const continuationPrompt = `Continue writing the chapter content. You have written ${finalWordCount} words so far, but you need to write exactly ${totalWords} words total. Please continue writing ${remainingWords} more words to complete the chapter. Do not repeat what has already been written. Continue with new content that flows naturally from where you left off:\n\n${content}\n\n[CONTINUE FROM HERE - ADD ${remainingWords} MORE WORDS]`;
+            // Create a more natural continuation prompt
+            const continuationPrompt = `Please continue and expand the chapter content below. Add more detailed explanations, examples, and analysis to make it more comprehensive. The content should flow naturally:\n\n${content}\n\n[Please continue with additional content, expanding on the concepts with more detail and examples]`;
             
             // Continue generation
             await generateContent(controller, continuationPrompt);
