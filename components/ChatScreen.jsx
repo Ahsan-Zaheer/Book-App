@@ -569,6 +569,8 @@ const getRequiredKeyPoints = () => {
         id: generateId(),
         sender: 'bot',
         text: `Great! Let's start with \n Chapter 1: ${first.title} \n Concept: ${first.concept} \n Please enter ${getRequiredKeyPoints()} key points you'd like to include in this Chapter.`,
+        isHtml: true,
+        htmlContent: `Great! Let's start with \n Chapter 1: ${first.title} \n Concept: ${first.concept} \n <strong>Please enter ${getRequiredKeyPoints()} key points you'd like to include in this Chapter.</strong>`,
       },
     ]);
     setKeyPoints(getInitialKeyPoints());
@@ -1126,9 +1128,9 @@ const getRequiredKeyPoints = () => {
               >
                 <div
                   className={`p-3 rounded message ${msg.sender === 'user' ? 'userMsg' : 'botMsg'}`}
-                  
+                  dangerouslySetInnerHTML={msg.isHtml && msg.htmlContent ? { __html: msg.htmlContent.replace(/\n/g, '<br />') } : undefined}
                 >
-                 {msg.custom ? msg.custom : formatMessageText(msg.text)}
+                 {!(msg.isHtml && msg.htmlContent) && (msg.custom ? msg.custom : formatMessageText(msg.text))}
 
                 </div>
               </div>
