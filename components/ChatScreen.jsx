@@ -688,6 +688,22 @@ const getRequiredKeyPoints = () => {
     ]);
 
     try {
+      // Get the target word count based on book type
+      const getTargetWordCount = (bookType) => {
+        switch (bookType) {
+          case 'Ebook':
+            return 700;
+          case 'Short Book':
+            return 1000;
+          case 'Full Length Book':
+            return 1500;
+          default:
+            return 700;
+        }
+      };
+
+      const targetWords = getTargetWordCount(bookType);
+
       const stream = await generateChapterStream({
         bookId,
         bookType,
@@ -695,7 +711,8 @@ const getRequiredKeyPoints = () => {
         title: selectedTitle,
         chapterIndex: currentChapter,
         chapterTitle,
-        keyPoints: _keyPoints ?? keyPoints, 
+        keyPoints: _keyPoints ?? keyPoints,
+        targetWordCount: targetWords,
       });
 
       let fullText = '';
