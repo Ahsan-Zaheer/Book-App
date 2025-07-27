@@ -276,6 +276,12 @@
 }
 
 
+.regeneration{
+  background-color: #0f01ff;
+  color: white;
+}
+
+
 @media (max-width: 600px) {
   .messages {
     width: 95%;
