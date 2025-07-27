@@ -895,26 +895,18 @@ const getRequiredKeyPoints = () => {
                 );
               }
               if (/^Part\s*\d+/i.test(cleaned)) {
-                // Look for pattern: "Part X: Title" followed by content that starts with uppercase
-                // Split at the point where we see an uppercase letter followed by lowercase (start of sentence)
-                const match = cleaned.match(/^(Part\s*\d+\s*:\s*.*?)([A-Z][a-z][^.]*\..*|[A-Z][a-z].*?)$/);
+                // Look for "Part X: Title" pattern and split where content starts
+                // Content typically starts with "As", "The", "In", etc. followed by lowercase
+                const match = cleaned.match(/^(Part\s*\d+\s*:\s*[^A-Z]*(?:[A-Z][a-z]*\s*)*[A-Z][a-z]*?)([A-Z][a-z]+\s+[a-z].*|As\s+.*|The\s+.*|In\s+.*|When\s+.*|After\s+.*|During\s+.*|Through\s+.*|With\s+.*|From\s+.*|By\s+.*|On\s+.*|At\s+.*)$/);
                 
                 if (match) {
-                  let partTitle = match[1].trim();
-                  let partContent = match[2] ? match[2].trim() : '';
-                  
-                  // More precise splitting: look for where title ends and content begins
-                  // Title typically ends before a word that starts a sentence
-                  const titleContentSplit = partTitle.match(/^(Part\s*\d+\s*:\s*(?:[A-Z][a-z]*\s*)*[A-Z][a-z]*)\s*([A-Z][a-z].*)?$/);
-                  if (titleContentSplit && titleContentSplit[2]) {
-                    partTitle = titleContentSplit[1].trim();
-                    partContent = (titleContentSplit[2] + ' ' + partContent).trim();
-                  }
+                  const partTitle = match[1].trim();
+                  const partContent = match[2] ? match[2].trim() : '';
                   
                   return (
                     <React.Fragment key={`${idx}-${jdx}`}>
                       <br />
-                      <strong>{partTitle}</strong>
+                      <strong>{partTitle}  </strong>
                       {partContent && (
                         <>
                           <br />
@@ -925,16 +917,16 @@ const getRequiredKeyPoints = () => {
                     </React.Fragment>
                   );
                 } else {
-                  // Simple fallback - just look for "Part X: " and take everything up to first sentence
-                  const simpleMatch = cleaned.match(/^(Part\s*\d+\s*:\s*[^.!?]*?)([.!?].*|$)/);
-                  if (simpleMatch) {
-                    const partTitle = simpleMatch[1].trim();
-                    const partContent = simpleMatch[2] ? simpleMatch[2].trim() : '';
+                  // Fallback: try to find where title ends by looking for common sentence starters
+                  const fallbackMatch = cleaned.match(/^(Part\s*\d+\s*:\s*.*?)(?=(?:As|The|In|When|After|During|Through|With|From|By|On|At|[A-Z][a-z]+\s+[a-z])\s)/);
+                  if (fallbackMatch) {
+                    const partTitle = fallbackMatch[1].trim();
+                    const partContent = cleaned.substring(partTitle.length).trim();
                     
                     return (
                       <React.Fragment key={`${idx}-${jdx}`}>
                         <br />
-                        <strong>{partTitle}</strong>
+                        <strong>{partTitle}  </strong>
                         {partContent && (
                           <>
                             <br />
@@ -949,7 +941,7 @@ const getRequiredKeyPoints = () => {
                     return (
                       <React.Fragment key={`${idx}-${jdx}`}>
                         <br />
-                        <strong>{cleaned}</strong>
+                        <strong>{cleaned}  </strong>
                         <br />
                       </React.Fragment>
                     );
