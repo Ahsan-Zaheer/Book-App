@@ -343,26 +343,39 @@ export default function ChatScreen({ initialBookId = null }) {
         const randomTitlePrompt = titleGenerationPrompts[Math.floor(Math.random() * titleGenerationPrompts.length)];
         const answer = await askQuestion(randomTitlePrompt);
 
-      
         const titles = answer
           .split(/\n|\r/)
           .map((t) => t.trim())
           .filter((t) => /^\d+\./.test(t))
           .map((t) => {
-            // Match titles inside **bold** markdown with : or - as separator
-            const match = t.match(/^\d+\.\s*\*\*(.+?)\s*[:\-–]\s*(.+?)\*\*$/);
-            if (match) {
-              return { title: match[1].trim(), subtitle: match[2].trim() };
-            } else {
-              // Fallback: try to extract title and subtitle without markdown
-              const fallback = t.match(/^\d+\.\s*(.*?)\s*[:\-–]\s*(.*)$/);
-              if (fallback) {
-                return { title: fallback[1].trim(), subtitle: fallback[2].trim() };
-              } else {
-                return { title: t.replace(/^\d+\.\s*/, '').trim(), subtitle: '' };
-              }
+            // Remove the number prefix (e.g., "1. ")
+            const withoutNumber = t.replace(/^\d+\.\s*/, '').trim();
+            
+            // Look for pipe separator first (our preferred format)
+            const pipeMatch = withoutNumber.match(/^(.+?)\s*\|\s*(.+)$/);
+            if (pipeMatch) {
+              return { 
+                title: pipeMatch[1].trim().replace(/\*\*/g, ''), 
+                subtitle: pipeMatch[2].trim().replace(/\*\*/g, '') 
+              };
             }
-          });
+            
+            // Fallback: look for colon or dash separators
+            const colonDashMatch = withoutNumber.match(/^(.+?)\s*[:\-–]\s*(.+)$/);
+            if (colonDashMatch) {
+              return { 
+                title: colonDashMatch[1].trim().replace(/\*\*/g, ''), 
+                subtitle: colonDashMatch[2].trim().replace(/\*\*/g, '') 
+              };
+            }
+            
+            // If no separator found, treat entire text as title
+            return { 
+              title: withoutNumber.replace(/\*\*/g, '').trim(), 
+              subtitle: '' 
+            };
+          })
+          .filter(item => item.title.length > 0); // Remove empty titles
 
         setTitleOptions(titles);
 
