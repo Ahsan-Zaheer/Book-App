@@ -65,55 +65,61 @@ export const POST = async (req: Request) => {
 
   if (keyPoints.length > 0) {
     prompt = basePrompt +
-    "CRITICAL: You MUST write EXACTLY " + totalWords + " words total. This is NON-NEGOTIABLE.\n\n" +
+    "🚨 CRITICAL WORD COUNT REQUIREMENT: You MUST write EXACTLY " + totalWords + " words total. DO NOT STOP UNTIL YOU REACH THIS TARGET! 🚨\n\n" +
     
-    "MANDATORY STRUCTURE:\n" +
+    "MANDATORY STRUCTURE (MUST FOLLOW EXACTLY):\n" +
     "Chapter " + chapterIndex + ": " + chapterTitle + "\n\n" +
-    "Part 1: [Insert Title]\n[Write EXACTLY " + wordsPerPart + " words - count every single word]\n\n" +
-    "Part 2: [Insert Title]\n[Write EXACTLY " + wordsPerPart + " words - count every single word]\n\n" +
-    "Part 3: [Insert Title]\n[Write EXACTLY " + wordsPerPart + " words - count every single word]\n\n" +
-    "Part 4: [Insert Title]\n[Write EXACTLY " + wordsPerPart + " words - count every single word]\n\n" +
+    "Part 1: [Insert Creative Title]\n[Write comprehensive content with detailed explanations, examples, and thorough coverage - EXACTLY " + wordsPerPart + " words]\n\n" +
+    "Part 2: [Insert Creative Title]\n[Write comprehensive content with detailed explanations, examples, and thorough coverage - EXACTLY " + wordsPerPart + " words]\n\n" +
+    "Part 3: [Insert Creative Title]\n[Write comprehensive content with detailed explanations, examples, and thorough coverage - EXACTLY " + wordsPerPart + " words]\n\n" +
+    "Part 4: [Insert Creative Title]\n[Write comprehensive content with detailed explanations, examples, and thorough coverage - EXACTLY " + wordsPerPart + " words]\n\n" +
     
-    "WORD COUNT ENFORCEMENT:\n" +
-    "- TOTAL: " + totalWords + " words (no exceptions)\n" +
-    "- Each part: " + wordsPerPart + " words (no exceptions)\n" +
-    "- Count words continuously as you write\n" +
-    "- Stop immediately when you reach the target\n\n" +
+    "ABSOLUTE WORD COUNT REQUIREMENTS:\n" +
+    "- TOTAL TARGET: " + totalWords + " words (YOU MUST REACH THIS NUMBER)\n" +
+    "- Each part target: " + wordsPerPart + " words (EXPAND CONTENT TO MEET THIS)\n" +
+    "- Write detailed paragraphs with comprehensive explanations\n" +
+    "- Include examples, case studies, detailed analysis\n" +
+    "- Expand on every concept thoroughly\n" +
+    "- DO NOT summarize or compress - EXPAND and ELABORATE\n\n" +
     
-    "CONTENT REQUIREMENTS:\n" +
+    "CONTENT EXPANSION REQUIREMENTS:\n" +
     "- Use these key points across all 4 parts: " + keyPoints.join("; ") + "\n" +
-    "- Write detailed, comprehensive content to reach word targets\n" +
+    "- Write in-depth, educational content with extensive detail\n" +
+    "- Include practical examples and real-world applications\n" +
+    "- Add comprehensive explanations for every concept\n" +
+    "- Use descriptive language and thorough analysis\n" +
     "- Add TWO SPACES after every period\n" +
-    "- Professional, educational tone\n" +
-    "- No bullet points or lists - use full paragraphs\n" +
-    "- Expand on concepts with examples and explanations\n\n" +
+    "- Professional, educational tone with rich vocabulary\n" +
+    "- Write full paragraphs - no bullet points or short sentences\n\n" +
     
     "BOOK SUMMARY TO FOLLOW: " + summary;
   } else {
     prompt = basePrompt +
-      "CRITICAL WORD COUNT REQUIREMENT: You MUST write EXACTLY " + totalWords + " words total.\n\n" +
+      "🚨 ABSOLUTE WORD COUNT REQUIREMENT: You MUST write EXACTLY " + totalWords + " words total. DO NOT STOP WRITING UNTIL YOU REACH THIS TARGET! 🚨\n\n" +
       
-      "MANDATORY WORD TARGETS:\n" +
-      "- Part 1: EXACTLY " + wordsPerPart + " words (count each word)\n" +
-      "- Part 2: EXACTLY " + wordsPerPart + " words (count each word)\n" +
-      "- Part 3: EXACTLY " + wordsPerPart + " words (count each word)\n" +
-      "- Part 4: EXACTLY " + wordsPerPart + " words (count each word)\n" +
-      "- TOTAL: " + totalWords + " words (this is mandatory)\n\n" +
+      "MANDATORY WORD TARGETS (NON-NEGOTIABLE):\n" +
+      "- Part 1: EXACTLY " + wordsPerPart + " words (write extensively with detailed explanations)\n" +
+      "- Part 2: EXACTLY " + wordsPerPart + " words (write extensively with detailed explanations)\n" +
+      "- Part 3: EXACTLY " + wordsPerPart + " words (write extensively with detailed explanations)\n" +
+      "- Part 4: EXACTLY " + wordsPerPart + " words (write extensively with detailed explanations)\n" +
+      "- TOTAL: " + totalWords + " words (YOU MUST REACH THIS NUMBER)\n\n" +
       
       "STRUCTURE (Follow exactly):\n" +
       "Chapter " + chapterIndex + ": " + chapterTitle + "\n\n" +
-      "Part 1: [Title]\n[Write comprehensive content with detailed explanations - exactly " + wordsPerPart + " words]\n\n" +
-      "Part 2: [Title]\n[Write comprehensive content with detailed explanations - exactly " + wordsPerPart + " words]\n\n" +
-      "Part 3: [Title]\n[Write comprehensive content with detailed explanations - exactly " + wordsPerPart + " words]\n\n" +
-      "Part 4: [Title]\n[Write comprehensive content with detailed explanations - exactly " + wordsPerPart + " words]\n\n" +
+      "Part 1: [Creative Title]\n[Write extensive, comprehensive content with detailed explanations, examples, and thorough analysis - EXACTLY " + wordsPerPart + " words]\n\n" +
+      "Part 2: [Creative Title]\n[Write extensive, comprehensive content with detailed explanations, examples, and thorough analysis - EXACTLY " + wordsPerPart + " words]\n\n" +
+      "Part 3: [Creative Title]\n[Write extensive, comprehensive content with detailed explanations, examples, and thorough analysis - EXACTLY " + wordsPerPart + " words]\n\n" +
+      "Part 4: [Creative Title]\n[Write extensive, comprehensive content with detailed explanations, examples, and thorough analysis - EXACTLY " + wordsPerPart + " words]\n\n" +
       
-      "WRITING REQUIREMENTS:\n" +
-      "- Write detailed, educational content about the book topic\n" +
-      "- Use full paragraphs with comprehensive explanations\n" +
-      "- Include examples, details, and thorough coverage\n" +
+      "CONTENT EXPANSION REQUIREMENTS:\n" +
+      "- Write in-depth, educational content about the book topic\n" +
+      "- Use extensive paragraphs with comprehensive explanations\n" +
+      "- Include detailed examples, case studies, and practical applications\n" +
+      "- Provide thorough analysis and deep insights\n" +
       "- Add two spaces after every period\n" +
-      "- Professional, clear tone\n" +
-      "- Expand concepts fully to meet word count requirements\n\n" +
+      "- Professional, educational tone with rich vocabulary\n" +
+      "- Expand every concept fully to meet exact word count requirements\n" +
+      "- DO NOT summarize or compress - ELABORATE and EXPAND\n\n" +
       
       "Book Summary: " + summary;
   }
@@ -127,9 +133,9 @@ export const POST = async (req: Request) => {
       try {
         const model = new ChatOpenAI({
           modelName: "gpt-4o",
-          temperature: 0.2, // Lower temperature for more controlled output
+          temperature: 0.3, // Slightly higher for more creative expansion
           streaming: true,
-          maxTokens: Math.ceil(totalWords * 1.3), // Limit tokens to prevent overgeneration
+          maxTokens: Math.ceil(totalWords * 1.8), // Increased token limit to allow full generation
           openAIApiKey: process.env.OPEN_AI_KEY,
           callbackManager: CallbackManager.fromHandlers({
             async handleLLMNewToken(token) {
@@ -138,12 +144,17 @@ export const POST = async (req: Request) => {
               // Count words in real-time
               const currentWordCount = countWords(content);
               
-              // Stop if we exceed the target (with small buffer)
-              if (currentWordCount > totalWords + 50) {
+              // Only stop if we significantly exceed the target
+              if (currentWordCount > totalWords + 200) {
                 console.log("Stopping generation - word count exceeded:", currentWordCount);
                 controller.enqueue(encoder.encode("event: done\n\n"));
                 controller.close();
                 return;
+              }
+          
+              // Log progress every 500 words
+              if (currentWordCount % 500 === 0) {
+                console.log(`Progress: ${currentWordCount}/${totalWords} words`);
               }
               
               controller.enqueue(encoder.encode("data: " + token + "\n\n"));
