@@ -665,31 +665,32 @@ const getRequiredKeyPoints = () => {
       const existingChapters = oldOutline.map(ch => `${ch.title}: ${ch.concept}`).join('\n');
       
       answer = await askQuestion(
-        `Generate a **completely NEW and UNIQUE** outline with ${count} chapters for the ${bookType} titled "${selectedTitle}", based on this summary:\n${summary}.\n\nPREVIOUS OUTLINE TO AVOID (do not repeat, rephrase, or use similar concepts):\n${existingChapters}\n\nRequirements for the new outline:\n- Use entirely different chapter themes and approaches\n- Explore alternative angles, perspectives, or methodologies\n- Introduce fresh concepts and unique chapter structures\n- Avoid any similarity to the previous version\n- Each chapter should have a distinctive title and brief concept (max two lines)\n- Be creative and think outside the box\n\nFormat: Chapter X: [Title] - [Concept]`
+        `Generate a **completely NEW and UNIQUE** outline with ${count} chapters for the ${bookType} titled "${selectedTitle}", based on this summary:\n${refinedSummary || summary}.\n\nPREVIOUS OUTLINE TO AVOID (do not repeat, rephrase, or use similar concepts):\n${existingChapters}\n\nRequirements for the new outline:\n- Use entirely different chapter themes and approaches\n- Explore alternative angles, perspectives, or methodologies\n- Introduce fresh concepts and unique chapter structures\n- Avoid any similarity to the previous version\n- Each chapter should have a distinctive title and brief concept (max two lines)\n- Be creative and think outside the box\n\nFormat: Chapter X: [Title] - [Concept]`
       );
     } else {
       // Array of different prompt variations for outline generation
+      const summaryToUse = refinedSummary || summary;
       const outlineGenerationPrompts = [
-        `Provide an outline of ${count} chapters for the ${bookType} "${selectedTitle}" based on this summary:\n${summary}. Each chapter should have a title followed by a brief concept of the chapter in no more than two lines.`,
-        `Create a comprehensive ${count}-chapter outline for the ${bookType} titled "${selectedTitle}" using this summary:\n${summary}. Structure each chapter with a compelling title and a concise concept description (maximum two lines).`,
-        `Develop a detailed outline with ${count} chapters for "${selectedTitle}" (${bookType}) based on:\n${summary}. Format each chapter with an engaging title and brief conceptual overview in two lines or less.`,
-        `Design a strategic ${count}-chapter framework for the ${bookType} "${selectedTitle}" drawing from this summary:\n${summary}. Present each chapter with a descriptive title and core concept explanation (limit two lines).`,
-        `Construct a logical outline of ${count} chapters for "${selectedTitle}" as a ${bookType}, inspired by:\n${summary}. Each chapter needs a clear title and succinct concept summary (no more than two lines).`,
-        `Build a structured ${count}-chapter plan for the ${bookType} "${selectedTitle}" based on this content:\n${summary}. Include chapter titles with brief conceptual descriptions (maximum two lines each).`,
-        `Formulate an organized outline with ${count} chapters for "${selectedTitle}" (${bookType}) using:\n${summary}. Provide chapter titles accompanied by concise concept explanations (two lines maximum).`,
-        `Generate a cohesive ${count}-chapter structure for the ${bookType} titled "${selectedTitle}" from this summary:\n${summary}. Each chapter should feature a title and brief concept overview (limit two lines).`,
-        `Craft a methodical outline of ${count} chapters for "${selectedTitle}" as a ${bookType}, drawing from:\n${summary}. Format with chapter titles and compact concept descriptions (no more than two lines).`,
-        `Establish a well-organized ${count}-chapter blueprint for the ${bookType} "${selectedTitle}" based on:\n${summary}. Include chapter titles with short conceptual summaries (maximum two lines each).`,
-        `Create a systematic outline with ${count} chapters for "${selectedTitle}" (${bookType}) inspired by this summary:\n${summary}. Structure each chapter with a title and brief concept explanation (two lines or less).`,
-        `Develop a thoughtful ${count}-chapter framework for the ${bookType} titled "${selectedTitle}" using:\n${summary}. Present chapter titles with concise conceptual overviews (limit two lines).`,
-        `Design a purposeful outline of ${count} chapters for "${selectedTitle}" as a ${bookType}, based on:\n${summary}. Each chapter requires a descriptive title and compact concept summary (maximum two lines).`,
-        `Construct a clear ${count}-chapter structure for the ${bookType} "${selectedTitle}" from this content:\n${summary}. Include engaging chapter titles with brief concept descriptions (no more than two lines).`,
-        `Build a comprehensive outline with ${count} chapters for "${selectedTitle}" (${bookType}) drawing from:\n${summary}. Format each chapter with a compelling title and succinct conceptual explanation (two lines maximum).`,
-        `Formulate a detailed ${count}-chapter plan for the ${bookType} titled "${selectedTitle}" based on this summary:\n${summary}. Provide chapter titles accompanied by concise concept overviews (limit two lines each).`,
-        `Generate a strategic outline of ${count} chapters for "${selectedTitle}" as a ${bookType}, using:\n${summary}. Each chapter should have a clear title and brief conceptual description (maximum two lines).`,
-        `Craft a logical ${count}-chapter framework for the ${bookType} "${selectedTitle}" inspired by this content:\n${summary}. Structure with chapter titles and compact concept summaries (no more than two lines).`,
-        `Establish a coherent outline with ${count} chapters for "${selectedTitle}" (${bookType}) based on:\n${summary}. Include chapter titles with short conceptual explanations (two lines or less).`,
-        `Create a well-structured ${count}-chapter blueprint for the ${bookType} titled "${selectedTitle}" from this summary:\n${summary}. Present each chapter with a title and brief concept overview (limit two lines).`
+        `Provide an outline of ${count} chapters for the ${bookType} "${selectedTitle}" based on this summary:\n${summaryToUse}. Each chapter should have a title followed by a brief concept of the chapter in no more than two lines.`,
+        `Create a comprehensive ${count}-chapter outline for the ${bookType} titled "${selectedTitle}" using this summary:\n${summaryToUse}. Structure each chapter with a compelling title and a concise concept description (maximum two lines).`,
+        `Develop a detailed outline with ${count} chapters for "${selectedTitle}" (${bookType}) based on:\n${summaryToUse}. Format each chapter with an engaging title and brief conceptual overview in two lines or less.`,
+        `Design a strategic ${count}-chapter framework for the ${bookType} "${selectedTitle}" drawing from this summary:\n${summaryToUse}. Present each chapter with a descriptive title and core concept explanation (limit two lines).`,
+        `Construct a logical outline of ${count} chapters for "${selectedTitle}" as a ${bookType}, inspired by:\n${summaryToUse}. Each chapter needs a clear title and succinct concept summary (no more than two lines).`,
+        `Build a structured ${count}-chapter plan for the ${bookType} "${selectedTitle}" based on this content:\n${summaryToUse}. Include chapter titles with brief conceptual descriptions (maximum two lines each).`,
+        `Formulate an organized outline with ${count} chapters for "${selectedTitle}" (${bookType}) using:\n${summaryToUse}. Provide chapter titles accompanied by concise concept explanations (two lines maximum).`,
+        `Generate a cohesive ${count}-chapter structure for the ${bookType} titled "${selectedTitle}" from this summary:\n${summaryToUse}. Each chapter should feature a title and brief concept overview (limit two lines).`,
+        `Craft a methodical outline of ${count} chapters for "${selectedTitle}" as a ${bookType}, drawing from:\n${summaryToUse}. Format with chapter titles and compact concept descriptions (no more than two lines).`,
+        `Establish a well-organized ${count}-chapter blueprint for the ${bookType} "${selectedTitle}" based on:\n${summaryToUse}. Include chapter titles with short conceptual summaries (maximum two lines each).`,
+        `Create a systematic outline with ${count} chapters for "${selectedTitle}" (${bookType}) inspired by this summary:\n${summaryToUse}. Structure each chapter with a title and brief concept explanation (two lines or less).`,
+        `Develop a thoughtful ${count}-chapter framework for the ${bookType} titled "${selectedTitle}" using:\n${summaryToUse}. Present chapter titles with concise conceptual overviews (limit two lines).`,
+        `Design a purposeful outline of ${count} chapters for "${selectedTitle}" as a ${bookType}, based on:\n${summaryToUse}. Each chapter requires a descriptive title and compact concept summary (maximum two lines).`,
+        `Construct a clear ${count}-chapter structure for the ${bookType} "${selectedTitle}" from this content:\n${summaryToUse}. Include engaging chapter titles with brief concept descriptions (no more than two lines).`,
+        `Build a comprehensive outline with ${count} chapters for "${selectedTitle}" (${bookType}) drawing from:\n${summaryToUse}. Format each chapter with a compelling title and succinct conceptual explanation (two lines maximum).`,
+        `Formulate a detailed ${count}-chapter plan for the ${bookType} titled "${selectedTitle}" based on this summary:\n${summaryToUse}. Provide chapter titles accompanied by concise concept overviews (limit two lines each).`,
+        `Generate a strategic outline of ${count} chapters for "${selectedTitle}" as a ${bookType}, using:\n${summaryToUse}. Each chapter should have a clear title and brief conceptual description (maximum two lines).`,
+        `Craft a logical ${count}-chapter framework for the ${bookType} "${selectedTitle}" inspired by this content:\n${summaryToUse}. Structure with chapter titles and compact concept summaries (no more than two lines).`,
+        `Establish a coherent outline with ${count} chapters for "${selectedTitle}" (${bookType}) based on:\n${summaryToUse}. Include chapter titles with short conceptual explanations (two lines or less).`,
+        `Create a well-structured ${count}-chapter blueprint for the ${bookType} titled "${selectedTitle}" from this summary:\n${summaryToUse}. Present each chapter with a title and brief concept overview (limit two lines).`
       ];
 
       // Randomly select a prompt variation
