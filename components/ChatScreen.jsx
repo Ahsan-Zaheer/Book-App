@@ -291,9 +291,33 @@ export default function ChatScreen({ initialBookId = null }) {
         const newBookId = created._id;
         setBookId(newBookId);
 
-        const refined = await askQuestion(
-          `Rewrite the following book summary in a single polished paragraph:\n${currentInput}`
-        );
+        // Array of different prompt variations for summary refinement
+        const summaryRefinementPrompts = [
+          `Rewrite the following book summary in a single polished paragraph:\n${currentInput}`,
+          `Transform this book summary into an elegant, cohesive paragraph that captures the essence:\n${currentInput}`,
+          `Craft a refined, professional summary paragraph from the following content:\n${currentInput}`,
+          `Polish and restructure this book summary into a compelling single paragraph:\n${currentInput}`,
+          `Convert this summary into a sophisticated, well-crafted paragraph:\n${currentInput}`,
+          `Refine and enhance this book summary into a smooth, flowing paragraph:\n${currentInput}`,
+          `Reshape this summary into an articulate, engaging single paragraph:\n${currentInput}`,
+          `Transform this content into a beautifully written summary paragraph:\n${currentInput}`,
+          `Elevate this book summary into a polished, professional paragraph:\n${currentInput}`,
+          `Reframe this summary as an eloquent, well-structured paragraph:\n${currentInput}`,
+          `Convert this into a refined, captivating summary paragraph:\n${currentInput}`,
+          `Polish this book summary into a compelling, cohesive paragraph:\n${currentInput}`,
+          `Craft an improved, sophisticated version of this summary in paragraph form:\n${currentInput}`,
+          `Transform this into a well-articulated, professional book summary:\n${currentInput}`,
+          `Refine this content into a smooth, engaging summary paragraph:\n${currentInput}`,
+          `Reshape this summary into a polished, compelling single paragraph:\n${currentInput}`,
+          `Convert this into an elegant, well-crafted book summary paragraph:\n${currentInput}`,
+          `Transform this summary into a refined, professional narrative paragraph:\n${currentInput}`,
+          `Polish this content into a sophisticated, flowing summary paragraph:\n${currentInput}`,
+          `Craft a beautifully written, cohesive paragraph from this book summary:\n${currentInput}`
+        ];
+
+        // Randomly select a prompt variation
+        const randomPrompt = summaryRefinementPrompts[Math.floor(Math.random() * summaryRefinementPrompts.length)];
+        const refined = await askQuestion(randomPrompt);
         setRefinedSummary(refined);
 
         console.log(refinedSummary);
