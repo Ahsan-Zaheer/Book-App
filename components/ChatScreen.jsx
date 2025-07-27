@@ -53,8 +53,10 @@ export default function ChatScreen({ initialBookId = null }) {
           {titles.map((t, idx) => (
             <li key={idx} className="title-suggestion">
               <button className="selection" onClick={() => handleTitleSelect(t.title)}>
-                <span className="main-title">Title: {t.title}</span>
-                {t.subtitle && <div className="subtitle">Subtitle: {t.subtitle}</div>}
+                <div className="title-container">
+                  <div className="main-title">{t.title}</div>
+                  {t.subtitle && <div className="subtitle">{t.subtitle}</div>}
+                </div>
               </button>
             </li>
           ))}
@@ -325,26 +327,16 @@ export default function ChatScreen({ initialBookId = null }) {
 
         // Array of different prompt variations for title generation
         const titleGenerationPrompts = [
-          `Provide 10 book title suggestions with subtitles based on the following summary:\n${currentInput}`,
-          `Create 10 compelling book titles with subtitles that capture the essence of this summary:\n${currentInput}`,
-          `Generate 10 creative book title and subtitle combinations inspired by this content:\n${currentInput}`,
-          `Craft 10 engaging book titles with descriptive subtitles from this summary:\n${currentInput}`,
-          `Develop 10 memorable book titles with compelling subtitles based on:\n${currentInput}`,
-          `Design 10 captivating book titles with informative subtitles for this summary:\n${currentInput}`,
-          `Produce 10 professional book titles with engaging subtitles from this content:\n${currentInput}`,
-          `Formulate 10 attractive book titles with descriptive subtitles inspired by:\n${currentInput}`,
-          `Compose 10 striking book titles with meaningful subtitles based on this summary:\n${currentInput}`,
-          `Build 10 powerful book titles with explanatory subtitles from this content:\n${currentInput}`,
-          `Construct 10 dynamic book titles with compelling subtitles for this summary:\n${currentInput}`,
-          `Fashion 10 impactful book titles with descriptive subtitles based on:\n${currentInput}`,
-          `Shape 10 intriguing book titles with informative subtitles from this summary:\n${currentInput}`,
-          `Form 10 appealing book titles with engaging subtitles inspired by this content:\n${currentInput}`,
-          `Establish 10 distinctive book titles with meaningful subtitles for this summary:\n${currentInput}`,
-          `Create 10 unique book titles with explanatory subtitles based on this content:\n${currentInput}`,
-          `Generate 10 innovative book titles with descriptive subtitles from this summary:\n${currentInput}`,
-          `Develop 10 original book titles with compelling subtitles inspired by:\n${currentInput}`,
-          `Craft 10 fresh book titles with informative subtitles for this summary:\n${currentInput}`,
-          `Design 10 novel book titles with engaging subtitles based on this content:\n${currentInput}`
+          `Generate 10 book title suggestions based on this summary. Format each as: "1. TITLE | SUBTITLE"\n\nSummary: ${currentInput}\n\nRequirements:\n- Use the exact format: "1. TITLE | SUBTITLE"\n- Make titles catchy and memorable\n- Make subtitles descriptive and informative\n- Ensure each title-subtitle pair works together cohesively`,
+          `Create 10 compelling book titles with subtitles for this summary. Use this exact format: "1. TITLE | SUBTITLE"\n\nSummary: ${currentInput}\n\nGuidelines:\n- Title should be attention-grabbing\n- Subtitle should explain the book's value or approach\n- Use the pipe symbol (|) as separator\n- Number each entry clearly`,
+          `Develop 10 professional book title and subtitle combinations. Format: "1. TITLE | SUBTITLE"\n\nBased on: ${currentInput}\n\nCriteria:\n- Title: Short, impactful, memorable\n- Subtitle: Longer, explanatory, benefit-focused\n- Consistent formatting with pipe separator\n- Clear numbering from 1-10`,
+          `Generate 10 marketable book titles with descriptive subtitles. Use format: "1. TITLE | SUBTITLE"\n\nContent summary: ${currentInput}\n\nSpecifications:\n- Title should hook readers immediately\n- Subtitle should clarify the book's purpose\n- Maintain consistent pipe (|) separation\n- Number sequentially 1 through 10`,
+          `Create 10 engaging book title-subtitle pairs using format: "1. TITLE | SUBTITLE"\n\nSource material: ${currentInput}\n\nRequirements:\n- Title: Concise and compelling\n- Subtitle: Detailed and informative\n- Use pipe symbol for clean separation\n- Sequential numbering essential`,
+          `Craft 10 distinctive book titles with explanatory subtitles. Format: "1. TITLE | SUBTITLE"\n\nBased on summary: ${currentInput}\n\nGuidelines:\n- Title should be unique and memorable\n- Subtitle should describe key benefits or approach\n- Consistent pipe separator usage\n- Clear 1-10 numbering system`,
+          `Design 10 powerful book title and subtitle combinations. Use: "1. TITLE | SUBTITLE"\n\nFrom this summary: ${currentInput}\n\nCriteria:\n- Title: Strong, attention-grabbing\n- Subtitle: Clear value proposition\n- Pipe symbol for professional formatting\n- Numbered list from 1 to 10`,
+          `Produce 10 strategic book titles with informative subtitles. Format: "1. TITLE | SUBTITLE"\n\nContent: ${currentInput}\n\nSpecifications:\n- Title should create curiosity\n- Subtitle should promise specific outcomes\n- Use pipe (|) for clean separation\n- Maintain sequential numbering`,
+          `Generate 10 commercial book title-subtitle pairs. Use format: "1. TITLE | SUBTITLE"\n\nBased on: ${currentInput}\n\nRequirements:\n- Title: Market-friendly and catchy\n- Subtitle: Benefit-driven and clear\n- Consistent pipe symbol usage\n- Proper 1-10 numbering`,
+          `Formulate 10 impactful book titles with descriptive subtitles. Format: "1. TITLE | SUBTITLE"\n\nSummary: ${currentInput}\n\nGuidelines:\n- Title should be emotionally engaging\n- Subtitle should explain the transformation offered\n- Use pipe separator consistently\n- Number each suggestion clearly`
         ];
 
         // Randomly select a prompt variation
@@ -613,25 +605,39 @@ const getRequiredKeyPoints = () => {
         `Generate 10 completely NEW and UNIQUE book title suggestions with subtitles. These must be entirely different from any previous suggestions.\n\nBook summary: ${summaryToUse}\n\nPREVIOUS TITLES TO AVOID (do not repeat or rephrase these):\n${existingTitles}\n\nRequirements:\n- Use completely different keywords and themes\n- Explore new angles, metaphors, and perspectives\n- Vary the style (some catchy, some academic, some emotional, etc.)\n- Make each title memorable and distinct\n- Format as: "1. **Title: Subtitle**"`
       );
 
-       const titles = answer
+        const titles = answer
           .split(/\n|\r/)
           .map((t) => t.trim())
           .filter((t) => /^\d+\./.test(t))
           .map((t) => {
-            // Match titles inside **bold** markdown with : or - as separator
-            const match = t.match(/^\d+\.\s*\*\*(.+?)\s*[:\-–]\s*(.+?)\*\*$/);
-            if (match) {
-              return { title: match[1].trim(), subtitle: match[2].trim() };
-            } else {
-              // Fallback: try to extract title and subtitle without markdown
-              const fallback = t.match(/^\d+\.\s*(.*?)\s*[:\-–]\s*(.*)$/);
-              if (fallback) {
-                return { title: fallback[1].trim(), subtitle: fallback[2].trim() };
-              } else {
-                return { title: t.replace(/^\d+\.\s*/, '').trim(), subtitle: '' };
-              }
+            // Remove the number prefix (e.g., "1. ")
+            const withoutNumber = t.replace(/^\d+\.\s*/, '').trim();
+            
+            // Look for pipe separator first (our preferred format)
+            const pipeMatch = withoutNumber.match(/^(.+?)\s*\|\s*(.+)$/);
+            if (pipeMatch) {
+              return { 
+                title: pipeMatch[1].trim().replace(/\*\*/g, ''), 
+                subtitle: pipeMatch[2].trim().replace(/\*\*/g, '') 
+              };
             }
-          });
+            
+            // Fallback: look for colon or dash separators
+            const colonDashMatch = withoutNumber.match(/^(.+?)\s*[:\-–]\s*(.+)$/);
+            if (colonDashMatch) {
+              return { 
+                title: colonDashMatch[1].trim().replace(/\*\*/g, ''), 
+                subtitle: colonDashMatch[2].trim().replace(/\*\*/g, '') 
+              };
+            }
+            
+            // If no separator found, treat entire text as title
+            return { 
+              title: withoutNumber.replace(/\*\*/g, '').trim(), 
+              subtitle: '' 
+            };
+          })
+          .filter(item => item.title.length > 0); // Remove empty titles
 
           console.log(titles);
           
