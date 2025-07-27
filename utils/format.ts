@@ -18,9 +18,9 @@ export function formatChapterText(text: string, doubleSpaceAfterPeriod = false):
     "\n**$1**\n"
   );
 
-  // ✅ Bold full Part headings ending with !!!
+  // ✅ Bold full Part headings ending with !!! (hide the !!!)
   sanitized = sanitized.replace(
-    /\n?(Part\s*\d+[^!]*!!!)/gi,
+    /\n?(Part\s*\d+[^!]*)(!!!)/gi,
     "\n**$1**\n"
   );
 

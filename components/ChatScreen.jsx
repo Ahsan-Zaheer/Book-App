@@ -1001,12 +1001,12 @@ const getRequiredKeyPoints = () => {
                 );
               }
               if (/^Part\s*\d+/i.test(cleaned)) {
-                // Look for part titles ending with !!!
-                const match = cleaned.match(/^(Part\s*\d+[^!]*!!!)(.*)$/);
+                // Look for part titles ending with !!! and hide the !!!
+                const match = cleaned.match(/^(Part\s*\d+[^!]*)(!!!)(.*)$/);
                 
                 if (match) {
-                  const partTitle = match[1].trim();
-                  const partContent = match[2] ? match[2].trim() : '';
+                  const partTitle = match[1].trim(); // Part title without !!!
+                  const partContent = match[3] ? match[3].trim() : ''; // Content after !!!
                   
                   return (
                     <React.Fragment key={`${idx}-${jdx}`}>
