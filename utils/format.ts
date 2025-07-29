@@ -18,7 +18,7 @@ export function formatChapterText(text: string, doubleSpaceAfterPeriod = false):
 
   // ✅ Bold part titles ending with !!! (hide the !!!)
   sanitized = sanitized.replace(
-    /\n?([^.\n]*?)(!!!)/gi,
+    /^([^.\n!]+?)\s*!!!/gim,
     "\n\n\n**$1**\n\n\n"
   );
 
