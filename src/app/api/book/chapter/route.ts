@@ -135,7 +135,7 @@ export const POST = async (req: Request) => {
           modelName: "gpt-4o",
           temperature: 0.4, // Slightly higher for more expansive content
           streaming: true,
-          maxTokens: Math.ceil(totalWords * 2.0), // Higher token limit to ensure full generation
+          maxTokens: Math.ceil(wordsPerPart * 2.0), // Higher token limit to ensure full generation
           openAIApiKey: process.env.OPEN_AI_KEY,
           callbackManager: CallbackManager.fromHandlers({
             async handleLLMNewToken(token) {
