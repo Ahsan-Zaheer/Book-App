@@ -1013,7 +1013,10 @@ const getRequiredKeyPoints = () => {
   const formatMessageText = (text, doubleSpace = false) => {
     if (!text || typeof text !== 'string') return text;
 
-    const sanitized = formatChapterText(text, doubleSpace);
+    let sanitized = formatChapterText(text, doubleSpace);
+
+    // Remove ** markers that were added by formatChapterText but preserve the text
+    sanitized = sanitized.replace(/\*\*(.*?)\*\*/g, '$1');
 
     // Match lines that start with "1. ", "2. ", etc.
     const numberedListRegex = /^(\d+\.\s.*)$/gm;
@@ -1077,6 +1080,19 @@ const getRequiredKeyPoints = () => {
                     </React.Fragment>
                   );
                 }
+              }
+              
+              // Check if line is already formatted with ** (from utils/format.ts)
+              if (cleaned.startsWith('**') && cleaned.endsWith('**')) {
+                const boldText = cleaned.slice(2, -2); // Remove ** markers
+                return (
+                  <React.Fragment key={`${idx}-${jdx}`}>
+                    <br />
+                    <br />
+                    <strong>{boldText}</strong>
+                    <br />
+                  </React.Fragment>
+                );
               }
               
               // Additional check for any line containing "!!!" that might be a part title
