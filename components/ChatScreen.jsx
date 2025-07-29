@@ -1048,7 +1048,7 @@ const getRequiredKeyPoints = () => {
               }
               // Check for part titles (either "Part X:" format, titles ending with !!!, or standalone titles)
               if (/^Part\s*\d+/i.test(cleaned) || cleaned.includes('!!!') || 
-                  (/^[A-Z][^.\n]*[A-Za-z]$/.test(cleaned) && cleaned.length < 100 && !cleaned.includes(' the ') && !cleaned.includes(' and ') && !cleaned.includes(' of ') && !cleaned.includes(' in '))) {
+                  (/^[A-Z][^.\n]*[A-Za-z]$/.test(cleaned) && cleaned.length < 100)) {
                 
                 // Look for part titles ending with !!! and hide the !!!
                 const match = cleaned.match(/^(.*?)(!!!)(.*)$/);
