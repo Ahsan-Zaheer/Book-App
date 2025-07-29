@@ -79,7 +79,7 @@ export const POST = async (req: Request) => {
       `Write Part ${partIndex + 1} of Chapter ${chapterIndex} titled "${chapterTitle}" for the book "${title}".\n\n` +
       
       `STRUCTURE FOR THIS PART:\n` +
-      `[Creative Title] !!!\n` +
+      `Part ${partIndex + 1}:  [Three Explanation mark: !!!] [Creative Title] [Three Explanation mark: !!!]\n` +
       `[Write extensive, detailed content with comprehensive explanations, multiple examples, and thorough analysis - target ${wordsPerPart} words]\n\n` +
 
       `CRITICAL REQUIREMENTS:\n` +
@@ -106,7 +106,7 @@ export const POST = async (req: Request) => {
       `Write Part ${partIndex + 1} of Chapter ${chapterIndex} titled "${chapterTitle}" for the book "${title}".\n\n` +
       
       `STRUCTURE FOR THIS PART:\n` +
-      `[Creative Title] !!!\n` +
+      `Part ${partIndex + 1}: [Three Explanation mark: !!!] **[Creative Title]** [Three Explanation mark: !!!]\n` +
       `[Write extensive, detailed content - target ${wordsPerPart} words]\n\n` +
 
       `CRITICAL REQUIREMENTS:\n` +
