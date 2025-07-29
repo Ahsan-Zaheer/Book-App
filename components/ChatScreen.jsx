@@ -1059,7 +1059,7 @@ const getRequiredKeyPoints = () => {
                     <React.Fragment key={`${idx}-${jdx}`}>
                       <br />
                       <br />
-                      <strong style={{ fontWeight: 'bold' }}>{partTitle}</strong>
+                      <strong style={{ fontWeight: 'bold', fontSize: '1.1em' }}>{partTitle}</strong>
                       {partContent && (
                         <>
                           <br />
@@ -1075,7 +1075,7 @@ const getRequiredKeyPoints = () => {
                     <React.Fragment key={`${idx}-${jdx}`}>
                       <br />
                       <br />
-                      <strong style={{ fontWeight: 'bold' }}>{cleaned}</strong>
+                      <strong style={{ fontWeight: 'bold', fontSize: '1.1em' }}>{cleaned}</strong>
                       <br />
                     </React.Fragment>
                   );
@@ -1089,7 +1089,7 @@ const getRequiredKeyPoints = () => {
                   <React.Fragment key={`${idx}-${jdx}`}>
                     <br />
                     <br />
-                    <strong style={{ fontWeight: 'bold' }}>{boldText}</strong>
+                    <strong style={{ fontWeight: 'bold', fontSize: '1.1em' }}>{boldText}</strong>
                     <br />
                   </React.Fragment>
                 );
@@ -1106,7 +1106,7 @@ const getRequiredKeyPoints = () => {
                     <React.Fragment key={`${idx}-${jdx}`}>
                       <br />
                       <br />
-                      <strong style={{ fontWeight: 'bold' }}>{partTitle}</strong>
+                      <strong style={{ fontWeight: 'bold', fontSize: '1.1em' }}>{partTitle}</strong>
                       {partContent && (
                         <>
                           <br />
