@@ -1046,8 +1046,10 @@ const getRequiredKeyPoints = () => {
                   </React.Fragment>
                 );
               }
-              // Check for part titles (either "Part X:" format or titles ending with !!!)
-              if (/^Part\s*\d+/i.test(cleaned) || cleaned.includes('!!!')) {
+              // Check for part titles (either "Part X:" format, titles ending with !!!, or standalone titles)
+              if (/^Part\s*\d+/i.test(cleaned) || cleaned.includes('!!!') || 
+                  (/^[A-Z][^.\n]*[A-Za-z]$/.test(cleaned) && cleaned.length < 100 && !cleaned.includes(' the ') && !cleaned.includes(' and ') && !cleaned.includes(' of ') && !cleaned.includes(' in '))) {
+                
                 // Look for part titles ending with !!! and hide the !!!
                 const match = cleaned.match(/^(.*?)(!!!)(.*)$/);
                 
@@ -1071,6 +1073,16 @@ const getRequiredKeyPoints = () => {
                   );
                 } else if (/^Part\s*\d+/i.test(cleaned)) {
                   // Fallback: make the whole line bold if it starts with Part
+                  return (
+                    <React.Fragment key={`${idx}-${jdx}`}>
+                      <br />
+                      <br />
+                      <strong style={{ fontWeight: 'bold', fontSize: '1.1em' }}>{cleaned}</strong>
+                      <br />
+                    </React.Fragment>
+                  );
+                } else if (/^[A-Z][^.\n]*[A-Za-z]$/.test(cleaned) && cleaned.length < 100) {
+                  // Detect standalone part titles (like "The Lens of Innocence")
                   return (
                     <React.Fragment key={`${idx}-${jdx}`}>
                       <br />
