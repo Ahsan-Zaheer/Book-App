@@ -83,9 +83,9 @@ export const POST = async (req: Request) => {
       ` [Three Explanation Marks: !!!] [Creative Title] [Three Explanation Marks: !!!]\n` +
       `[Write extensive, detailed content with comprehensive explanations, multiple examples, and thorough analysis \n\n` +
 
-      `Please fullfill the REQUIREMENTS:\n` +
+      `FULLFILL THE REQUIREMENTS:\n` +
       `- Write ONLY Part ${partIndex + 1} (do not write other parts)\n` +
-      `- Write more than ${wordsPerPart} words for this part\n` +
+      `- Write more than ${wordsPerPart} words for this part, this is an important requirement must follow it \n` +
       `- Write extensive, detailed content with multiple paragraphs\n` +
       `- Include comprehensive explanations, practical examples, and case studies\n` +
       `- Use thorough analysis and multiple perspectives\n` +
@@ -93,7 +93,7 @@ export const POST = async (req: Request) => {
       `- Expand extensively on concepts with deep insights and analysis\n` +
       `- Add two spaces after every period\n` +
       `- Maintain a professional, educational tone throughout\n` +
-      `- Ensure this part flows naturally from previous parts\n\n` +
+      `- Ensure this part flows naturally from previous parts and do not stop writing until the ${wordsPerPart} words counts target is not acheived \n\n` +
       
       `KEY POINTS TO FOCUS ON IN THIS PART:\n` +
       `- Primary focus: ${relevantKeyPoints.join("; ")}\n` +
@@ -112,9 +112,9 @@ export const POST = async (req: Request) => {
       ` [Three Explanation Marks: !!!] [Creative Title] [Three Explanation Marks: !!!]\n` +
       `[Write extensive, detailed content \n\n` +
 
-      `Please fullfill the REQUIREMENTS:\n` +
+      `FULLFILL THE REQUIREMENTS:\n` +
       `- Write ONLY Part ${partIndex + 1} (do not write other parts)\n` +
-      `- Write more than ${wordsPerPart} words for this part\n` +
+      `- Write more than ${wordsPerPart} words for this part, this is an important requirement must follow it\n` +
       `- Write extensive, educational content about the book topic\n` +
       `- Use multiple detailed paragraphs with comprehensive explanations\n` +
       `- Include numerous practical examples, case studies, and real-world applications\n` +
@@ -123,7 +123,7 @@ export const POST = async (req: Request) => {
       `- Maintain a professional, educational tone with rich vocabulary\n` +
       `- Expand concepts extensively with detailed exploration and comprehensive insights\n` +
       `- Write substantial, detailed content to meet word targets\n` +
-      `- Ensure this part flows naturally from previous parts\n\n` +
+      `- Ensure this part flows naturally from previous parts and do not stop writing until the ${wordsPerPart} words counts target is not acheived \n\n` +
       
       `Book Summary: ${summary}`;
 
