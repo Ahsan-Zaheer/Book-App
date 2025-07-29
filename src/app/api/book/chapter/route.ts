@@ -17,7 +17,6 @@ function getWordsPerPart(bookType: string): number {
       return 1000; 
     case 'Full Length Book':
       return 1500; 
-      return 700;
   }
 }
 
