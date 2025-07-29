@@ -22,6 +22,12 @@ export function formatChapterText(text: string, doubleSpaceAfterPeriod = false):
     "\n\n\n**$1**\n\n\n"
   );
 
+  // ✅ Also detect part titles that appear at the start of content (without !!!)
+  sanitized = sanitized.replace(
+    /^([A-Z][^.\n]*[A-Za-z])(?=\n[A-Z])/gm,
+    "\n\n\n**$1**\n\n\n"
+  );
+
   if(doubleSpaceAfterPeriod) {
 
   sanitized = sanitized.replace(/\.([ \n]|$)/g, (m, p1) => `.  ${p1 === '\n' ? '' : ''}`);
