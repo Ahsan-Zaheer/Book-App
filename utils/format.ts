@@ -20,14 +20,14 @@ export function formatChapterText(text: string, doubleSpaceAfterPeriod = false):
 
   // ✅ Bold full Part headings ending with !!! (hide the !!!)
   sanitized = sanitized.replace(
-    /\n?(Part\s*\d+[^!]*?)(!!!)/gi,
-    "\n**$1**\n"
+    /\n?(Part\s*\d+:[^!]*?)(!!!)/gi,
+    "\n\n\n**$1**\n\n\n"
   );
 
   // ✅ Also handle part titles that don't start with "Part X:" but end with !!!
   sanitized = sanitized.replace(
     /\n?([^.\n]*?:\s*[^!]*?)(!!!)/gi,
-    "\n\n**$1**\n"
+    "\n\n\n**$1**\n\n\n"
   );
 
   if(doubleSpaceAfterPeriod) {
