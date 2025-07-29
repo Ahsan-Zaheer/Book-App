@@ -16,9 +16,9 @@ export function formatChapterText(text: string, doubleSpaceAfterPeriod = false):
     "\n**$1**\n"
   );
 
-  // ✅ Also handle part titles that don't start with "Part X:" but end with !!!
+  // ✅ Bold part titles ending with !!! (hide the !!!)
   sanitized = sanitized.replace(
-    /\n?([^.\n]*?:\s*[^!]*?)(!!!)/gi,
+    /\n?([^.\n]*?)(!!!)/gi,
     "\n\n\n**$1**\n\n\n"
   );
 
