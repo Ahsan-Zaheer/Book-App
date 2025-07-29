@@ -146,14 +146,6 @@ export const POST = async (req: Request) => {
               
               // Count words in real-time
               const currentWordCount = countWords(content);
-              
-              // Only stop if we significantly exceed the target for this part
-              if (currentWordCount > wordsPerPart + 200) {
-                console.log("Stopping generation - word count exceeded:", currentWordCount);
-                controller.enqueue(encoder.encode("event: done\n\n"));
-                controller.close();
-                return;
-              }
           
               // Log progress every 200 words
               if (currentWordCount % 200 === 0) {
