@@ -75,16 +75,17 @@ export const POST = async (req: Request) => {
       Math.floor(((partIndex + 1) / 4) * keyPoints.length)
     );
 
+
     prompt = basePrompt + contextPrompt +
       `Write Part ${partIndex + 1} of Chapter ${chapterIndex} titled "${chapterTitle}" for the book "${title}".\n\n` +
       
       `STRUCTURE FOR THIS PART:\n` +
       ` [Three Explanation Marks: !!!] [Creative Title] [Three Explanation Marks: !!!]\n` +
-      `[Write extensive, detailed content with comprehensive explanations, multiple examples, and thorough analysis - target ${wordsPerPart} words]\n\n` +
+      `[Write extensive, detailed content with comprehensive explanations, multiple examples, and thorough analysis \n\n` +
 
-      `CRITICAL REQUIREMENTS:\n` +
+      `Please fullfill the REQUIREMENTS:\n` +
       `- Write ONLY Part ${partIndex + 1} (do not write other parts)\n` +
-      `- Target approximately ${wordsPerPart} words for this part\n` +
+      `- Write more than ${wordsPerPart} words for this part\n` +
       `- Write extensive, detailed content with multiple paragraphs\n` +
       `- Include comprehensive explanations, practical examples, and case studies\n` +
       `- Use thorough analysis and multiple perspectives\n` +
@@ -102,16 +103,18 @@ export const POST = async (req: Request) => {
       
       `BOOK SUMMARY TO FOLLOW: ${summary}`;
   } else {
+
+
     prompt = basePrompt + contextPrompt +
       `Write Part ${partIndex + 1} of Chapter ${chapterIndex} titled "${chapterTitle}" for the book "${title}".\n\n` +
       
       `STRUCTURE FOR THIS PART:\n` +
       ` [Three Explanation Marks: !!!] [Creative Title] [Three Explanation Marks: !!!]\n` +
-      `[Write extensive, detailed content - target ${wordsPerPart} words]\n\n` +
+      `[Write extensive, detailed content \n\n` +
 
-      `CRITICAL REQUIREMENTS:\n` +
+      `Please fullfill the REQUIREMENTS:\n` +
       `- Write ONLY Part ${partIndex + 1} (do not write other parts)\n` +
-      `- Target approximately ${wordsPerPart} words for this part\n` +
+      `- Write more than ${wordsPerPart} words for this part\n` +
       `- Write extensive, educational content about the book topic\n` +
       `- Use multiple detailed paragraphs with comprehensive explanations\n` +
       `- Include numerous practical examples, case studies, and real-world applications\n` +
@@ -123,6 +126,7 @@ export const POST = async (req: Request) => {
       `- Ensure this part flows naturally from previous parts\n\n` +
       
       `Book Summary: ${summary}`;
+
   }
 
   const encoder = new TextEncoder();
@@ -135,7 +139,6 @@ export const POST = async (req: Request) => {
           modelName: "gpt-4o",
           temperature: 0.4, // Slightly higher for more expansive content
           streaming: true,
-          maxTokens: Math.ceil(wordsPerPart * 2.0), // Higher token limit to ensure full generation
           openAIApiKey: process.env.OPEN_AI_KEY,
           callbackManager: CallbackManager.fromHandlers({
             async handleLLMNewToken(token) {
