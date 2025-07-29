@@ -1054,6 +1054,7 @@ const getRequiredKeyPoints = () => {
                   return (
                     <React.Fragment key={`${idx}-${jdx}`}>
                       <br />
+                      <br />
                       <strong>{partTitle}  </strong>
                       {partContent && (
                         <>
@@ -1068,6 +1069,7 @@ const getRequiredKeyPoints = () => {
                   // Fallback: make the whole line bold if it starts with Part
                   return (
                     <React.Fragment key={`${idx}-${jdx}`}>
+                      <br />
                       <br />
                       <strong>{cleaned}  </strong>
                       <br />
