@@ -37,9 +37,9 @@ function countWords(text: string): number {
 }
 
 export const POST = async (req: Request) => {
-  const { bookId, bookType, summary, title, chapterIndex, chapterTitle, keyPoints, targetWordCount } = await req.json();
+  const { bookId, bookType, summary, title, chapterIndex, chapterTitle, keyPoints, targetWordCount, partIndex, previousParts } = await req.json();
 
-  if (!bookId || !chapterTitle || !summary || !title || !Array.isArray(keyPoints) || !chapterIndex) {
+  if (!bookId || !chapterTitle || !summary || !title || !Array.isArray(keyPoints) || !chapterIndex || partIndex === undefined) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
@@ -54,70 +54,76 @@ export const POST = async (req: Request) => {
 
   // Use targetWordCount from frontend if provided, otherwise fall back to getWordsPerPart
   const wordsPerPart = targetWordCount || getWordsPerPart(bookType);
-  const totalWords = wordsPerPart * 4;
 
-  console.log(`Total words for chapter: ${totalWords} (Parts: ${wordsPerPart} each)`);
-  console.log(`Target word count received: ${targetWordCount}`);
+  console.log(`Generating Part ${partIndex + 1} for Chapter ${chapterIndex}`);
+  console.log(`Target words per part: ${wordsPerPart}`);
 
-  const basePrompt = "You are a professional book writer. Write Chapter " + chapterIndex + " titled \"" + chapterTitle + "\" for the " + "Book" + " \"" + title + "\".\n\n";
+  const basePrompt = "You are a professional book writer. ";
+
+  // Build context from previous parts
+  let contextPrompt = "";
+  if (previousParts && previousParts.length > 0) {
+    contextPrompt = "PREVIOUS PARTS OF THIS CHAPTER FOR CONTEXT:\n" + 
+      previousParts.map((part, idx) => `Part ${idx + 1}:\n${part}`).join("\n\n") + 
+      "\n\nNow continue with the next part, ensuring it flows naturally from the previous content and maintains consistency in tone and style.\n\n";
+  }
 
   let prompt: string;
 
   if (keyPoints.length > 0) {
-    prompt = basePrompt +
-    "Write a comprehensive chapter with EXACTLY 4 parts. Each part must be substantial and detailed to reach the target word count.\n\n" +
-    
-    "MANDATORY STRUCTURE (DO NOT ADD EXTRA PARTS):\n" +
-    "Chapter " + chapterIndex + ": " + chapterTitle + "\n\n" +
-    "Part 1: [Creative Title] [Three Explanation mark: !!!]\n[Write extensive, detailed content with comprehensive explanations, multiple examples, and thorough analysis - target " + wordsPerPart + " words]\n\n" +
-    "Part 2: [Creative Title] [Three Explanation mark: !!!]\n[Write extensive, detailed content with comprehensive explanations, multiple examples, and thorough analysis - target " + wordsPerPart + " words]\n\n" +
-    "Part 3: [Creative Title] [Three Explanation mark: !!!]\n[Write extensive, detailed content with comprehensive explanations, multiple examples, and thorough analysis - target " + wordsPerPart + " words]\n\n" +
-    "Part 4: [Creative Title] [Three Explanation mark: !!!]\n[Write extensive, detailed content with comprehensive explanations, multiple examples, and thorough analysis - target " + wordsPerPart + " words]\n\n" +
+    const relevantKeyPoints = keyPoints.slice(
+      Math.floor((partIndex / 4) * keyPoints.length),
+      Math.floor(((partIndex + 1) / 4) * keyPoints.length)
+    );
 
-    "CRITICAL REQUIREMENTS:\n" +
-    "- Write ONLY 4 parts (no more, no less)\n" +
-    "- Each part should be approximately " + wordsPerPart + " words\n" +
-    "- Total target: " + totalWords + " words\n" +
-    "- Write extensive, detailed content with multiple paragraphs per part\n" +
-    "- Include comprehensive explanations, practical examples, and case studies\n" +
-    "- Use thorough analysis and multiple perspectives\n" +
-    "- Write in full, detailed paragraphs with rich, descriptive language\n" +
-    "- Expand extensively on concepts with deep insights and analysis\n" +
-    "- Add two spaces after every period\n" +
-    "- Maintain a professional, educational tone throughout\n\n" +
-    
-    "KEY POINTS TO INCORPORATE:\n" +
-    "- Distribute these key points across all 4 parts: " + keyPoints.join("; ") + "\n" +
-    "- Expand each key point extensively with detailed explanations and multiple examples\n" +
-    "- Connect concepts logically throughout the chapter with comprehensive analysis\n" +
-    "- Provide thorough, in-depth coverage of each topic area\n\n" +
-    
-    "BOOK SUMMARY TO FOLLOW: " + summary;
+    prompt = basePrompt + contextPrompt +
+      `Write Part ${partIndex + 1} of Chapter ${chapterIndex} titled "${chapterTitle}" for the book "${title}".\n\n` +
+      
+      `STRUCTURE FOR THIS PART:\n` +
+      `Part ${partIndex + 1}: [Creative Title] [Three Explanation mark: !!!]\n` +
+      `[Write extensive, detailed content with comprehensive explanations, multiple examples, and thorough analysis - target ${wordsPerPart} words]\n\n` +
+
+      `CRITICAL REQUIREMENTS:\n` +
+      `- Write ONLY Part ${partIndex + 1} (do not write other parts)\n` +
+      `- Target approximately ${wordsPerPart} words for this part\n` +
+      `- Write extensive, detailed content with multiple paragraphs\n` +
+      `- Include comprehensive explanations, practical examples, and case studies\n` +
+      `- Use thorough analysis and multiple perspectives\n` +
+      `- Write in full, detailed paragraphs with rich, descriptive language\n` +
+      `- Expand extensively on concepts with deep insights and analysis\n` +
+      `- Add two spaces after every period\n` +
+      `- Maintain a professional, educational tone throughout\n` +
+      `- Ensure this part flows naturally from previous parts\n\n` +
+      
+      `KEY POINTS TO FOCUS ON IN THIS PART:\n` +
+      `- Primary focus: ${relevantKeyPoints.join("; ")}\n` +
+      `- Expand each key point extensively with detailed explanations and multiple examples\n` +
+      `- Connect concepts logically with the overall chapter theme\n` +
+      `- Provide thorough, in-depth coverage of these specific topics\n\n` +
+      
+      `BOOK SUMMARY TO FOLLOW: ${summary}`;
   } else {
-    prompt = basePrompt +
-      "Write a comprehensive chapter with EXACTLY 4 parts. Each part must be substantial and detailed.\n\n" +
+    prompt = basePrompt + contextPrompt +
+      `Write Part ${partIndex + 1} of Chapter ${chapterIndex} titled "${chapterTitle}" for the book "${title}".\n\n` +
       
-      "MANDATORY STRUCTURE (DO NOT ADD EXTRA PARTS):\n" +
-      "Chapter " + chapterIndex + ": " + chapterTitle + "\n\n" +
-      "Part 1: [Creative Title] [Three Explanation mark: !!!]\n[Write extensive, detailed content - target " + wordsPerPart + " words]\n\n" +
-      "Part 2: [Creative Title] [Three Explanation mark: !!!]\n[Write extensive, detailed content - target " + wordsPerPart + " words]\n\n" +
-      "Part 3: [Creative Title] [Three Explanation mark: !!!]\n[Write extensive, detailed content - target " + wordsPerPart + " words]\n\n" +
-      "Part 4: [Creative Title] [Three Explanation mark: !!!]\n[Write extensive, detailed content - target " + wordsPerPart + " words]\n\n" +
+      `STRUCTURE FOR THIS PART:\n` +
+      `Part ${partIndex + 1}: [Creative Title] [Three Explanation mark: !!!]\n` +
+      `[Write extensive, detailed content - target ${wordsPerPart} words]\n\n` +
 
-      "CRITICAL REQUIREMENTS:\n" +
-      "- Write ONLY 4 parts (no additional parts)\n" +
-      "- Each part should be approximately " + wordsPerPart + " words\n" +
-      "- Total target: " + totalWords + " words\n" +
-      "- Write extensive, educational content about the book topic\n" +
-      "- Use multiple detailed paragraphs with comprehensive explanations\n" +
-      "- Include numerous practical examples, case studies, and real-world applications\n" +
-      "- Provide thorough, in-depth analysis from multiple perspectives\n" +
-      "- Add two spaces after every period\n" +
-      "- Maintain a professional, educational tone with rich vocabulary\n" +
-      "- Expand concepts extensively with detailed exploration and comprehensive insights\n" +
-      "- Write substantial, detailed content for each part to meet word targets\n\n" +
+      `CRITICAL REQUIREMENTS:\n` +
+      `- Write ONLY Part ${partIndex + 1} (do not write other parts)\n` +
+      `- Target approximately ${wordsPerPart} words for this part\n` +
+      `- Write extensive, educational content about the book topic\n` +
+      `- Use multiple detailed paragraphs with comprehensive explanations\n` +
+      `- Include numerous practical examples, case studies, and real-world applications\n` +
+      `- Provide thorough, in-depth analysis from multiple perspectives\n` +
+      `- Add two spaces after every period\n` +
+      `- Maintain a professional, educational tone with rich vocabulary\n` +
+      `- Expand concepts extensively with detailed exploration and comprehensive insights\n` +
+      `- Write substantial, detailed content to meet word targets\n` +
+      `- Ensure this part flows naturally from previous parts\n\n` +
       
-      "Book Summary: " + summary;
+      `Book Summary: ${summary}`;
   }
 
   const encoder = new TextEncoder();
@@ -139,17 +145,17 @@ export const POST = async (req: Request) => {
               // Count words in real-time
               const currentWordCount = countWords(content);
               
-              // Only stop if we significantly exceed the target
-              if (currentWordCount > totalWords + 500) {
+              // Only stop if we significantly exceed the target for this part
+              if (currentWordCount > wordsPerPart + 200) {
                 console.log("Stopping generation - word count exceeded:", currentWordCount);
                 controller.enqueue(encoder.encode("event: done\n\n"));
                 controller.close();
                 return;
               }
           
-              // Log progress every 500 words
-              if (currentWordCount % 500 === 0) {
-                console.log(`Progress: ${currentWordCount}/${totalWords} words`);
+              // Log progress every 200 words
+              if (currentWordCount % 200 === 0) {
+                console.log(`Progress: ${currentWordCount}/${wordsPerPart} words`);
               }
               
               controller.enqueue(encoder.encode("data: " + token + "\n\n"));
@@ -160,22 +166,11 @@ export const POST = async (req: Request) => {
 
               const formatted = formatChapterText(content, true);
               
-              // Log final word count
+              // Log final word count for this part
               const finalWordCount = countWords(formatted);
-              console.log("Final chapter word count: " + finalWordCount + ", Expected: " + totalWords);
+              console.log(`Final Part ${partIndex + 1} word count: ${finalWordCount}, Expected: ${wordsPerPart}`);
 
-              book.chapters.push({
-                idx: chapterIndex,
-                title: chapterTitle,
-                keyPoints: keyPoints,
-                aiContent: formatted,
-              });
-
-              if (book.chapterCount && book.chapters.length >= book.chapterCount) {
-                book.status = "generated";
-              }
-
-              await book.save();
+              // Don't save to database here - let the frontend handle combining parts
             },
             async handleLLMError(err) {
               controller.error(err);

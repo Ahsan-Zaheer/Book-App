@@ -807,31 +807,74 @@ const getRequiredKeyPoints = () => {
       };
 
       const targetWords = getTargetWordCount(bookType);
+      let fullChapterText = '';
+      let previousParts = [];
 
-      const stream = await generateChapterStream({
-        bookId,
-        bookType,
-        summary,
-        title: selectedTitle,
-        chapterIndex: currentChapter,
-        chapterTitle,
-        keyPoints: _keyPoints ?? keyPoints,
-        targetWordCount: targetWords,
-      });
-
-      let fullText = '';
-      for await (const chunk of stream) {
-        fullText += chunk;
+      // Generate 4 parts sequentially
+      for (let partIndex = 0; partIndex < 4; partIndex++) {
         setMessages((prev) =>
           prev.map((m) =>
-            m.id === loadingId ? { ...m, text: (m.text || '') + chunk } : m
+            m.id === loadingId ? { ...m, text: fullChapterText + `\n\nGenerating Part ${partIndex + 1}/4...` } : m
           )
         );
+
+        const stream = await generateChapterStream({
+          bookId,
+          bookType,
+          summary,
+          title: selectedTitle,
+          chapterIndex: currentChapter,
+          chapterTitle,
+          keyPoints: _keyPoints ?? keyPoints,
+          targetWordCount: targetWords,
+          partIndex,
+          previousParts: [...previousParts],
+        });
+
+        let partText = '';
+        for await (const chunk of stream) {
+          partText += chunk;
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === loadingId ? { ...m, text: fullChapterText + partText } : m
+            )
+          );
+        }
+
+        // Add this part to the full chapter and previous parts array
+        fullChapterText += partText;
+        previousParts.push(partText);
+
+        // Small delay between parts to avoid rate limiting
+        if (partIndex < 3) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+
+      // Save the complete chapter to the database
+      try {
+        const response = await fetch('/api/book/save-chapter', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            bookId,
+            chapterIndex: currentChapter,
+            chapterTitle,
+            keyPoints: _keyPoints ?? keyPoints,
+            aiContent: fullChapterText,
+          }),
+        });
+
+        if (!response.ok) {
+          console.error('Failed to save chapter to database');
+        }
+      } catch (saveError) {
+        console.error('Error saving chapter:', saveError);
       }
 
       setMessages((prev) =>
         prev.map((m) =>
-          m.id === loadingId ? { ...m, text: fullText, custom: formatMessageText(fullText, true) } : m
+          m.id === loadingId ? { ...m, text: fullChapterText, custom: formatMessageText(fullChapterText, true) } : m
         )
       );
 
