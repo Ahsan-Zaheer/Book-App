@@ -841,8 +841,8 @@ const getRequiredKeyPoints = () => {
           );
         }
 
-        // Add this part to the full chapter and previous parts array
-        fullChapterText += partText;
+        // Add this part to the full chapter and previous parts array with proper line breaks
+        fullChapterText += (partIndex > 0 ? '\n\n' : '') + partText;
         previousParts.push(partText);
 
         // Small delay between parts to avoid rate limiting
@@ -1073,6 +1073,30 @@ const getRequiredKeyPoints = () => {
                       <br />
                       <br />
                       <strong>{cleaned}</strong>
+                      <br />
+                    </React.Fragment>
+                  );
+                }
+              }
+              
+              // Additional check for any line containing "!!!" that might be a part title
+              if (cleaned.includes('!!!')) {
+                const match = cleaned.match(/^(.*?)(!!!)(.*)$/);
+                if (match) {
+                  const partTitle = match[1].trim();
+                  const partContent = match[3] ? match[3].trim() : '';
+                  
+                  return (
+                    <React.Fragment key={`${idx}-${jdx}`}>
+                      <br />
+                      <br />
+                      <strong>{partTitle}</strong>
+                      {partContent && (
+                        <>
+                          <br />
+                          <span style={{ whiteSpace: 'pre-wrap' }}>{partContent}</span>
+                        </>
+                      )}
                       <br />
                     </React.Fragment>
                   );
