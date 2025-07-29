@@ -16,24 +16,6 @@ export function formatChapterText(text: string, doubleSpaceAfterPeriod = false):
     "\n**$1**\n"
   );
 
-  // ✅ Bold part titles that start and end with !!! (hide the !!!)
-  sanitized = sanitized.replace(
-    /!!!\s*([^!]+?)\s*!!!/gi,
-    "\n\n\n**$1**\n\n\n"
-  );
-
-  // ✅ Also detect part titles that appear at the start of content (without !!!)
-  // Look for lines that start with capital letter, contain no periods, and are followed by paragraph text
-  sanitized = sanitized.replace(
-    /^([A-Z][^.\n]*[A-Za-z])(?=\n[A-Z][a-z])/gm,
-    "\n\n\n**$1**\n\n\n"
-  );
-  
-  // ✅ Additional detection for standalone part titles at the beginning of paragraphs
-  sanitized = sanitized.replace(
-    /\n([A-Z][^.\n]*[A-Za-z])\n([A-Z][a-z])/g,
-    "\n\n**$1**\n\n$2"
-  );
 
   if(doubleSpaceAfterPeriod) {
 
