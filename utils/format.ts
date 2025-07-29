@@ -24,6 +24,12 @@ export function formatChapterText(text: string, doubleSpaceAfterPeriod = false):
     "\n**$1**\n"
   );
 
+  // ✅ Also handle part titles that don't start with "Part X:" but end with !!!
+  sanitized = sanitized.replace(
+    /\n?([^.\n]*?:\s*[^!]*?)(!!!)/gi,
+    "\n**$1**\n"
+  );
+
   if(doubleSpaceAfterPeriod) {
   // ✅ Add triple space after the last colon in Part titles
   sanitized = sanitized.replace(/(Part\s+\d+:[^:]*:)(\s*)/g, "$1  ");

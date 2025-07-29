@@ -1043,9 +1043,10 @@ const getRequiredKeyPoints = () => {
                   </React.Fragment>
                 );
               }
-              if (/^Part\s*\d+/i.test(cleaned)) {
+              // Check for part titles (either "Part X:" format or titles ending with !!!)
+              if (/^Part\s*\d+/i.test(cleaned) || cleaned.includes('!!!')) {
                 // Look for part titles ending with !!! and hide the !!!
-                const match = cleaned.match(/^(Part\s*\d+[^!]*)(!!!)(.*)$/);
+                const match = cleaned.match(/^(.*?)(!!!)(.*)$/);
                 
                 if (match) {
                   const partTitle = match[1].trim(); // Part title without !!!
@@ -1055,7 +1056,7 @@ const getRequiredKeyPoints = () => {
                     <React.Fragment key={`${idx}-${jdx}`}>
                       <br />
                       <br />
-                      <strong>{partTitle}  </strong>
+                      <strong>{partTitle}</strong>
                       {partContent && (
                         <>
                           <br />
@@ -1065,13 +1066,13 @@ const getRequiredKeyPoints = () => {
                       <br />
                     </React.Fragment>
                   );
-                } else {
+                } else if (/^Part\s*\d+/i.test(cleaned)) {
                   // Fallback: make the whole line bold if it starts with Part
                   return (
                     <React.Fragment key={`${idx}-${jdx}`}>
                       <br />
                       <br />
-                      <strong>{cleaned}  </strong>
+                      <strong>{cleaned}</strong>
                       <br />
                     </React.Fragment>
                   );
