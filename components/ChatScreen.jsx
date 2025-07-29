@@ -1046,6 +1046,50 @@ const getRequiredKeyPoints = () => {
                   </React.Fragment>
                 );
               }
+
+              // Check for part titles with !!! markers
+              if (cleaned.includes('!!!')) {
+                const match = cleaned.match(/^(.*?)!!!\s*([^!]+?)\s*!!!(.*?)$/);
+                if (match) {
+                  const beforeTitle = match[1].trim();
+                  const partTitle = match[2].trim();
+                  const afterTitle = match[3].trim();
+                  
+                  return (
+                    <React.Fragment key={`${idx}-${jdx}`}>
+                      {beforeTitle && (
+                        <>
+                          <span style={{ whiteSpace: 'pre-wrap' }}>{beforeTitle}</span>
+                          <br />
+                        </>
+                      )}
+                      <br />
+                      <strong style={{ fontWeight: 'bold', fontSize: '1.1em' }}>{partTitle}</strong>
+                      <br />
+                      <br />
+                      {afterTitle && (
+                        <>
+                          <span style={{ whiteSpace: 'pre-wrap' }}>{afterTitle}</span>
+                          <br />
+                        </>
+                      )}
+                    </React.Fragment>
+                  );
+                }
+              }
+
+              // Check if line is already formatted with ** (from utils/format.ts)
+              if (cleaned.startsWith('**') && cleaned.endsWith('**')) {
+                const boldText = cleaned.slice(2, -2); // Remove ** markers
+                return (
+                  <React.Fragment key={`${idx}-${jdx}`}>
+                    <br />
+                    <strong style={{ fontWeight: 'bold', fontSize: '1.1em' }}>{boldText}</strong>
+                    <br />
+                    <br />
+                  </React.Fragment>
+                );
+              }
               
               return (
                 <React.Fragment key={`${idx}-${jdx}`}>
