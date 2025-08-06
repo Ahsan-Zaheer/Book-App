@@ -38,6 +38,8 @@ export default function ChatScreen({ initialBookId = null }) {
   const [outline, setOutline] = useState([]);
   const [isLoadingChat, setIsLoadingChat] = useState(false);
   const [useSimpleInput, setUseSimpleInput] = useState(false);
+  const [useCustomOutline, setUseCustomOutline] = useState(false);
+  const [customOutline, setCustomOutline] = useState([]);
 
   const createTitleSuggestionMessage = (id, refined, titles, originalSummary) => ({
     id,
@@ -90,6 +92,7 @@ export default function ChatScreen({ initialBookId = null }) {
         <div className="d-flex gap-2 mt-2">
           <button className="selection" onClick={() => handleOutlineDecision(true, outlineData)}>Go ahead with this</button>
           <button className="selection regeneration" onClick={() => handleOutlineDecision(false, null)}>Generate another suggestion</button>
+          <button className="selection" onClick={() => handleWriteOwnOutline()}>Write your own outline</button>
         </div>
       </div>
     ),
@@ -155,6 +158,8 @@ export default function ChatScreen({ initialBookId = null }) {
           if (Array.isArray(stored.outline)) setOutline(stored.outline);
           if (stored.refinedSummary) setRefinedSummary(stored.refinedSummary);
           if (Array.isArray(stored.titleOptions)) setTitleOptions(stored.titleOptions);
+          if (typeof stored.useCustomOutline === 'boolean') setUseCustomOutline(stored.useCustomOutline);
+          if (Array.isArray(stored.customOutline)) setCustomOutline(stored.customOutline);
 
           let restoredMessages = Array.isArray(stored.messages)
             ? stored.messages.map((m) => restoreMessage(m))
@@ -223,6 +228,8 @@ export default function ChatScreen({ initialBookId = null }) {
       keyPoints,
       hasKeyPoints,
       outline,
+      useCustomOutline,
+      customOutline,
     };
 
     if (saveTimeout.current) clearTimeout(saveTimeout.current);
@@ -245,6 +252,8 @@ export default function ChatScreen({ initialBookId = null }) {
     keyPoints,
     hasKeyPoints,
     outline,
+    useCustomOutline,
+    customOutline,
   ]);
 
   const sendMessage = async (overrideInput = null, overrideStep = null) => {
@@ -534,6 +543,10 @@ const getRequiredKeyPoints = () => {
     return Array(Math.max(3, getRequiredKeyPoints())).fill('');
   };
 
+  const getInitialCustomOutline = (count) => {
+    return Array(count).fill({ title: '', concept: '' });
+  };
+
   const ensureTitleInStorage = (id, title) => {
     if (!id || !title) return;
     const list = JSON.parse(localStorage.getItem('book_titles') || '[]');
@@ -591,6 +604,71 @@ const getRequiredKeyPoints = () => {
     setStep('chapters');
     setInput(''); // clear input so user can type a new number
   }
+};
+
+const handleWriteOwnOutline = () => {
+  setUseCustomOutline(true);
+  setCustomOutline(getInitialCustomOutline(chapterCount));
+  setMessages((prev) => [
+    ...prev,
+    {
+      id: generateId(),
+      sender: 'bot',
+      text: `Great! Please create your own outline with ${chapterCount} chapters. Enter a title and concept for each chapter.`,
+    },
+  ]);
+  setStep('customOutline');
+};
+
+const handleCustomOutlineChange = (index, field, value) => {
+  const newOutline = [...customOutline];
+  newOutline[index] = { ...newOutline[index], [field]: value };
+  setCustomOutline(newOutline);
+};
+
+const handleSubmitCustomOutline = () => {
+  const filledOutline = customOutline.filter(ch => ch.title.trim() && ch.concept.trim());
+  
+  if (filledOutline.length < chapterCount) {
+    setMessages((prev) => [
+      ...prev,
+      { id: generateId(), sender: 'bot', text: `Please fill in all ${chapterCount} chapters with both title and concept.` },
+    ]);
+    return;
+  }
+
+  // Set the custom outline as the main outline
+  setOutline(filledOutline);
+  
+  // Show user's custom outline
+  const formattedOutline = filledOutline.map((ch, idx) => `${idx + 1}. ${ch.title}: ${ch.concept}`).join('\n');
+  setMessages((prev) => [
+    ...prev,
+    {
+      id: generateId(),
+      sender: 'user',
+      text: `Here is my custom outline:\n${formattedOutline}`,
+    },
+  ]);
+
+  // Continue with the first chapter
+  const first = filledOutline[0];
+  setSelectedChapter(first.title);
+  setMessages((prev) => [
+    ...prev,
+    {
+      id: generateId(),
+      sender: 'bot',
+      text: `Perfect! Let's start with \n Chapter 1: ${first.title} \n Concept: ${first.concept} \n Please enter ${getRequiredKeyPoints()} key points you'd like to include in this Chapter.`,
+      isHtml: true,
+      htmlContent: `Perfect! Let's start with \n Chapter 1: ${first.title} \n Concept: ${first.concept} \n <strong>Please enter ${getRequiredKeyPoints()} key points you'd like to include in this Chapter.</strong>`,
+    },
+  ]);
+  
+  setKeyPoints(getInitialKeyPoints());
+  setStep('keypoints');
+  setUseCustomOutline(false);
+  setUseSimpleInput(false);
 };
 
   const handleSummaryRegeneration = async (originalSummary = null, currentRefined = null) => {
@@ -1018,6 +1096,8 @@ Continue this exact format for all ${count} chapters. Each chapter must start wi
     setIsGenerating(false);
     setIsMultiline(false);
     setUseSimpleInput(false);
+    setUseCustomOutline(false);
+    setCustomOutline([]);
     if (bookId) {
       saveChatState(bookId, {}).catch(() => {});
     }
@@ -1200,7 +1280,43 @@ Continue this exact format for all ${count} chapters. Each chapter must start wi
           </div>
 
           {/* Input Section */}
-          {step === 'keypoints' && !isGenerating ? (
+          {step === 'customOutline' && !isGenerating ? (
+            <div className="p-3 keypointBg">
+              <p className="text-dark mb-2">Create your outline with {chapterCount} chapters:</p>
+              <div className="scrollable-keypoints mb-2">
+                {customOutline.map((chapter, idx) => (
+                  <div key={idx} className="mb-3">
+                    <label className="form-label text-dark">Chapter {idx + 1}</label>
+                    <input
+                      type="text"
+                      className="keypoint-input mb-2"
+                      value={chapter.title}
+                      placeholder={`Chapter ${idx + 1} Title`}
+                      onChange={(e) => handleCustomOutlineChange(idx, 'title', e.target.value)}
+                    />
+                    <textarea
+                      className="keypoint-input"
+                      value={chapter.concept}
+                      placeholder={`Chapter ${idx + 1} Concept`}
+                      onChange={(e) => handleCustomOutlineChange(idx, 'concept', e.target.value)}
+                      rows={2}
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="d-flex justify-content-between">
+                <button className="btn-chat" onClick={handleSubmitCustomOutline}>
+                  Submit Custom Outline
+                </button>
+                <button className="btn-toggle-input" onClick={() => {
+                  setUseCustomOutline(false);
+                  setStep('outline');
+                }}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : step === 'keypoints' && !isGenerating ? (
             useSimpleInput ? (
               <div className="p-3">
                 <div className={`chatInputBg${isMultiline ? " multiline" : ""} d-flex align-items-center gap-2`}>
@@ -1260,7 +1376,7 @@ Continue this exact format for all ${count} chapters. Each chapter must start wi
                 </div>
               </div>
             )
-          ) : step === 'outline' ? null : (
+          ) : step === 'outline' || step === 'customOutline' ? null : (
             <div className="p-3">
                 <div className={`chatInputBg${isMultiline ? " multiline" : ""} d-flex align-items-center gap-2`}>
                   <textarea
