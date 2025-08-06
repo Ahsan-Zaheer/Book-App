@@ -446,6 +446,8 @@ export default function ChatScreen({ initialBookId = null }) {
               
               const outlineData = await getOutlineSuggestions(num, outline);
               setOutline(outlineData);
+              // Ensure chapterCount is properly set to the requested number
+              setChapterCount(num);
               setMessages((prev) =>
                 prev.map((m) =>
                   m.id === loadingId
@@ -608,13 +610,9 @@ const getRequiredKeyPoints = () => {
 
 const handleWriteOwnOutline = () => {
   // Use the chapter count that was actually requested by the user
-  const validChapterCount = chapterCount || outline.length;
+  // If chapterCount is null, use outline.length, if that's also 0, default to 4
+  const validChapterCount = chapterCount || outline.length || 4;
   console.log('Chapter count for custom outline:', { chapterCount, outlineLength: outline.length, validChapterCount });
-  
-  if (!validChapterCount) {
-    console.error('No valid chapter count found');
-    return;
-  }
   
   setUseCustomOutline(true);
   setCustomOutline(getInitialCustomOutline(validChapterCount));
