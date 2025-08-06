@@ -650,8 +650,8 @@ const handleSubmitCustomOutline = () => {
     text: 'Here is my custom outline:',
     custom: (
       <div>
-        <p><strong>Here is my custom outline:</strong></p>
-        <ol>
+        <p style={{ color: 'white' }}><strong>Here is my custom outline:</strong></p>
+        <ol style={{ color: 'white' }}>
           {filledOutline.map((ch, idx) => (
             <li key={idx}>
               <strong>{ch.title}</strong>
