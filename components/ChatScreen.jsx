@@ -607,14 +607,16 @@ const getRequiredKeyPoints = () => {
 };
 
 const handleWriteOwnOutline = () => {
+  // Ensure we have a valid chapter count
+  const validChapterCount = chapterCount || outline.length || 5; // fallback to 5 if nothing else
   setUseCustomOutline(true);
-  setCustomOutline(getInitialCustomOutline(chapterCount));
+  setCustomOutline(getInitialCustomOutline(validChapterCount));
   setMessages((prev) => [
     ...prev,
     {
       id: generateId(),
       sender: 'bot',
-      text: `Great! Please create your own outline with ${chapterCount} chapters. Enter a title and concept for each chapter.`,
+      text: `Great! Please create your own outline with ${validChapterCount} chapters. Enter a title and concept for each chapter.`,
     },
   ]);
   setStep('customOutline');
@@ -628,11 +630,12 @@ const handleCustomOutlineChange = (index, field, value) => {
 
 const handleSubmitCustomOutline = () => {
   const filledOutline = customOutline.filter(ch => ch.title.trim() && ch.concept.trim());
+  const expectedCount = chapterCount || customOutline.length;
   
-  if (filledOutline.length < chapterCount) {
+  if (filledOutline.length < expectedCount) {
     setMessages((prev) => [
       ...prev,
-      { id: generateId(), sender: 'bot', text: `Please fill in all ${chapterCount} chapters with both title and concept.` },
+      { id: generateId(), sender: 'bot', text: `Please fill in all ${expectedCount} chapters with both title and concept.` },
     ]);
     return;
   }
@@ -1282,7 +1285,7 @@ Continue this exact format for all ${count} chapters. Each chapter must start wi
           {/* Input Section */}
           {step === 'customOutline' && !isGenerating ? (
             <div className="p-3 keypointBg">
-              <p className="text-dark mb-2">Create your outline with {chapterCount} chapters:</p>
+              <p className="text-dark mb-2">Create your outline with {chapterCount || customOutline.length} chapters:</p>
               <div className="scrollable-keypoints mb-2">
                 {customOutline.map((chapter, idx) => (
                   <div key={idx} className="mb-3">
