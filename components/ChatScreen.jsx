@@ -657,7 +657,7 @@ const handleSubmitCustomOutline = () => {
           {filledOutline.map((ch, idx) => (
             <li key={idx}>
               <strong>{ch.title}</strong>
-              <p className="mb-0">{ch.concept}</p>
+              <p className="mb-0" style={{ color: 'white' }}>{ch.concept}</p>
             </li>
           ))}
         </ol>
