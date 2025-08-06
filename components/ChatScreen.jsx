@@ -643,15 +643,29 @@ const handleSubmitCustomOutline = () => {
   // Set the custom outline as the main outline
   setOutline(filledOutline);
   
-  // Show user's custom outline
-  const formattedOutline = filledOutline.map((ch, idx) => `${idx + 1}. ${ch.title}: ${ch.concept}`).join('\n');
+  // Show user's custom outline with proper formatting
+  const customOutlineMessage = {
+    id: generateId(),
+    sender: 'user',
+    text: 'Here is my custom outline:',
+    custom: (
+      <div>
+        <p><strong>Here is my custom outline:</strong></p>
+        <ol>
+          {filledOutline.map((ch, idx) => (
+            <li key={idx}>
+              <strong>{ch.title}</strong>
+              <p className="mb-0">{ch.concept}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+    ),
+  };
+  
   setMessages((prev) => [
     ...prev,
-    {
-      id: generateId(),
-      sender: 'user',
-      text: `Here is my custom outline:\n${formattedOutline}`,
-    },
+    customOutlineMessage,
   ]);
 
   // Continue with the first chapter
