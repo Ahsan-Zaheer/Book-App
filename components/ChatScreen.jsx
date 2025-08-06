@@ -607,9 +607,14 @@ const getRequiredKeyPoints = () => {
 };
 
 const handleWriteOwnOutline = () => {
-  // Ensure we have a valid chapter count - prioritize chapterCount, then outline length, then default to 4
-  const validChapterCount = chapterCount || outline.length || 4;
+  // Use the chapter count that was actually requested by the user
+  const validChapterCount = chapterCount || outline.length;
   console.log('Chapter count for custom outline:', { chapterCount, outlineLength: outline.length, validChapterCount });
+  
+  if (!validChapterCount) {
+    console.error('No valid chapter count found');
+    return;
+  }
   
   setUseCustomOutline(true);
   setCustomOutline(getInitialCustomOutline(validChapterCount));
