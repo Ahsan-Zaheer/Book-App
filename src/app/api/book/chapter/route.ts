@@ -89,6 +89,8 @@ export const POST = async (req: Request) => {
       `- Write extensive, detailed content with multiple paragraphs\n` +
       `- Include comprehensive explanations, practical examples, and case studies\n` +
       `- Use thorough analysis and multiple perspectives\n` +
+      `- Do NOT include personal stories, first-person pronouns, or personal opinions\n` +
+      `- Maintain a universal, impersonal tone – all examples should be general or theoretical\n` +
       `- Write in full, detailed paragraphs with rich, descriptive language\n` +
       `- Expand extensively on concepts with deep insights and analysis\n` +
       `- Add two spaces after every period\n` +
@@ -118,6 +120,8 @@ export const POST = async (req: Request) => {
       `- Write extensive, educational content about the book topic\n` +
       `- Use multiple detailed paragraphs with comprehensive explanations\n` +
       `- Include numerous practical examples, case studies, and real-world applications\n` +
+      `- Do NOT include personal stories, first-person pronouns, or personal opinions\n` +
+      `- Maintain a universal, impersonal tone – all examples should be general or theoretical\n` +
       `- Provide thorough, in-depth analysis from multiple perspectives\n` +
       `- Add two spaces after every period\n` +
       `- Maintain a professional, educational tone with rich vocabulary\n` +
