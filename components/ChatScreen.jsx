@@ -607,8 +607,8 @@ const getRequiredKeyPoints = () => {
 };
 
 const handleWriteOwnOutline = () => {
-  // Ensure we have a valid chapter count
-  const validChapterCount = chapterCount || outline.length || 5; // fallback to 5 if nothing else
+  // Use the actual chapter count that was requested, or fall back to outline length
+  const validChapterCount = chapterCount || outline.length;
   setUseCustomOutline(true);
   setCustomOutline(getInitialCustomOutline(validChapterCount));
   setMessages((prev) => [
