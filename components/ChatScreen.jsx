@@ -635,13 +635,13 @@ const handleCustomOutlineChange = (index, field, value) => {
 };
 
 const handleSubmitCustomOutline = () => {
-  const filledOutline = customOutline.filter(ch => ch.title.trim() && ch.concept.trim());
+  const filledOutline = customOutline.filter(ch => ch.title.trim());
   const expectedCount = chapterCount || customOutline.length;
   
   if (filledOutline.length < expectedCount) {
     setMessages((prev) => [
       ...prev,
-      { id: generateId(), sender: 'bot', text: `Please fill in all ${expectedCount} chapters with both title and concept.` },
+      { id: generateId(), sender: 'bot', text: `Please fill in all ${expectedCount} chapter titles.` },
     ]);
     return;
   }
@@ -1319,7 +1319,7 @@ Continue this exact format for all ${count} chapters. Each chapter must start wi
                     <textarea
                       className="keypoint-input"
                       value={chapter.concept}
-                      placeholder={`Chapter ${idx + 1} Concept`}
+                      placeholder={`Chapter ${idx + 1} Concept (optional)`}
                       onChange={(e) => handleCustomOutlineChange(idx, 'concept', e.target.value)}
                       rows={3}
                     />
