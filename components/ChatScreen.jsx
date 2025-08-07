@@ -621,7 +621,7 @@ const handleWriteOwnOutline = (chaps) => {
   {
     id: generateId(),
     sender: 'bot',
-    text: `Great! Please create your own outline with **${chaps}** chapters. Enter a title and concept for each chapter.`,
+    text: `Great! Please create your own outline with **${chaps}** chapters. Enter a title for each chapter and optionally add a concept description.`,
   },
 
   ]);
