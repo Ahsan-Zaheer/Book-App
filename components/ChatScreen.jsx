@@ -617,12 +617,13 @@ const handleWriteOwnOutline = (chaps) => {
   setUseCustomOutline(true);
   setCustomOutline(getInitialCustomOutline(chaps));
   setMessages((prev) => [
-    ...prev,
-    {
-      id: generateId(),
-      sender: 'bot',
-      text: `Great! Please create your own outline with ${chaps} chapters. Enter a title and concept for each chapter.`,
-    },
+  ...prev,
+  {
+    id: generateId(),
+    sender: 'bot',
+    text: `Great! Please create your own outline with **${chaps}** chapters. Enter a title and concept for each chapter.`,
+  },
+
   ]);
   setStep('customOutline');
 };
@@ -1304,9 +1305,8 @@ Continue this exact format for all ${count} chapters. Each chapter must start wi
           {/* Input Section */}
           {step === 'customOutline' && !isGenerating ? (
             <div className="p-3 keypointBg">
-              <p className="text-dark mb-2">Create your outline with {chapterCount || customOutline.length} chapters:</p>
               <div className="scrollable-keypoints mb-2">
-                {chapterCount.map((chapter, idx) => (
+                {customOutline.map((chapter, idx) => (
                   <div key={idx} className="mb-3">
                     <label className="form-label text-dark">Chapter {idx + 1}</label>
                     <input
@@ -1321,7 +1321,7 @@ Continue this exact format for all ${count} chapters. Each chapter must start wi
                       value={chapter.concept}
                       placeholder={`Chapter ${idx + 1} Concept`}
                       onChange={(e) => handleCustomOutlineChange(idx, 'concept', e.target.value)}
-                      rows={2}
+                      rows={3}
                     />
                   </div>
                 ))}
