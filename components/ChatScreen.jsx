@@ -92,7 +92,7 @@ export default function ChatScreen({ initialBookId = null }) {
         <div className="d-flex gap-2 mt-2">
           <button className="selection" onClick={() => handleOutlineDecision(true, outlineData)}>Go ahead with this</button>
           <button className="selection regeneration" onClick={() => handleOutlineDecision(false, null)}>Generate another suggestion</button>
-          <button className="selection" onClick={() => handleWriteOwnOutline()}>Write your own outline</button>
+          <button className="selection" onClick={() => handleWriteOwnOutline(outlineData.length)}>Write your own outline</button>
         </div>
       </div>
     ),
@@ -608,20 +608,20 @@ const getRequiredKeyPoints = () => {
   }
 };
 
-const handleWriteOwnOutline = () => {
+const handleWriteOwnOutline = (chaps) => {
   // Use the chapter count that was actually requested by the user
   // If chapterCount is null, use outline.length, if that's also 0, default to 4
-  const validChapterCount = chapterCount || outline.length || 4;
-  console.log('Chapter count for custom outline:', { chapterCount, outlineLength: outline.length, validChapterCount });
+  const validChapterCount = chaps;
+  console.log('Chapter count for custom outline:', chaps);
   
   setUseCustomOutline(true);
-  setCustomOutline(getInitialCustomOutline(validChapterCount));
+  setCustomOutline(getInitialCustomOutline(chaps));
   setMessages((prev) => [
     ...prev,
     {
       id: generateId(),
       sender: 'bot',
-      text: `Great! Please create your own outline with ${validChapterCount} chapters. Enter a title and concept for each chapter.`,
+      text: `Great! Please create your own outline with ${chaps} chapters. Enter a title and concept for each chapter.`,
     },
   ]);
   setStep('customOutline');
@@ -1306,7 +1306,7 @@ Continue this exact format for all ${count} chapters. Each chapter must start wi
             <div className="p-3 keypointBg">
               <p className="text-dark mb-2">Create your outline with {chapterCount || customOutline.length} chapters:</p>
               <div className="scrollable-keypoints mb-2">
-                {customOutline.map((chapter, idx) => (
+                {chapterCount.map((chapter, idx) => (
                   <div key={idx} className="mb-3">
                     <label className="form-label text-dark">Chapter {idx + 1}</label>
                     <input
