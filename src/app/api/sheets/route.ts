@@ -24,7 +24,7 @@ export const GET = async (req: Request) => {
   const skip = (page - 1) * PAGE_SIZE;
 
   const books = await Book.find(filter)
-    .sort({ _id: -1 }) // deterministic ordering for pagination
+    .sort({ _id: 1 }) 
     .skip(skip)
     .limit(PAGE_SIZE)
     .populate("author")
