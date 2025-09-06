@@ -6,6 +6,7 @@ import { Icon } from '@iconify/react';
 
 import { askQuestion, saveTitle, createBook, generateChapterStream, loadChatState, saveChatState } from '../utils/api';
 import { formatChapterText } from '../utils/format';
+import { ensureTitleInStorage } from '../utils/bookHelpers';
 
 const generateId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
@@ -140,7 +141,9 @@ export default function ChatScreen({ initialBookId = null }) {
       setIsLoadingChat(true);
       try {
         const stored = await loadChatState(initialBookId);
-        console.log("old book", stored);
+        console.log("📚 Loaded book data:", stored);
+        console.log("📚 Book has chapters:", stored?.chapters?.length || 0);
+        console.log("📚 ChatState:", stored?.chatState);
         
         if (stored) {
           // Check if this is a completed book with chapters but empty chatState
@@ -150,13 +153,25 @@ export default function ChatScreen({ initialBookId = null }) {
             stored.chatState.messages.length === 0 ||
             stored.chatState.step === 'bookType';
 
+          console.log("📚 Has chapters:", hasChapters);
+          console.log("📚 Has empty chat state:", hasEmptyOrMinimalChatState);
+
           if (hasChapters && hasEmptyOrMinimalChatState) {
             // Reconstruct the chat state from the completed book
-            console.log("Reconstructing chat state from completed book");
+            console.log("🔄 Reconstructing chat state from completed book");
+            
+            // Determine book type from chapter count if not specified
+            let bookTypeToUse = stored.bookType;
+            if (!bookTypeToUse) {
+              const chapterCount = stored.chapters.length;
+              if (chapterCount <= 6) bookTypeToUse = 'Ebook';
+              else if (chapterCount <= 10) bookTypeToUse = 'Short Book';
+              else bookTypeToUse = 'Full Length Book';
+            }
             
             // Set basic book info
-            setBookType(stored.bookType || 'Full Length Book'); // Default based on chapter count
-            setSelectedBookType(stored.bookType || 'Full Length Book');
+            setBookType(bookTypeToUse);
+            setSelectedBookType(bookTypeToUse);
             setSelectedTitle(stored.suggestedTitle || stored.title || 'Untitled Book');
             setSummary(stored.summary || '');
             setChapterCount(stored.chapters.length);
@@ -176,21 +191,23 @@ export default function ChatScreen({ initialBookId = null }) {
             // Reconstruct messages showing the book completion
             const reconstructedMessages = [
               { id: generateId(), sender: 'bot', text: 'Hi 👋! What kind of book do you want to write?' },
-              { id: generateId(), sender: 'user', text: `I want to write a ${stored.bookType || 'Full Length Book'}` },
+              { id: generateId(), sender: 'user', text: `I want to write a ${bookTypeToUse}` },
               { id: generateId(), sender: 'user', text: stored.summary },
               { id: generateId(), sender: 'bot', text: `Great! Your book "${stored.suggestedTitle || stored.title}" has been completed with ${stored.chapters.length} chapters.` },
-              ...stored.chapters.map(chapter => ({
+              ...stored.chapters.map((chapter, index) => ({
                 id: generateId(),
                 sender: 'bot',
-                text: chapter.aiContent,
-                custom: formatMessageText(chapter.aiContent, true)
+                text: `**Chapter ${chapter.idx || index + 1}: ${chapter.title}**\n\n${chapter.aiContent}`,
+                custom: formatMessageText(`**Chapter ${chapter.idx || index + 1}: ${chapter.title}**\n\n${chapter.aiContent}`, true)
               })),
               { id: generateId(), sender: 'bot', text: '🎉 Book generation complete!' }
             ];
             
+            console.log("📝 Reconstructed messages:", reconstructedMessages.length);
             setMessages(reconstructedMessages);
           } else {
             // Use stored chatState as before
+            console.log("📋 Using existing chat state");
             const chatState = stored.chatState || stored;
             
             if (chatState.step) setStep(chatState.step);
@@ -218,10 +235,16 @@ export default function ChatScreen({ initialBookId = null }) {
 
             setMessages(restoredMessages);
           }
+        } else {
+          console.log("❌ No book data found");
+          // If no stored data, start fresh
+          setMessages([{ id: generateId(), sender: 'bot', text: 'Hi 👋! What kind of book do you want to write?' }]);
         }
         setBookId(initialBookId);
       } catch (e) {
-        console.error('Failed to load stored chat', e);
+        console.error('❌ Failed to load stored chat', e);
+        // On error, start fresh
+        setMessages([{ id: generateId(), sender: 'bot', text: 'Hi 👋! What kind of book do you want to write?' }]);
       } finally {
         setIsLoadingChat(false);
         setUseSimpleInput(false);
@@ -601,15 +624,6 @@ const getRequiredKeyPoints = () => {
     return Array(count).fill({ title: '', concept: '' });
   };
 
-  const ensureTitleInStorage = (id, title) => {
-    if (!id || !title) return;
-    const list = JSON.parse(localStorage.getItem('book_titles') || '[]');
-    if (!list.find((b) => b.id === id)) {
-      list.push({ id, title });
-      localStorage.setItem('book_titles', JSON.stringify(list));
-      window.dispatchEvent(new Event('titlesUpdated'));
-    }
-  };
 
 
   const handleTitleSelect = (title) => {
