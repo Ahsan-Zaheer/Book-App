@@ -150,7 +150,11 @@ export default function ChatScreen({ initialBookId = null }) {
       try {
         const stored = await loadChatState(initialBookId);
         console.log("📚 Raw API response:", stored);
+        console.log("📚 Raw API response keys:", Object.keys(stored || {}));
         console.log("📚 Book has chapters:", stored?.chapters?.length || 0);
+        console.log("📚 First chapter:", stored?.chapters?.[0]);
+        console.log("📚 Book summary:", stored?.summary);
+        console.log("📚 Book suggestedTitle:", stored?.suggestedTitle);
         console.log("📚 ChatState exists:", !!stored?.chatState);
         console.log("📚 ChatState messages:", stored?.chatState?.messages?.length || 0);
         
