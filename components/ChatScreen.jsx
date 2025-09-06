@@ -140,32 +140,84 @@ export default function ChatScreen({ initialBookId = null }) {
       setIsLoadingChat(true);
       try {
         const stored = await loadChatState(initialBookId);
-        console.log("old book", stored.bookType);
+        console.log("old book", stored);
+        
         if (stored) {
-          if (stored.step) setStep(stored.step);
-          if (stored.bookType) setBookType(stored.bookType);
-          if (stored.selectedBookType) setSelectedBookType(stored.selectedBookType);
-          if (stored.selectedTitle) {
-            setSelectedTitle(stored.selectedTitle);
-            ensureTitleInStorage(initialBookId, stored.selectedTitle);
+          // Check if this is a completed book with chapters but empty chatState
+          const hasChapters = stored.chapters && stored.chapters.length > 0;
+          const hasEmptyOrMinimalChatState = !stored.chatState || 
+            !stored.chatState.messages || 
+            stored.chatState.messages.length === 0 ||
+            stored.chatState.step === 'bookType';
+
+          if (hasChapters && hasEmptyOrMinimalChatState) {
+            // Reconstruct the chat state from the completed book
+            console.log("Reconstructing chat state from completed book");
+            
+            // Set basic book info
+            setBookType(stored.bookType || 'Full Length Book'); // Default based on chapter count
+            setSelectedBookType(stored.bookType || 'Full Length Book');
+            setSelectedTitle(stored.suggestedTitle || stored.title || 'Untitled Book');
+            setSummary(stored.summary || '');
+            setChapterCount(stored.chapters.length);
+            setCurrentChapter(stored.chapters.length + 1); // Next chapter would be after the last one
+            setStep('content'); // Book is complete
+            
+            // Ensure title is in storage
+            ensureTitleInStorage(initialBookId, stored.suggestedTitle || stored.title || 'Untitled Book');
+            
+            // Create outline from existing chapters
+            const reconstructedOutline = stored.chapters.map(ch => ({
+              title: ch.title,
+              concept: ch.keyPoints ? ch.keyPoints.slice(0, 3).join(', ') : 'Chapter content'
+            }));
+            setOutline(reconstructedOutline);
+            
+            // Reconstruct messages showing the book completion
+            const reconstructedMessages = [
+              { id: generateId(), sender: 'bot', text: 'Hi 👋! What kind of book do you want to write?' },
+              { id: generateId(), sender: 'user', text: `I want to write a ${stored.bookType || 'Full Length Book'}` },
+              { id: generateId(), sender: 'user', text: stored.summary },
+              { id: generateId(), sender: 'bot', text: `Great! Your book "${stored.suggestedTitle || stored.title}" has been completed with ${stored.chapters.length} chapters.` },
+              ...stored.chapters.map(chapter => ({
+                id: generateId(),
+                sender: 'bot',
+                text: chapter.aiContent,
+                custom: formatMessageText(chapter.aiContent, true)
+              })),
+              { id: generateId(), sender: 'bot', text: '🎉 Book generation complete!' }
+            ];
+            
+            setMessages(reconstructedMessages);
+          } else {
+            // Use stored chatState as before
+            const chatState = stored.chatState || stored;
+            
+            if (chatState.step) setStep(chatState.step);
+            if (chatState.bookType) setBookType(chatState.bookType);
+            if (chatState.selectedBookType) setSelectedBookType(chatState.selectedBookType);
+            if (chatState.selectedTitle) {
+              setSelectedTitle(chatState.selectedTitle);
+              ensureTitleInStorage(initialBookId, chatState.selectedTitle);
+            }
+            if (chatState.selectedChapter) setSelectedChapter(chatState.selectedChapter);
+            if (typeof chatState.chapterCount !== 'undefined') setChapterCount(chatState.chapterCount);
+            if (chatState.summary) setSummary(chatState.summary);
+            if (typeof chatState.currentChapter !== 'undefined') setCurrentChapter(chatState.currentChapter);
+            if (Array.isArray(chatState.keyPoints)) setKeyPoints(chatState.keyPoints);
+            if (typeof chatState.hasKeyPoints === 'boolean') setHasKeyPoints(chatState.hasKeyPoints);
+            if (Array.isArray(chatState.outline)) setOutline(chatState.outline);
+            if (chatState.refinedSummary) setRefinedSummary(chatState.refinedSummary);
+            if (Array.isArray(chatState.titleOptions)) setTitleOptions(chatState.titleOptions);
+            if (typeof chatState.useCustomOutline === 'boolean') setUseCustomOutline(chatState.useCustomOutline);
+            if (Array.isArray(chatState.customOutline)) setCustomOutline(chatState.customOutline);
+
+            let restoredMessages = Array.isArray(chatState.messages)
+              ? chatState.messages.map((m) => restoreMessage(m))
+              : [{ id: generateId(), sender: 'bot', text: 'Hi 👋! What kind of book do you want to write?' }];
+
+            setMessages(restoredMessages);
           }
-          if (stored.selectedChapter) setSelectedChapter(stored.selectedChapter);
-          if (typeof stored.chapterCount !== 'undefined') setChapterCount(stored.chapterCount);
-          if (stored.summary) setSummary(stored.summary);
-          if (typeof stored.currentChapter !== 'undefined') setCurrentChapter(stored.currentChapter);
-          if (Array.isArray(stored.keyPoints)) setKeyPoints(stored.keyPoints);
-          if (typeof stored.hasKeyPoints === 'boolean') setHasKeyPoints(stored.hasKeyPoints);
-          if (Array.isArray(stored.outline)) setOutline(stored.outline);
-          if (stored.refinedSummary) setRefinedSummary(stored.refinedSummary);
-          if (Array.isArray(stored.titleOptions)) setTitleOptions(stored.titleOptions);
-          if (typeof stored.useCustomOutline === 'boolean') setUseCustomOutline(stored.useCustomOutline);
-          if (Array.isArray(stored.customOutline)) setCustomOutline(stored.customOutline);
-
-          let restoredMessages = Array.isArray(stored.messages)
-            ? stored.messages.map((m) => restoreMessage(m))
-            : [];
-
-          setMessages(restoredMessages);
         }
         setBookId(initialBookId);
       } catch (e) {
