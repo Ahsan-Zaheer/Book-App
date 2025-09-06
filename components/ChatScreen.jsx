@@ -133,7 +133,7 @@ export default function ChatScreen({ initialBookId = null }) {
     return msg;
   };
 
-  // Load stored chat when an initial book id is provided
+  
   useEffect(() => {
     const load = async () => {
       if (!initialBookId) return;
