@@ -125,12 +125,20 @@ export default function ChatScreen({ initialBookId = null }) {
     }
     if (msg.customType === 'outline' && msg.data) {
       setOutline(msg.data.outline || []);
-
       return createOutlineMessage(msg.id, msg.data.outline || []);
     }
     if (msg.customType === 'summaryPrompt') {
       return createSummaryPromptMessage(msg.id);
     }
+    
+    // Handle reconstructed chapter messages - they need custom formatting
+    if (msg.sender === 'bot' && msg.text && msg.text.includes('**Chapter')) {
+      return {
+        ...msg,
+        custom: formatMessageText(msg.text, true)
+      };
+    }
+    
     return msg;
   };
 
@@ -141,14 +149,19 @@ export default function ChatScreen({ initialBookId = null }) {
       setIsLoadingChat(true);
       try {
         const stored = await loadChatState(initialBookId);
-        console.log("📚 Loaded book data:", stored);
+        console.log("📚 Raw API response:", stored);
         console.log("📚 Book has chapters:", stored?.chapters?.length || 0);
-        console.log("📚 ChatState:", stored?.chatState);
+        console.log("📚 ChatState exists:", !!stored?.chatState);
+        console.log("📚 ChatState messages:", stored?.chatState?.messages?.length || 0);
         
         if (stored) {
           // The API now handles reconstruction, so we just use the chatState
           console.log("📋 Using chat state from API");
           const chatState = stored.chatState || {};
+          
+          console.log("📋 Final chatState to use:", chatState);
+          console.log("📋 Messages in chatState:", chatState.messages?.length || 0);
+          console.log("📋 Step in chatState:", chatState.step);
           
           if (chatState.step) setStep(chatState.step);
           if (chatState.bookType) setBookType(chatState.bookType);
@@ -173,6 +186,8 @@ export default function ChatScreen({ initialBookId = null }) {
             ? chatState.messages.map((m) => restoreMessage(m))
             : [{ id: generateId(), sender: 'bot', text: 'Hi 👋! What kind of book do you want to write?' }];
 
+          console.log("📋 Restored messages:", restoredMessages.length);
+          console.log("📋 First few messages:", restoredMessages.slice(0, 3));
           setMessages(restoredMessages);
         } else {
           console.log("❌ No book data found");
