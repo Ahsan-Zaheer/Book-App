@@ -149,19 +149,10 @@ export default function ChatScreen({ initialBookId = null }) {
       setIsLoadingChat(true);
       try {
         const stored = await loadChatState(initialBookId);
-        console.log("📚 Loaded book data:", stored);
-        console.log("📚 Book data keys:", Object.keys(stored || {}));
-        console.log("📚 Book has chapters:", stored?.chapters?.length || 0);
-        console.log("📚 First chapter title:", stored?.chapters?.[0]?.title);
-        console.log("📚 Book summary:", stored?.summary?.substring(0, 100));
-        console.log("📚 Book suggestedTitle:", stored?.suggestedTitle);
-        console.log("📚 ChatState exists:", !!stored?.chatState);
-        console.log("📚 ChatState messages:", stored?.chatState?.messages?.length || 0);
+     
         
         if (stored) {
-          console.log("📋 Book data found, checking for reconstruction need");
-          console.log("📋 Stored chapters:", stored.chapters?.length || 0);
-          console.log("📋 Stored chatState:", !!stored.chatState);
+     
           
           // Check if this book needs reconstruction (has chapters but incomplete chatState)
           const hasChapters = stored.chapters && stored.chapters.length > 0;
@@ -171,12 +162,10 @@ export default function ChatScreen({ initialBookId = null }) {
             stored.chatState.step === 'bookType' ||
             (hasChapters && stored.chatState.step !== 'content' && stored.chatState.messages.length < stored.chapters.length + 4);
 
-          console.log("📋 Has incomplete chat state:", hasIncompleteOrMinimalChatState);
-          console.log("📋 Current step:", stored.chatState?.step);
-          console.log("📋 Messages vs chapters:", stored.chatState?.messages?.length, "vs", stored.chapters?.length);
+     
 
           if (hasChapters && hasIncompleteOrMinimalChatState) {
-            console.log("🔄 Client-side reconstruction needed");
+          
             
             // Determine book type from chapter count if not specified
             let bookTypeToUse = stored.bookType;
@@ -221,16 +210,14 @@ export default function ChatScreen({ initialBookId = null }) {
               { id: generateId(), sender: 'bot', text: '🎉 Book generation complete!' }
             ];
             
-            console.log("📝 Client reconstructed messages:", reconstructedMessages.length);
+          
             setMessages(reconstructedMessages);
           } else {
             // Use existing chatState
-            console.log("📋 Using existing chat state from API");
+        
             const chatState = stored.chatState || {};
             
-            console.log("📋 Final chatState to use:", chatState);
-            console.log("📋 Messages in chatState:", chatState.messages?.length || 0);
-            console.log("📋 Step in chatState:", chatState.step);
+      
           
           if (chatState.step) setStep(chatState.step);
           if (chatState.bookType) setBookType(chatState.bookType);
@@ -255,12 +242,11 @@ export default function ChatScreen({ initialBookId = null }) {
             ? chatState.messages.map((m) => restoreMessage(m))
             : [{ id: generateId(), sender: 'bot', text: 'Hi 👋! What kind of book do you want to write?' }];
 
-          console.log("📋 Restored messages:", restoredMessages.length);
-          console.log("📋 First few messages:", restoredMessages.slice(0, 3));
+      
           setMessages(restoredMessages);
           }
         } else {
-          console.log("❌ No book data found");
+        
           // If no stored data, start fresh
           setMessages([{ id: generateId(), sender: 'bot', text: 'Hi 👋! What kind of book do you want to write?' }]);
         }
@@ -432,7 +418,7 @@ export default function ChatScreen({ initialBookId = null }) {
         const refined = await askQuestion(randomPrompt);
         setRefinedSummary(refined);
 
-        console.log(refinedSummary);
+      
         
 
         // Array of different prompt variations for title generation
@@ -489,7 +475,7 @@ export default function ChatScreen({ initialBookId = null }) {
 
         setTitleOptions(titles);
 
-        console.log(titles);
+       
         
         setMessages((prev) =>
           prev.map((m) =>
@@ -541,7 +527,7 @@ export default function ChatScreen({ initialBookId = null }) {
             ]);
             try {
 
-              console.log("🔄 Generating outline", outline);
+             
               
               const outlineData = await getOutlineSuggestions(num, outline);
               setOutline(outlineData);
@@ -702,7 +688,7 @@ const handleWriteOwnOutline = (chaps) => {
   // Use the chapter count that was actually requested by the user
   // If chapterCount is null, use outline.length, if that's also 0, default to 4
   const validChapterCount = chaps;
-  console.log('Chapter count for custom outline:', chaps);
+  
   
   setUseCustomOutline(true);
   setCustomOutline(getInitialCustomOutline(chaps));
@@ -794,11 +780,7 @@ const handleSubmitCustomOutline = () => {
     // Use passed parameters first, then fall back to state variables
     const summaryToUse = originalSummary || currentRefined || refinedSummary || summary;
     
-    console.log('Summary to use:', summaryToUse);
-    console.log('Original Summary passed:', originalSummary);
-    console.log('Current Refined passed:', currentRefined);
-    console.log('State Summary:', summary);
-    console.log('State Refined Summary:', refinedSummary);
+    
     
 
     try {
@@ -849,7 +831,6 @@ const handleSubmitCustomOutline = () => {
           })
           .filter(item => item.title.length > 0); // Remove empty titles
 
-          console.log(titles);
           
 
         setTitleOptions(titles);
@@ -874,13 +855,11 @@ const handleSubmitCustomOutline = () => {
 
     let answer;
     
-    console.log("old outline",oldOutline);
-    
     if(Array.isArray(oldOutline) && oldOutline.length > 0){
       // Generate completely different outline when regenerating
       const existingChapters = oldOutline.map(ch => `${ch.title}: ${ch.concept}`).join('\n');
       const summaryToUse = refinedSummary || summary;
-      console.log("Summary to use: ", summaryToUse);
+      
 
 
       
@@ -910,7 +889,7 @@ Chapter 3: [Title]
 
 Continue this exact format for all ${count} chapters. Each chapter must start with "Chapter X:" followed by the title on the same line, then the concept description on the next line(s).`
       );
-      console.log(answer);
+      
       
     } else {
       // Use a single, highly specific prompt that ensures consistent formatting
@@ -948,7 +927,7 @@ Continue this exact format for all ${count} chapters. Each chapter must start wi
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      console.log(`🔍 Line ${i + 1}: ${line}`);
+     
 
       if (isChapterLine(line)) {
         if (current) chapters.push(current);
@@ -981,7 +960,7 @@ Continue this exact format for all ${count} chapters. Each chapter must start wi
 
     if (current) chapters.push(current);
     const finalChapters = chapters.slice(0, count);
-    console.log("✅ Final parsed chapters array:", finalChapters);
+   
     return finalChapters;
   };
 

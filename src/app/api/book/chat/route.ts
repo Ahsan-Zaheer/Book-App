@@ -14,13 +14,7 @@ export const GET = async (req: Request) => {
     return NextResponse.json({ error: "Book not found" }, { status: 404 });
   }
   
-  console.log("📚 API: Found book with ID:", bookId);
-  console.log("📚 API: Book has chapters:", book.chapters?.length || 0);
-  console.log("📚 API: Book summary:", book.summary?.substring(0, 100) + "...");
-  console.log("📚 API: Book suggestedTitle:", book.suggestedTitle);
-  console.log("📚 API: Book chatState exists:", !!book.chatState);
-  console.log("📚 API: ChatState step:", book.chatState?.step);
-  console.log("📚 API: ChatState messages:", book.chatState?.messages?.length || 0);
+
   
   // If chatState is empty but book has chapters, reconstruct chatState
   const hasChapters = book.chapters && book.chapters.length > 0;
@@ -30,14 +24,9 @@ export const GET = async (req: Request) => {
     book.chatState.step === 'bookType' ||
     (hasChapters && book.chatState.step !== 'content' && book.chatState.messages.length < book.chapters.length + 4);
 
-  console.log("📚 API: Has chapters:", hasChapters);
-  console.log("📚 API: Has incomplete chat state:", hasIncompleteOrMinimalChatState);
-  console.log("📚 API: Current step:", book.chatState?.step);
-  console.log("📚 API: Messages vs chapters:", book.chatState?.messages?.length, "vs", book.chapters?.length);
+
 
   if (hasChapters && hasIncompleteOrMinimalChatState) {
-    console.log("🔄 Reconstructing chatState from completed book in API");
-    console.log("🔄 Chapter titles:", book.chapters.map(ch => ch.title));
     
     // Determine book type from chapter count if not specified
     let bookTypeToUse = book.bookType;
@@ -90,9 +79,7 @@ export const GET = async (req: Request) => {
     
     // Update the book with the reconstructed chatState
     await (Book as any).findByIdAndUpdate(bookId, { chatState: reconstructedChatState });
-    
-    console.log("✅ API: Successfully reconstructed and saved chatState");
-    console.log("✅ API: Returning book with", book.chapters.length, "chapters");
+
     
     // Return the full book data with reconstructed chatState
     return NextResponse.json({ 
@@ -103,8 +90,7 @@ export const GET = async (req: Request) => {
     });
   }
   
-  // Return the full book data (not just chatState)
-  console.log("📚 API: Returning existing book data with", book.chapters?.length || 0, "chapters");
+
   return NextResponse.json({ data: book });
 };
 

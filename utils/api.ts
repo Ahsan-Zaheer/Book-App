@@ -95,9 +95,7 @@ export const loadChatState = async (bookId) => {
     if (cached) {
         try {
             const parsedCache = JSON.parse(cached);
-            console.log("📚 API: Found cached data for book:", bookId);
-            console.log("📚 API: Cached data has chapters:", parsedCache?.chapters?.length || 0);
-            console.log("📚 API: Cached chatState messages:", parsedCache?.chatState?.messages?.length || 0);
+           
             
             // Check if cached data looks like it needs reconstruction
             const hasChapters = parsedCache.chapters && parsedCache.chapters.length > 0;
@@ -108,13 +106,13 @@ export const loadChatState = async (bookId) => {
                 (hasChapters && parsedCache.chatState.step !== 'content' && parsedCache.chatState.messages.length < parsedCache.chapters.length + 4);
             
             if (hasChapters && hasIncompleteOrMinimalChatState) {
-                console.log("🔄 API: Cached data needs reconstruction, fetching fresh from server");
+             
                 shouldFetchFresh = true;
             } else if (!hasChapters && (!parsedCache.chatState || parsedCache.chatState.messages?.length <= 1)) {
-                console.log("🔄 API: Cached data appears incomplete, fetching fresh");
+               
                 shouldFetchFresh = true;
             } else {
-                console.log("📚 API: Using cached data");
+              
                 return parsedCache;
             }
         } catch (e) {
@@ -126,17 +124,14 @@ export const loadChatState = async (bookId) => {
     }
     
     if (shouldFetchFresh) {
-        console.log("📚 API: Fetching fresh data for book:", bookId);
+       
         // Clear the potentially stale cache
         localStorage.removeItem(`chat_${bookId}`);
         
         const res = await fetch(createUrl(`/api/book/chat?bookId=${bookId}`));
         if (res.ok) {
             const response = await res.json();
-            console.log("📚 API: Fresh response received");
-            console.log("📚 API: Response has data:", !!response.data);
-            console.log("📚 API: Data has chapters:", response.data?.chapters?.length || 0);
-            console.log("📚 API: Data chatState messages:", response.data?.chatState?.messages?.length || 0);
+         
             
             if (response.data) {
                 // Cache the fresh book data
