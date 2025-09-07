@@ -9,7 +9,7 @@ export const GET = async (req: Request) => {
     return NextResponse.json({ error: "bookId is required" }, { status: 400 });
   }
   await connectToDatabase();
-  const book = await Book.findById(bookId).lean();
+  const book = await (Book as any).findById(bookId).lean();
   if (!book) {
     return NextResponse.json({ error: "Book not found" }, { status: 404 });
   }
@@ -86,7 +86,7 @@ export const GET = async (req: Request) => {
     };
     
     // Update the book with the reconstructed chatState
-    await Book.findByIdAndUpdate(bookId, { chatState: reconstructedChatState });
+    await (Book as any).findByIdAndUpdate(bookId, { chatState: reconstructedChatState });
     
     console.log("✅ API: Successfully reconstructed and saved chatState");
     console.log("✅ API: Returning book with", book.chapters.length, "chapters");
@@ -111,7 +111,7 @@ export const PUT = async (req: Request) => {
     return NextResponse.json({ error: "bookId is required" }, { status: 400 });
   }
   await connectToDatabase();
-  const book = await Book.findByIdAndUpdate(bookId, { chatState: state }, { new: true });
+  const book = await (Book as any).findByIdAndUpdate(bookId, { chatState: state }, { new: true });
   if (!book) {
     return NextResponse.json({ error: "Book not found" }, { status: 404 });
   }
