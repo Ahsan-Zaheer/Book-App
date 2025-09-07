@@ -92,16 +92,29 @@ export const loadChatState = async (bookId) => {
     const cached = localStorage.getItem(`chat_${bookId}`);
     if (cached) {
         try {
-            return JSON.parse(cached);
-        } catch {}
+            const parsedCache = JSON.parse(cached);
+            console.log("📚 API: Using cached data for book:", bookId);
+            console.log("📚 API: Cached data has chapters:", parsedCache?.chapters?.length || 0);
+            return parsedCache;
+        } catch (e) {
+            console.warn("📚 API: Failed to parse cached data, fetching fresh");
+        }
     }
+    
+    console.log("📚 API: Fetching fresh data for book:", bookId);
     const res = await fetch(createUrl(`/api/book/chat?bookId=${bookId}`));
     if (res.ok) {
-        const data = await res.json();
-        if (data.data) {
-            localStorage.setItem(`chat_${bookId}`, JSON.stringify(data.data));
+        const response = await res.json();
+        console.log("📚 API: Raw response:", response);
+        console.log("📚 API: Response has data:", !!response.data);
+        console.log("📚 API: Data has chapters:", response.data?.chapters?.length || 0);
+        
+        if (response.data) {
+            // Cache the book data
+            localStorage.setItem(`chat_${bookId}`, JSON.stringify(response.data));
+            return response.data;
         }
-        return data.data;
+        return null;
     } else {
         throw new Error('Failed to load chat');
     }
