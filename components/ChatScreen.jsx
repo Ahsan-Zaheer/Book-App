@@ -149,17 +149,83 @@ export default function ChatScreen({ initialBookId = null }) {
       setIsLoadingChat(true);
       try {
         const stored = await loadChatState(initialBookId);
-        console.log("📚 Raw API response:", stored);
-        console.log("📚 Raw API response keys:", Object.keys(stored || {}));
+        console.log("📚 Loaded book data:", stored);
+        console.log("📚 Book data keys:", Object.keys(stored || {}));
+        console.log("📚 Book has chapters:", stored?.chapters?.length || 0);
+        console.log("📚 First chapter title:", stored?.chapters?.[0]?.title);
+        console.log("📚 Book summary:", stored?.summary?.substring(0, 100));
+        console.log("📚 Book suggestedTitle:", stored?.suggestedTitle);
+        console.log("📚 ChatState exists:", !!stored?.chatState);
+        console.log("📚 ChatState messages:", stored?.chatState?.messages?.length || 0);
         
         if (stored) {
-          // The API now handles reconstruction, so we just use the chatState
-          console.log("📋 Using chat state from API");
-          const chatState = stored.chatState || {};
+          console.log("📋 Book data found, checking for reconstruction need");
+          console.log("📋 Stored chapters:", stored.chapters?.length || 0);
+          console.log("📋 Stored chatState:", !!stored.chatState);
           
-          console.log("📋 Final chatState to use:", chatState);
-          console.log("📋 Messages in chatState:", chatState.messages?.length || 0);
-          console.log("📋 Step in chatState:", chatState.step);
+          // Check if this book needs reconstruction (has chapters but empty chatState)
+          const hasChapters = stored.chapters && stored.chapters.length > 0;
+          const hasEmptyOrMinimalChatState = !stored.chatState || 
+            !stored.chatState.messages || 
+            stored.chatState.messages.length === 0 ||
+            stored.chatState.step === 'bookType';
+
+          if (hasChapters && hasEmptyOrMinimalChatState) {
+            console.log("🔄 Client-side reconstruction needed");
+            
+            // Determine book type from chapter count if not specified
+            let bookTypeToUse = stored.bookType;
+            if (!bookTypeToUse) {
+              const chapterCount = stored.chapters.length;
+              if (chapterCount <= 6) bookTypeToUse = 'Ebook';
+              else if (chapterCount <= 10) bookTypeToUse = 'Short Book';
+              else bookTypeToUse = 'Full Length Book';
+            }
+            
+            // Set all the state variables
+            setBookType(bookTypeToUse);
+            setSelectedBookType(bookTypeToUse);
+            setSelectedTitle(stored.suggestedTitle || stored.title || 'Untitled Book');
+            setSummary(stored.summary || '');
+            setChapterCount(stored.chapters.length);
+            setCurrentChapter(stored.chapters.length + 1);
+            setStep('content');
+            
+            // Ensure title is in storage
+            ensureTitleInStorage(initialBookId, stored.suggestedTitle || stored.title || 'Untitled Book');
+            
+            // Create outline from existing chapters
+            const reconstructedOutline = stored.chapters.map(ch => ({
+              title: ch.title,
+              concept: ch.keyPoints ? ch.keyPoints.slice(0, 3).join(', ') : 'Chapter content'
+            }));
+            setOutline(reconstructedOutline);
+            
+            // Reconstruct messages showing the book completion
+            const reconstructedMessages = [
+              { id: generateId(), sender: 'bot', text: 'Hi 👋! What kind of book do you want to write?' },
+              { id: generateId(), sender: 'user', text: `I want to write a ${bookTypeToUse}` },
+              { id: generateId(), sender: 'user', text: stored.summary },
+              { id: generateId(), sender: 'bot', text: `Great! Your book "${stored.suggestedTitle || stored.title}" has been completed with ${stored.chapters.length} chapters.` },
+              ...stored.chapters.map((chapter, index) => ({
+                id: generateId(),
+                sender: 'bot',
+                text: `**Chapter ${chapter.idx || index + 1}: ${chapter.title}**\n\n${chapter.aiContent}`,
+                custom: formatMessageText(`**Chapter ${chapter.idx || index + 1}: ${chapter.title}**\n\n${chapter.aiContent}`, true)
+              })),
+              { id: generateId(), sender: 'bot', text: '🎉 Book generation complete!' }
+            ];
+            
+            console.log("📝 Client reconstructed messages:", reconstructedMessages.length);
+            setMessages(reconstructedMessages);
+          } else {
+            // Use existing chatState
+            console.log("📋 Using existing chat state from API");
+            const chatState = stored.chatState || {};
+            
+            console.log("📋 Final chatState to use:", chatState);
+            console.log("📋 Messages in chatState:", chatState.messages?.length || 0);
+            console.log("📋 Step in chatState:", chatState.step);
           
           if (chatState.step) setStep(chatState.step);
           if (chatState.bookType) setBookType(chatState.bookType);
