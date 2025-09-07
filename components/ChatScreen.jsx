@@ -163,14 +163,19 @@ export default function ChatScreen({ initialBookId = null }) {
           console.log("📋 Stored chapters:", stored.chapters?.length || 0);
           console.log("📋 Stored chatState:", !!stored.chatState);
           
-          // Check if this book needs reconstruction (has chapters but empty chatState)
+          // Check if this book needs reconstruction (has chapters but incomplete chatState)
           const hasChapters = stored.chapters && stored.chapters.length > 0;
-          const hasEmptyOrMinimalChatState = !stored.chatState || 
+          const hasIncompleteOrMinimalChatState = !stored.chatState || 
             !stored.chatState.messages || 
             stored.chatState.messages.length === 0 ||
-            stored.chatState.step === 'bookType';
+            stored.chatState.step === 'bookType' ||
+            (hasChapters && stored.chatState.step !== 'content' && stored.chatState.messages.length < stored.chapters.length + 4);
 
-          if (hasChapters && hasEmptyOrMinimalChatState) {
+          console.log("📋 Has incomplete chat state:", hasIncompleteOrMinimalChatState);
+          console.log("📋 Current step:", stored.chatState?.step);
+          console.log("📋 Messages vs chapters:", stored.chatState?.messages?.length, "vs", stored.chapters?.length);
+
+          if (hasChapters && hasIncompleteOrMinimalChatState) {
             console.log("🔄 Client-side reconstruction needed");
             
             // Determine book type from chapter count if not specified

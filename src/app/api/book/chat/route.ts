@@ -24,15 +24,18 @@ export const GET = async (req: Request) => {
   
   // If chatState is empty but book has chapters, reconstruct chatState
   const hasChapters = book.chapters && book.chapters.length > 0;
-  const hasEmptyOrMinimalChatState = !book.chatState || 
+  const hasIncompleteOrMinimalChatState = !book.chatState || 
     !book.chatState.messages || 
     book.chatState.messages.length === 0 ||
-    book.chatState.step === 'bookType';
+    book.chatState.step === 'bookType' ||
+    (hasChapters && book.chatState.step !== 'content' && book.chatState.messages.length < book.chapters.length + 4);
 
   console.log("📚 API: Has chapters:", hasChapters);
-  console.log("📚 API: Has empty chat state:", hasEmptyOrMinimalChatState);
+  console.log("📚 API: Has incomplete chat state:", hasIncompleteOrMinimalChatState);
+  console.log("📚 API: Current step:", book.chatState?.step);
+  console.log("📚 API: Messages vs chapters:", book.chatState?.messages?.length, "vs", book.chapters?.length);
 
-  if (hasChapters && hasEmptyOrMinimalChatState) {
+  if (hasChapters && hasIncompleteOrMinimalChatState) {
     console.log("🔄 Reconstructing chatState from completed book in API");
     console.log("🔄 Chapter titles:", book.chapters.map(ch => ch.title));
     

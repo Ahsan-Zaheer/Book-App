@@ -101,12 +101,13 @@ export const loadChatState = async (bookId) => {
             
             // Check if cached data looks like it needs reconstruction
             const hasChapters = parsedCache.chapters && parsedCache.chapters.length > 0;
-            const hasEmptyOrMinimalChatState = !parsedCache.chatState || 
+            const hasIncompleteOrMinimalChatState = !parsedCache.chatState || 
                 !parsedCache.chatState.messages || 
                 parsedCache.chatState.messages.length === 0 ||
-                parsedCache.chatState.step === 'bookType';
+                parsedCache.chatState.step === 'bookType' ||
+                (hasChapters && parsedCache.chatState.step !== 'content' && parsedCache.chatState.messages.length < parsedCache.chapters.length + 4);
             
-            if (hasChapters && hasEmptyOrMinimalChatState) {
+            if (hasChapters && hasIncompleteOrMinimalChatState) {
                 console.log("🔄 API: Cached data needs reconstruction, fetching fresh from server");
                 shouldFetchFresh = true;
             } else if (!hasChapters && (!parsedCache.chatState || parsedCache.chatState.messages?.length <= 1)) {
