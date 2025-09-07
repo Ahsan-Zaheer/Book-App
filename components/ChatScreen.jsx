@@ -253,6 +253,7 @@ export default function ChatScreen({ initialBookId = null }) {
           console.log("📋 Restored messages:", restoredMessages.length);
           console.log("📋 First few messages:", restoredMessages.slice(0, 3));
           setMessages(restoredMessages);
+          }
         } else {
           console.log("❌ No book data found");
           // If no stored data, start fresh
